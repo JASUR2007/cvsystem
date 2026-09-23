@@ -6,6 +6,8 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': 'http://127.0.0.1:5015',
+      '/signin-google': 'http://127.0.0.1:5015',
+      '/signin-github': 'http://127.0.0.1:5015',
     },
   },
 })

@@ -67,16 +67,26 @@ export default function AdminPage() {
   const chosen = users.data?.items.find(u => u.id === selected[0])
 
   async function executeDeleteUsers() {
+    const toDelete = [...selected]
+    if (users.data) {
+      users.setData({
+        ...users.data,
+        items: users.data.items.filter(u => !toDelete.includes(u.id)),
+        totalItems: Math.max(0, users.data.totalItems - toDelete.length),
+      })
+    }
+    setSelected([])
+    setIsDeleteModalOpen(false)
     try {
       await Promise.all(
-        selected.map(id => api(`/admin/users/${id}`, { method: 'DELETE' }))
+        toDelete.map(id => api(`/admin/users/${id}`, { method: 'DELETE' }))
       )
-      setSelected([])
       users.reload()
       stats.reload()
       setMessage(t('Users successfully updated (delete).'))
     } catch (cause) {
       setMessage(cause instanceof Error ? cause.message : t('Could not perform operation.'))
+      users.reload()
     }
   }
 
@@ -85,27 +95,44 @@ export default function AdminPage() {
       setIsDeleteModalOpen(true)
       return
     }
+    const targets = [...selected]
+    if (users.data) {
+      users.setData({
+        ...users.data,
+        items: users.data.items.map(u =>
+          targets.includes(u.id) ? { ...u, isBlocked: kind === 'block' } : u
+        ),
+      })
+    }
+    setSelected([])
     try {
       await Promise.all(
-        selected.map(id => api(`/admin/users/${id}/${kind}`, { method: 'POST' }))
+        targets.map(id => api(`/admin/users/${id}/${kind}`, { method: 'POST' }))
       )
-      setSelected([])
       users.reload()
       stats.reload()
       setMessage(t(`Users successfully updated (${kind}).`))
     } catch (cause) {
       setMessage(cause instanceof Error ? cause.message : t('Could not perform operation.'))
+      users.reload()
     }
   }
 
   async function setRoles(roles: string[]) {
     if (!chosen) return
+    if (users.data) {
+      users.setData({
+        ...users.data,
+        items: users.data.items.map(u => (u.id === chosen.id ? { ...u, roles } : u)),
+      })
+    }
     try {
       await api(`/admin/users/${chosen.id}/roles`, json('PUT', { roles }))
       users.reload()
       setMessage(t('User roles updated successfully.'))
     } catch (cause) {
       setMessage(cause instanceof Error ? cause.message : t('Could not update roles.'))
+      users.reload()
     }
   }
 

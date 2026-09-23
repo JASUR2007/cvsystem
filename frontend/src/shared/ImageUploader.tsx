@@ -1,8 +1,17 @@
 import { useState } from 'react'
 import { api } from './api'
 import { imageUrl } from './imageUrl'
+import { t } from './i18n'
 
-export default function ImageUploader({ value, onChange, userId }: { value: string | null; onChange: (key: string | null) => void; userId?: string }) {
+export default function ImageUploader({
+  value,
+  onChange,
+  userId,
+}: {
+  value: string | null
+  onChange: (key: string | null) => void
+  userId?: string
+}) {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [preview, setPreview] = useState<string | null>(null)
@@ -10,7 +19,7 @@ export default function ImageUploader({ value, onChange, userId }: { value: stri
   async function upload(file: File) {
     setError('')
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024) {
-      setError('Choose a JPEG, PNG or WebP image smaller than 5 MB.')
+      setError(t('Choose a JPEG, PNG or WebP image smaller than 5 MB.'))
       return
     }
     setUploading(true)
@@ -39,10 +48,65 @@ export default function ImageUploader({ value, onChange, userId }: { value: stri
       }
       setPreview(URL.createObjectURL(file))
       onChange(objectKey)
-    } catch (cause) { setError(cause instanceof Error ? cause.message : 'Image upload failed.') }
-    finally { setUploading(false) }
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Image upload failed.')
+    } finally {
+      setUploading(false)
+    }
   }
 
   const source = preview ?? imageUrl(value)
-  return <div className="image-uploader" onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); const file = event.dataTransfer.files[0]; if (file && !uploading) void upload(file) }}>{source && <img src={source} alt="Uploaded preview" className="upload-preview" />}<input className="form-control" type="file" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={event => { const file = event.target.files?.[0]; if (file) void upload(file) }} />{uploading && <small>Uploading...</small>}{error && <small className="text-danger" role="alert">{error}</small>}{value && <button className="btn btn-sm btn-outline-danger" type="button" onClick={() => { setPreview(null); onChange(null) }}>Remove image</button>}</div>
+  return (
+    <div
+      className="image-uploader"
+      onDragOver={event => event.preventDefault()}
+      onDrop={event => {
+        event.preventDefault()
+        const file = event.dataTransfer.files[0]
+        if (file && !uploading) void upload(file)
+      }}
+    >
+      <div className="mb-2">
+        <label className="form-label small fw-semibold text-muted d-block mb-1">
+          {t('Upload image')} <span className="fw-normal">(JPEG, PNG, WebP ≤ 5 MB)</span>
+        </label>
+        <input
+          className="form-control"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          disabled={uploading}
+          onChange={event => {
+            const file = event.target.files?.[0]
+            if (file) void upload(file)
+          }}
+        />
+      </div>
+
+      {source && (
+        <div className="mb-2 d-flex align-items-center gap-2">
+          <img
+            src={source}
+            alt="Uploaded preview"
+            className="upload-preview border rounded"
+            style={{ maxWidth: 140, maxHeight: 140, objectFit: 'cover' }}
+          />
+          {value && (
+            <button
+              className="btn btn-sm btn-outline-danger"
+              type="button"
+              onClick={() => {
+                setPreview(null)
+                onChange(null)
+              }}
+            >
+              {t('Remove image')}
+            </button>
+          )}
+        </div>
+      )}
+
+      {uploading && <small className="text-muted d-block">{t('Uploading...')}</small>}
+      {error && <small className="text-danger d-block" role="alert">{error}</small>}
+    </div>
+  )
 }

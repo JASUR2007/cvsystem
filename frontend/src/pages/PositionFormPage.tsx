@@ -740,7 +740,7 @@ export default function PositionFormPage({ id }: { id?: string }) {
                     >
                       {availableCategories.map(cat => (
                         <option key={cat} value={cat}>
-                          {cat}
+                          {t(cat)}
                         </option>
                       ))}
                     </select>
@@ -755,7 +755,7 @@ export default function PositionFormPage({ id }: { id?: string }) {
                     >
                       {['String', 'Text', 'Numeric', 'Date', 'Period', 'Boolean', 'Dropdown', 'Image'].map(tp => (
                         <option key={tp} value={tp}>
-                          {tp}
+                          {t(tp)}
                         </option>
                       ))}
                     </select>

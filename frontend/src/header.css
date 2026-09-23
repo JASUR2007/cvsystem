@@ -470,6 +470,28 @@
   display: none;
 }
 
+@media (max-width: 1200px) {
+  .header-container {
+    padding: 0 16px;
+  }
+  .header-center {
+    max-width: 220px;
+  }
+  .nav-link {
+    padding: 6px 10px;
+    font-size: 13.5px;
+  }
+  .sign-out-btn .sign-out-text {
+    display: none !important;
+  }
+  .sign-out-btn {
+    padding: 6px 10px;
+  }
+  .user-badge .user-name-label {
+    max-width: 60px;
+  }
+}
+
 @media (max-width: 1024px) {
   .header-container {
     padding: 0 16px;

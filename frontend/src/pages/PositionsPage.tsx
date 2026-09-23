@@ -17,13 +17,23 @@ export default function PositionsPage({ user }: { user: CurrentUser | null }) {
   const result = useApi<Page<PositionListItem>>(`/positions?q=${encodeURIComponent(query)}&level=${level}&page=${page}`)
 
   async function handleDeleteConfirm() {
+    const toDelete = [...selected]
+    if (result.data) {
+      result.setData({
+        ...result.data,
+        items: result.data.items.filter(item => !toDelete.includes(item.id)),
+        totalItems: Math.max(0, result.data.totalItems - toDelete.length),
+      })
+    }
+    setSelected([])
+    setIsDeleteModalOpen(false)
     try {
-      await Promise.all(selected.map(id => api(`/positions/${id}`, { method: 'DELETE' })))
-      setSelected([])
+      await Promise.all(toDelete.map(id => api(`/positions/${id}`, { method: 'DELETE' })))
       setMessage(t('Selected positions were deleted.'))
       result.reload()
     } catch (error) {
       setMessage(error instanceof Error ? error.message : t('Could not delete positions.'))
+      result.reload()
     }
   }
 

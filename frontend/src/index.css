@@ -463,8 +463,8 @@ textarea.form-control {
   color: var(--text-primary);
 }
 
-/* Responsive labels for screens smaller than laptop (< 992px) */
-@media (max-width: 991.98px) {
+/* Responsive labels for screens smaller than laptop (< 1200px) */
+@media (max-width: 1199.98px) {
   .btn-responsive-text {
     display: none !important;
   }

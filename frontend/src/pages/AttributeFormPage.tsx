@@ -120,7 +120,7 @@ export default function AttributeFormPage({ id }: { id?: string }) {
             >
               {availableCategories.map(item => (
                 <option key={item} value={item}>
-                  {item}
+                  {t(item)}
                 </option>
               ))}
             </select>
@@ -136,7 +136,7 @@ export default function AttributeFormPage({ id }: { id?: string }) {
             >
               {['String', 'Text', 'Image', 'Numeric', 'Date', 'Period', 'Boolean', 'Dropdown'].map(item => (
                 <option key={item} value={item}>
-                  {item}
+                  {t(item)}
                 </option>
               ))}
             </select>

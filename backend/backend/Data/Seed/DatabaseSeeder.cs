@@ -45,6 +45,17 @@ public static class DatabaseSeeder
 
         await db.SaveChangesAsync();
 
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+
+        // Seed default local administrator / developer account
+        await EnsureUserAsync(
+            userManager,
+            email: "makej1318@gmail.com",
+            password: "Password123!",
+            firstName: "Jasur",
+            lastName: "Karimov",
+            roles: [Roles.Administrator, Roles.Recruiter, Roles.Candidate]);
+
         var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
         var adminEmail = configuration["BootstrapAdmin:Email"];
         var adminPassword = configuration["BootstrapAdmin:Password"];
@@ -58,7 +69,6 @@ public static class DatabaseSeeder
             throw new InvalidOperationException("Both BootstrapAdmin:Email and BootstrapAdmin:Password are required.");
         }
 
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
         var existing = await userManager.FindByEmailAsync(adminEmail);
         if (existing is not null)
         {
@@ -93,5 +103,51 @@ public static class DatabaseSeeder
         }
 
         await transaction.CommitAsync();
+    }
+
+    private static async Task EnsureUserAsync(
+        UserManager<AppUser> userManager,
+        string email,
+        string password,
+        string firstName,
+        string lastName,
+        string[] roles)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            user = new AppUser
+            {
+                Id = Guid.NewGuid(),
+                UserName = email,
+                Email = email,
+                FirstName = firstName,
+                LastName = lastName,
+                EmailConfirmed = true
+            };
+
+            var created = await userManager.CreateAsync(user, password);
+            if (!created.Succeeded)
+            {
+                var errors = string.Join("; ", created.Errors.Select(e => e.Description));
+                throw new InvalidOperationException($"Could not create user {email}: {errors}");
+            }
+        }
+        else
+        {
+            if (!await userManager.CheckPasswordAsync(user, password))
+            {
+                user.PasswordHash = userManager.PasswordHasher.HashPassword(user, password);
+                await userManager.UpdateAsync(user);
+            }
+        }
+
+        foreach (var role in roles)
+        {
+            if (!await userManager.IsInRoleAsync(user, role))
+            {
+                await userManager.AddToRoleAsync(user, role);
+            }
+        }
     }
 }

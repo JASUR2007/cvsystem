@@ -129,17 +129,35 @@
   padding: 0 14px 0 38px;
   font-size: 13.5px;
   background-color: var(--surface-soft);
-  border: 1px solid var(--bs-border-color);
+  border: 1.5px solid #cbd5e1;
   border-radius: 20px;
   color: var(--bs-body-color);
   outline: none;
   transition: all 0.2s ease-in-out;
 }
 
+[data-bs-theme="dark"] .header-search-form .search-input {
+  background-color: rgba(15, 23, 42, 0.6);
+  border-color: #334155;
+}
+
+.header-search-form .search-input:hover {
+  border-color: #94a3b8;
+}
+
+[data-bs-theme="dark"] .header-search-form .search-input:hover {
+  border-color: #64748b;
+}
+
 .header-search-form .search-input:focus {
   background-color: var(--surface-bg);
   border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+[data-bs-theme="dark"] .header-search-form .search-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
 }
 
 /* Right Section: Controls */

@@ -151,7 +151,12 @@ function App() {
         onThemeChange={val => preference('theme', val)}
         language={language}
         onLanguageChange={val => preference('language', val)}
-        onSignOut={() => signOut().catch(() => undefined).finally(() => setUser(null))}
+        onSignOut={() => {
+          signOut().catch(() => undefined).finally(() => {
+            setUser(null)
+            window.location.assign('/')
+          })
+        }}
       />
       <main className="main-content">
         <Page path={currentPath} user={user} onAuth={setUser} />

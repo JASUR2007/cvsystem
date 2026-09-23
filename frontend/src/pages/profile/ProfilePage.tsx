@@ -7,6 +7,7 @@ import InfoTab from './InfoTab'
 import ProjectsTab from './ProjectsTab'
 import { imageUrl } from '../../shared/imageUrl'
 import { t } from '../../shared/i18n'
+import ConfirmModal from '../../shared/ConfirmModal'
 import '../../profile.css'
 
 const LOCATION_SUGGESTIONS = [
@@ -75,8 +76,21 @@ export default function ProfilePage({ userId }: { userId?: string }) {
   const [detectingLocation, setDetectingLocation] = useState(false)
   const [requestingRecruiter, setRequestingRecruiter] = useState(false)
   const [recruiterMessage, setRecruiterMessage] = useState('')
+  const [selectedCvs, setSelectedCvs] = useState<string[]>([])
+  const [isDeleteCvModalOpen, setIsDeleteCvModalOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const revision = useRef(0)
+
+  async function handleDeleteCvsConfirm() {
+    try {
+      await Promise.all(selectedCvs.map(id => api(`/cvs/${id}`, { method: 'DELETE' })))
+      setSelectedCvs([])
+      cvs.reload()
+      setIsDeleteCvModalOpen(false)
+    } catch (cause) {
+      alert(cause instanceof Error ? cause.message : 'Could not delete CV.')
+    }
+  }
 
   const cachedUser = getCachedUser()
   const isCandidateOnly =
@@ -471,10 +485,34 @@ export default function ProfilePage({ userId }: { userId?: string }) {
       {tab === 'CVs' && (
         <div className="profile-settings-card">
           <div className="profile-card-header">
-            <h2 className="profile-card-title">{t('CVs')}</h2>
-            <a href="/positions" className="btn btn-outline-primary btn-sm">
-              + {t('Create CV')}
-            </a>
+            <div>
+              <h2 className="profile-card-title">{t('CVs')}</h2>
+              <p className="text-muted mb-0" style={{ fontSize: '0.875rem' }}>
+                {t('Manage tailored CVs generated for accessible positions.')}
+              </p>
+            </div>
+            <div className="d-flex gap-2">
+              {selectedCvs.length === 1 && (
+                <a
+                  href={`/cvs/${selectedCvs[0]}`}
+                  className="btn btn-outline-primary btn-sm"
+                >
+                  {t('Edit')}
+                </a>
+              )}
+              {selectedCvs.length > 0 && (
+                <button
+                  type="button"
+                  className="btn btn-outline-danger btn-sm"
+                  onClick={() => setIsDeleteCvModalOpen(true)}
+                >
+                  {t('Delete')} ({selectedCvs.length})
+                </button>
+              )}
+              <a href="/positions" className="btn btn-primary btn-sm">
+                + {t('Create CV')}
+              </a>
+            </div>
           </div>
 
           <Status loading={cvs.loading} error={cvs.error} empty={cvs.data?.length === 0} />
@@ -484,6 +522,17 @@ export default function ProfilePage({ userId }: { userId?: string }) {
               <table className="table table-hover align-middle mb-0">
                 <thead>
                   <tr>
+                    <th style={{ width: 44 }}>
+                      <input
+                        type="checkbox"
+                        className="form-check-input"
+                        aria-label="Select all"
+                        checked={selectedCvs.length > 0 && selectedCvs.length === cvs.data.length}
+                        onChange={e =>
+                          setSelectedCvs(e.target.checked ? cvs.data!.map(c => c.id) : [])
+                        }
+                      />
+                    </th>
                     <th>{t('Position')}</th>
                     <th>{t('Status')}</th>
                     <th>{t('Likes')}</th>
@@ -497,6 +546,21 @@ export default function ProfilePage({ userId }: { userId?: string }) {
                       className="click-row"
                       onClick={() => window.location.assign(`/cvs/${cv.id}`)}
                     >
+                      <td onClick={e => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          className="form-check-input"
+                          aria-label={`Select ${cv.position}`}
+                          checked={selectedCvs.includes(cv.id)}
+                          onChange={e =>
+                            setSelectedCvs(
+                              e.target.checked
+                                ? [...selectedCvs, cv.id]
+                                : selectedCvs.filter(id => id !== cv.id)
+                            )
+                          }
+                        />
+                      </td>
                       <td>
                         <a
                           href={`/cvs/${cv.id}`}
@@ -528,6 +592,17 @@ export default function ProfilePage({ userId }: { userId?: string }) {
           )}
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={isDeleteCvModalOpen}
+        title={t('Delete')}
+        message={`${t('Are you sure you want to delete')} ${selectedCvs.length} ${t('selected CV(s)?')}`}
+        confirmText={t('Delete')}
+        cancelText={t('Cancel')}
+        confirmVariant="danger"
+        onConfirm={handleDeleteCvsConfirm}
+        onCancel={() => setIsDeleteCvModalOpen(false)}
+      />
     </div>
   )
 }

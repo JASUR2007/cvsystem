@@ -312,6 +312,14 @@ const ru: Record<string, string> = {
   Fill: 'Заполнить',
   'CV published successfully.': 'Резюме успешно опубликовано.',
   'Edit this built-in field on the Me tab.': 'Отредактируйте это системное поле во вкладке "О себе".',
+  'Manage tailored CVs generated for accessible positions.': 'Управление резюме, созданными для доступных позиций.',
+  'selected CV(s)?': 'выбранных резюме?',
+  'Delete CVs': 'Удалить резюме',
+  'Looking to hire?': 'Ищете сотрудников?',
+  'Get recruiter access to publish positions and search candidates.': 'Получите доступ рекрутера для публикации позиций и поиска кандидатов.',
+  'Request Recruiter role': 'Запросить роль рекрутера',
+  'Requesting...': 'Отправка запроса...',
+  'Recruiter role granted! You can now post positions and review CVs.': 'Роль рекрутера получена! Теперь вы можете публиковать позиции и просматривать резюме.',
 }
 
 export function t(value: string) {

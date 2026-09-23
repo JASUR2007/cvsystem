@@ -208,43 +208,61 @@ export default function CvPage({ id, user }: { id: string; user: CurrentUser | n
           )}
         </section>
 
-        {/* Inline In-Place Edit Panel */}
+        {/* Modal Dialog for In-Place Attribute Editing */}
         {editing && (
-          <div className="card mt-4 p-4 border bg-secondary-subtle">
-            <div className="d-flex align-items-center justify-content-between mb-3">
-              <h3 className="h6 mb-0">
-                {t('Edit')} {editing.name}
-              </h3>
-              <button
-                type="button"
-                className="btn-close"
-                onClick={() => setEditing(null)}
-              ></button>
-            </div>
+          <div
+            className="modal fade show d-block"
+            tabIndex={-1}
+            role="dialog"
+            aria-modal="true"
+            style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 1050 }}
+            onClick={() => setEditing(null)}
+          >
+            <div
+              className="modal-dialog modal-dialog-centered"
+              role="document"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="modal-content shadow-lg border-0 bg-card">
+                <div className="modal-header border-bottom">
+                  <h5 className="modal-title h6 mb-0" style={{ fontWeight: 600 }}>
+                    {t('Edit')} {editing.name}
+                  </h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setEditing(null)}
+                    aria-label="Close"
+                  ></button>
+                </div>
 
-            <AttributeEditor
-              value={editing}
-              options={cv.attributes.find(item => item.value.attributeId === editing.attributeId)?.options}
-              onChange={setEditing}
-              userId={user?.roles.includes('Administrator') ? cv.candidateId : undefined}
-            />
+                <div className="modal-body py-3">
+                  <AttributeEditor
+                    value={editing}
+                    options={cv.attributes.find(item => item.value.attributeId === editing.attributeId)?.options}
+                    onChange={setEditing}
+                    userId={user?.roles.includes('Administrator') ? cv.candidateId : undefined}
+                  />
+                </div>
 
-            <div className="d-flex justify-content-end gap-2 mt-3 pt-2 border-top">
-              <button
-                type="button"
-                className="btn btn-outline-secondary btn-sm"
-                onClick={() => setEditing(null)}
-              >
-                {t('Cancel')}
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary btn-sm"
-                disabled={busy}
-                onClick={save}
-              >
-                {busy ? t('Saving...') : t('Save to profile')}
-              </button>
+                <div className="modal-footer border-top">
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary btn-sm"
+                    onClick={() => setEditing(null)}
+                  >
+                    {t('Cancel')}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    disabled={busy}
+                    onClick={save}
+                  >
+                    {busy ? t('Saving...') : t('Save to profile')}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}

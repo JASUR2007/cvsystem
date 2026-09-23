@@ -207,103 +207,122 @@ export default function ProjectsTab({ userId }: { userId?: string }) {
         </div>
       )}
 
-      {/* Add / Edit Project Panel */}
+      {/* Add / Edit Project Modal */}
       {form && (
-        <form className="card mt-4 p-4 border bg-secondary-subtle" onSubmit={save}>
-          <div className="d-flex align-items-center justify-content-between mb-3">
-            <h3 className="h5 mb-0">{form.id ? t('Edit project') : t('Add project')}</h3>
-            <button
-              type="button"
-              className="btn-close"
-              onClick={() => setForm(null)}
-              aria-label="Close"
-            ></button>
-          </div>
+        <div
+          className="modal fade show d-block"
+          tabIndex={-1}
+          role="dialog"
+          aria-modal="true"
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 1050 }}
+          onClick={() => setForm(null)}
+        >
+          <div
+            className="modal-dialog modal-dialog-centered modal-lg"
+            role="document"
+            onClick={e => e.stopPropagation()}
+          >
+            <form className="modal-content shadow-lg border-0 bg-card" onSubmit={save}>
+              <div className="modal-header border-bottom">
+                <h5 className="modal-title h5 mb-0" style={{ fontWeight: 600 }}>
+                  {form.id ? t('Edit project') : t('Add project')}
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setForm(null)}
+                  aria-label="Close"
+                ></button>
+              </div>
 
-          <div className="row g-3">
-            <div className="col-12">
-              <label className="form-label" style={{ fontWeight: 600 }}>{t('Name')} *</label>
-              <input
-                className="form-control"
-                value={form.name}
-                onChange={e => setForm({ ...form, name: e.target.value })}
-                required
-                maxLength={200}
-                placeholder={t('e.g. ERP System')}
-              />
-            </div>
+              <div className="modal-body">
+                <div className="row g-3">
+                  <div className="col-12">
+                    <label className="form-label" style={{ fontWeight: 600 }}>{t('Name')} *</label>
+                    <input
+                      className="form-control"
+                      value={form.name}
+                      onChange={e => setForm({ ...form, name: e.target.value })}
+                      required
+                      maxLength={200}
+                      placeholder={t('e.g. ERP System')}
+                    />
+                  </div>
 
-            <div className="col-md-6">
-              <label className="form-label" style={{ fontWeight: 600 }}>{t('Start Date')} *</label>
-              <input
-                type="date"
-                className="form-control"
-                value={form.startedOn}
-                onChange={e => setForm({ ...form, startedOn: e.target.value })}
-                required
-              />
-            </div>
+                  <div className="col-md-6">
+                    <label className="form-label" style={{ fontWeight: 600 }}>{t('Start Date')} *</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={form.startedOn}
+                      onChange={e => setForm({ ...form, startedOn: e.target.value })}
+                      required
+                    />
+                  </div>
 
-            <div className="col-md-6">
-              <label className="form-label" style={{ fontWeight: 600 }}>{t('End Date (leave empty if ongoing)')}</label>
-              <input
-                type="date"
-                className="form-control"
-                value={form.endedOn}
-                onChange={e => setForm({ ...form, endedOn: e.target.value })}
-              />
-            </div>
+                  <div className="col-md-6">
+                    <label className="form-label" style={{ fontWeight: 600 }}>{t('End Date (leave empty if ongoing)')}</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={form.endedOn}
+                      onChange={e => setForm({ ...form, endedOn: e.target.value })}
+                    />
+                  </div>
 
-            <div className="col-12">
-              <label className="form-label" style={{ fontWeight: 600 }}>{t('Technology Tags (comma-separated)')}</label>
-              <input
-                className="form-control"
-                list="tag-suggestions"
-                value={form.tags}
-                onChange={e => setForm({ ...form, tags: e.target.value })}
-                placeholder=".NET, React, PostgreSQL"
-              />
-              <datalist id="tag-suggestions">
-                {tags.data?.map(tag => (
-                  <option value={tag} key={tag} />
-                ))}
-              </datalist>
-            </div>
+                  <div className="col-12">
+                    <label className="form-label" style={{ fontWeight: 600 }}>{t('Technology Tags (comma-separated)')}</label>
+                    <input
+                      className="form-control"
+                      list="tag-suggestions"
+                      value={form.tags}
+                      onChange={e => setForm({ ...form, tags: e.target.value })}
+                      placeholder=".NET, React, PostgreSQL"
+                    />
+                    <datalist id="tag-suggestions">
+                      {tags.data?.map(tag => (
+                        <option value={tag} key={tag} />
+                      ))}
+                    </datalist>
+                  </div>
 
-            <div className="col-12">
-              <label className="form-label" style={{ fontWeight: 600 }}>{t('Description (Markdown)')}</label>
-              <textarea
-                className="form-control"
-                rows={4}
-                value={form.description}
-                onChange={e => setForm({ ...form, description: e.target.value })}
-                placeholder={t('Key contributions and achievements...')}
-              />
-            </div>
+                  <div className="col-12">
+                    <label className="form-label" style={{ fontWeight: 600 }}>{t('Description (Markdown)')}</label>
+                    <textarea
+                      className="form-control"
+                      rows={4}
+                      value={form.description}
+                      onChange={e => setForm({ ...form, description: e.target.value })}
+                      placeholder={t('Key contributions and achievements...')}
+                    />
+                  </div>
 
-            {form.description && (
-              <div className="col-12">
-                <div className="card p-3 bg-body">
-                  <small className="text-muted d-block mb-1">{t('Preview')}:</small>
-                  <Markdown>{form.description}</Markdown>
+                  {form.description && (
+                    <div className="col-12">
+                      <div className="card p-3 bg-body">
+                        <small className="text-muted d-block mb-1">{t('Preview')}:</small>
+                        <Markdown>{form.description}</Markdown>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-            )}
-          </div>
 
-          <div className="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
-            <button
-              type="button"
-              className="btn btn-outline-secondary"
-              onClick={() => setForm(null)}
-            >
-              {t('Cancel')}
-            </button>
-            <button type="submit" className="btn btn-primary">
-              {t('Save')}
-            </button>
+              <div className="modal-footer border-top">
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary"
+                  onClick={() => setForm(null)}
+                >
+                  {t('Cancel')}
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  {t('Save')}
+                </button>
+              </div>
+            </form>
           </div>
-        </form>
+        </div>
       )}
     </div>
   )

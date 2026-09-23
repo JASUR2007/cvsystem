@@ -33,7 +33,17 @@ public class SearchService(AppDbContext db, ICurrentUserService currentUser) : I
             query = PositionAccessHelper.Eligible(query, db, currentUser.RequireUserId());
 
         if (!string.IsNullOrWhiteSpace(q))
-            query = query.Where(position => position.SearchVector.Matches(q.Trim()));
+        {
+            var term = q.Trim();
+            var pattern = $"%{term}%";
+            query = query.Where(position =>
+                position.SearchVector.Matches(term)
+                || EF.Functions.ILike(position.Title, pattern)
+                || EF.Functions.ILike(position.ShortDescription, pattern)
+                || (position.Company != null && EF.Functions.ILike(position.Company, pattern))
+                || (position.Level != null && EF.Functions.ILike(position.Level.ToString()!, pattern))
+            );
+        }
 
         var currentPage = Math.Max(1, page);
         var size = Math.Clamp(pageSize, 1, 100);
@@ -60,7 +70,19 @@ public class SearchService(AppDbContext db, ICurrentUserService currentUser) : I
             query = PositionAccessHelper.EligibleCvs(query, db);
 
         if (!string.IsNullOrWhiteSpace(q))
-            query = query.Where(cv => cv.Position.SearchVector.Matches(q.Trim()) || cv.Candidate.SearchVector.Matches(q.Trim()));
+        {
+            var term = q.Trim();
+            var pattern = $"%{term}%";
+            query = query.Where(cv =>
+                cv.Position.SearchVector.Matches(term)
+                || cv.Candidate.SearchVector.Matches(term)
+                || EF.Functions.ILike(cv.Position.Title, pattern)
+                || EF.Functions.ILike(cv.Candidate.FirstName, pattern)
+                || EF.Functions.ILike(cv.Candidate.LastName, pattern)
+                || (cv.Candidate.Location != null && EF.Functions.ILike(cv.Candidate.Location, pattern))
+                || (cv.Position.Level != null && EF.Functions.ILike(cv.Position.Level.ToString()!, pattern))
+            );
+        }
 
         var currentPage = Math.Max(1, page);
         var size = Math.Clamp(pageSize, 1, 100);

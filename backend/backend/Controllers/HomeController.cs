@@ -1,72 +1,39 @@
-using backend.Data;
-using backend.Auth;
+using backend.DTOs.Home;
+using backend.DTOs.Positions;
+using backend.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class HomeController : ControllerBase
+public sealed class HomeController(IHomeService homeService) : ControllerBase
 {
-    private readonly AppDbContext _db;
-
-    public HomeController(AppDbContext db)
-    {
-        _db = db;
-    }
-
     [HttpGet("statistics")]
-    public async Task<IActionResult> GetStatistics()
+    public async Task<ActionResult<HomeStatisticsResponse>> GetStatistics(CancellationToken cancellationToken)
     {
-        var users = await _db.Users.CountAsync();
-        var candidates = await _db.UserRoles.Join(_db.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => r).Where(r => r.Name == Roles.Candidate).CountAsync();
-        var recruiters = await _db.UserRoles.Join(_db.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => r).Where(r => r.Name == Roles.Recruiter).CountAsync();
-        var positions = await _db.Positions.CountAsync();
-        var publishedCvs = await _db.Cvs.CountAsync();
-        var cvsLast24Hours = await _db.Cvs.Where(c => c.CreatedAt >= DateTime.UtcNow.AddDays(-1)).CountAsync();
-
-        return Ok(new
-        {
-            users,
-            candidates,
-            recruiters,
-            positions,
-            publishedCvs,
-            cvsLast24Hours
-        });
+        var result = await homeService.GetStatisticsAsync(cancellationToken);
+        return Ok(result);
     }
 
     [HttpGet("latest-positions")]
-    public async Task<IActionResult> GetLatestPositions()
+    public async Task<ActionResult<List<PositionListItem>>> GetLatestPositions(CancellationToken cancellationToken)
     {
-        var positions = await _db.Positions
-            .OrderByDescending(p => p.UpdatedAt)
-            .Take(10)
-            .Select(p => new { p.Id, p.Title, p.Company, p.Level, p.UpdatedAt })
-            .ToListAsync();
-        return Ok(positions);
+        var result = await homeService.GetLatestPositionsAsync(cancellationToken);
+        return Ok(result);
     }
 
     [HttpGet("popular-positions")]
-    public async Task<IActionResult> GetPopularPositions()
+    public async Task<ActionResult<List<PopularPositionResponse>>> GetPopularPositions(CancellationToken cancellationToken)
     {
-        var positions = await _db.Positions
-            .OrderByDescending(p => p.Cvs.Count)
-            .Take(5)
-            .Select(p => new { p.Id, p.Title, cvCount = p.Cvs.Count })
-            .ToListAsync();
-        return Ok(positions);
+        var result = await homeService.GetPopularPositionsAsync(cancellationToken);
+        return Ok(result);
     }
 
     [HttpGet("tags")]
-    public async Task<IActionResult> GetTags()
+    public async Task<ActionResult<List<TagResponse>>> GetTags(CancellationToken cancellationToken)
     {
-        var tags = await _db.Tags
-            .OrderByDescending(t => t.Projects.Count)
-            .Take(20)
-            .Select(t => new { t.Name, count = t.Projects.Count })
-            .ToListAsync();
-        return Ok(tags);
+        var result = await homeService.GetPopularTagsAsync(cancellationToken);
+        return Ok(result);
     }
 }

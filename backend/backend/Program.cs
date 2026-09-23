@@ -6,15 +6,22 @@ using Amazon;
 using Amazon.Runtime;
 using Amazon.S3;
 using backend.Auth;
+using backend.Common.Middleware;
 using backend.Data;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using backend.Data.Seed;
+using backend.Entities;
+using backend.Services;
+using backend.Services.Interfaces;
+using backend.Storage;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configuration validation
 var connectionString = builder.Configuration.GetConnectionString("Default")
     ?? throw new InvalidOperationException("ConnectionStrings:Default is required.");
 var jwtKey = builder.Configuration["Jwt:Key"]
@@ -29,6 +36,7 @@ if (Encoding.UTF8.GetByteCount(jwtKey) < 32)
     throw new InvalidOperationException("Jwt:Key must contain at least 32 bytes.");
 }
 
+// Database & Identity
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 builder.Services.AddIdentityCore<AppUser>(options =>
     {
@@ -37,7 +45,30 @@ builder.Services.AddIdentityCore<AppUser>(options =>
     })
     .AddRoles<IdentityRole<Guid>>()
     .AddEntityFrameworkStores<AppDbContext>();
-builder.Services.AddScoped<TokenService>();
+
+// HTTP Context & Current User
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+// Token & Storage Services
+builder.Services.AddScoped<JwtTokenService>();
+builder.Services.AddScoped<IFileStorageService, AcdnS3Service>();
+
+// Domain Business Services
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<IAttributeService, AttributeService>();
+builder.Services.AddScoped<IPositionService, PositionService>();
+builder.Services.AddScoped<ICvService, CvService>();
+builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<IDiscussionService, DiscussionService>();
+builder.Services.AddScoped<ILikeService, LikeService>();
+builder.Services.AddScoped<ISearchService, SearchService>();
+builder.Services.AddScoped<IHomeService, HomeService>();
+builder.Services.AddScoped<IAdminUserService, AdminUserService>();
+builder.Services.AddScoped<ISettingsService, SettingsService>();
+
+// Authentication & Authorization
 var authentication = builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddCookie("External", options =>
     {
@@ -87,6 +118,7 @@ var authentication = builder.Services.AddAuthentication(JwtBearerDefaults.Authen
             }
         };
     });
+
 if (!string.IsNullOrWhiteSpace(builder.Configuration["Authentication:Google:ClientId"])
     && !string.IsNullOrWhiteSpace(builder.Configuration["Authentication:Google:ClientSecret"]))
 {
@@ -97,6 +129,7 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration["Authentication:Google:Clie
         options.SignInScheme = "External";
     });
 }
+
 if (!string.IsNullOrWhiteSpace(builder.Configuration["Authentication:GitHub:ClientId"])
     && !string.IsNullOrWhiteSpace(builder.Configuration["Authentication:GitHub:ClientSecret"]))
 {
@@ -108,7 +141,10 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration["Authentication:GitHub:Clie
         options.Scope.Add("user:email");
     });
 }
+
 builder.Services.AddAuthorization();
+
+// S3 Client
 var s3Endpoint = builder.Configuration["S3:Endpoint"];
 var s3AccessKey = builder.Configuration["S3:AccessKey"];
 var s3SecretKey = builder.Configuration["S3:SecretKey"];
@@ -118,6 +154,8 @@ if (!string.IsNullOrWhiteSpace(s3Endpoint) && !string.IsNullOrWhiteSpace(s3Acces
         new BasicAWSCredentials(s3AccessKey, s3SecretKey),
         new AmazonS3Config { ServiceURL = s3Endpoint, ForcePathStyle = true }));
 }
+
+// CORS
 var frontendOrigins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? [];
 if (frontendOrigins.Length > 0)
 {
@@ -125,17 +163,23 @@ if (frontendOrigins.Length > 0)
         policy.WithOrigins(frontendOrigins).AllowAnyHeader().AllowAnyMethod()));
 }
 
-builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+// Controllers & OpenAPI
+builder.Services.AddControllers().AddJsonOptions(options =>
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-await DatabaseInitializer.InitializeAsync(app.Services);
+// Global Exception Handling Middleware
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+// Database Seeding
+await DatabaseSeeder.InitializeAsync(app.Services);
 
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    await DbSeeder.SeedAsync(app.Services);
+    await DevelopmentDataSeeder.SeedAsync(app.Services);
 }
 
 app.UseHttpsRedirection();

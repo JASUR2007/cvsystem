@@ -59,7 +59,15 @@ const uz: Record<string, string> = {
   'Position CVs': 'Lavozim CVlari', 'Search candidate': 'Nomzodni qidirish',
   'All attributes': 'Barcha atributlar', 'Filter value': 'Filtr qiymati',
   Newest: 'Eng yangi', 'Most liked': 'Eng ko‘p yoqtirilgan', Candidate: 'Nomzod',
-  Edit: 'Tahrirlash', 'Candidate profile': 'Nomzod profili'
+  Edit: 'Tahrirlash', 'Candidate profile': 'Nomzod profili',
+  Eligibility: 'Muvofiqlik', Eligible: 'Mos', 'Missing info': 'Ma’lumot yetarli emas', 'Not eligible': 'Mos emas',
+  'Position match': 'Lavozimga moslik', years: 'yil',
+  'Explore open positions and evaluate your CV match with structured requirements.': 'Ochiq lavozimlarni ko‘ring va tuzilgan talablar bo‘yicha CV mosligingizni baholang.',
+  'Search positions...': 'Lavozimlarni qidirish...',
+  'No positions match your current search criteria. Try adjusting or clearing your filters.': 'Qidiruv mezonlaringizga mos lavozim topilmadi. Filtrlarni o‘zgartirib ko‘ring.',
+  'No positions have been posted yet.': 'Hozircha hech qanday lavozim joylashtirilmagan.',
+  'Reset filters': 'Filtrlarni tiklash',
+  'CVs in last 24 hours': 'Oxirgi 24 soatdagi CVlar'
 }
 
 const ru: Record<string, string> = {
@@ -120,8 +128,12 @@ const ru: Record<string, string> = {
   Name: 'Название', Category: 'Категория', Type: 'Тип', Usage: 'Использование', 'Built-in': 'Системный',
   'Position CVs': 'Резюме позиции', 'Search candidate': 'Поиск кандидата', 'All attributes': 'Все атрибуты',
   'Filter value': 'Значение фильтра', Newest: 'Сначала новые', 'Most liked': 'Самые популярные', Candidate: 'Кандидат',
-  'Candidate profile': 'Профиль кандидата'
-
+  'Candidate profile': 'Профиль кандидата',
+  'Explore open positions and evaluate your CV match with structured requirements.': 'Изучайте открытые позиции и оценивайте соответствие вашего резюме структурированным требованиям.',
+  'Search positions...': 'Поиск позиций...',
+  'No positions match your current search criteria. Try adjusting or clearing your filters.': 'По вашему запросу ничего не найдено. Попробуйте изменить параметры поиска.',
+  'No positions have been posted yet.': 'Позиции пока не добавлены.',
+  'Reset filters': 'Сбросить фильтры'
 }
 
 export function t(value: string) {
@@ -130,6 +142,3 @@ export function t(value: string) {
   if (language === 'uz') return uz[value] ?? value
   return value
 }
-
-
-

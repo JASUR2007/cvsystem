@@ -88,7 +88,12 @@ export default function CvPage({ id, user }: { id: string; user: CurrentUser | n
             </span>
 
             {cv.canEdit && cv.status === 'Draft' && (
-              <button className="btn btn-primary btn-sm" onClick={publish}>
+              <button
+                className="btn btn-primary btn-sm"
+                disabled={cv.attributes.some(a => a.isRequired && !a.isFilled)}
+                onClick={publish}
+                title={cv.attributes.some(a => a.isRequired && !a.isFilled) ? t('Fill all required attributes before publishing.') : ''}
+              >
                 {t('Publish')}
               </button>
             )}

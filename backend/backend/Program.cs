@@ -257,6 +257,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("frontend");
+app.UseStaticFiles();
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
@@ -264,5 +265,19 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapGet("/api/health", () => Results.Ok(new { status = "ok" }));
+app.MapGet("/uploads/{**path}", (string path) =>
+{
+    var localPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", path.Replace('/', Path.DirectorySeparatorChar));
+    if (!File.Exists(localPath)) return Results.NotFound();
+    var ext = Path.GetExtension(localPath).ToLowerInvariant();
+    var contentType = ext switch
+    {
+        ".jpg" or ".jpeg" => "image/jpeg",
+        ".png" => "image/png",
+        ".webp" => "image/webp",
+        _ => "application/octet-stream"
+    };
+    return Results.File(localPath, contentType);
+});
 
 app.Run();

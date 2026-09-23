@@ -74,7 +74,7 @@ export default function ProjectsTab({ userId }: { userId?: string }) {
         <div>
           <h2 className="profile-card-title">{t('Projects')}</h2>
           <p className="text-muted mb-0" style={{ fontSize: '0.875rem' }}>
-            List notable projects to demonstrate practical experience on generated CVs.
+            {t('List notable projects to demonstrate practical experience on generated CVs.')}
           </p>
         </div>
 
@@ -85,7 +85,7 @@ export default function ProjectsTab({ userId }: { userId?: string }) {
             </button>
           )}
           <button className="btn btn-primary btn-sm" onClick={() => setForm(blank)}>
-            + Add Project
+            + {t('Add project')}
           </button>
         </div>
       </div>
@@ -115,10 +115,10 @@ export default function ProjectsTab({ userId }: { userId?: string }) {
                     }
                   />
                 </th>
-                <th>Name</th>
-                <th>Period</th>
-                <th>Tags</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
+                <th>{t('Name')}</th>
+                <th>{t('Period')}</th>
+                <th>{t('Tags')}</th>
+                <th style={{ textAlign: 'right' }}>{t('Actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -210,7 +210,7 @@ export default function ProjectsTab({ userId }: { userId?: string }) {
       {form && (
         <form className="card mt-4 p-4 border bg-secondary-subtle" onSubmit={save}>
           <div className="d-flex align-items-center justify-content-between mb-3">
-            <h3 className="h5 mb-0">{form.id ? 'Edit project' : 'Add project'}</h3>
+            <h3 className="h5 mb-0">{form.id ? t('Edit project') : t('Add project')}</h3>
             <button
               type="button"
               className="btn-close"
@@ -221,19 +221,19 @@ export default function ProjectsTab({ userId }: { userId?: string }) {
 
           <div className="row g-3">
             <div className="col-12">
-              <label className="form-label" style={{ fontWeight: 600 }}>Name *</label>
+              <label className="form-label" style={{ fontWeight: 600 }}>{t('Name')} *</label>
               <input
                 className="form-control"
                 value={form.name}
                 onChange={e => setForm({ ...form, name: e.target.value })}
                 required
                 maxLength={200}
-                placeholder="e.g. ERP System"
+                placeholder={t('e.g. ERP System')}
               />
             </div>
 
             <div className="col-md-6">
-              <label className="form-label" style={{ fontWeight: 600 }}>Start Date *</label>
+              <label className="form-label" style={{ fontWeight: 600 }}>{t('Start Date')} *</label>
               <input
                 type="date"
                 className="form-control"
@@ -244,7 +244,7 @@ export default function ProjectsTab({ userId }: { userId?: string }) {
             </div>
 
             <div className="col-md-6">
-              <label className="form-label" style={{ fontWeight: 600 }}>End Date (leave empty if ongoing)</label>
+              <label className="form-label" style={{ fontWeight: 600 }}>{t('End Date (leave empty if ongoing)')}</label>
               <input
                 type="date"
                 className="form-control"
@@ -254,7 +254,7 @@ export default function ProjectsTab({ userId }: { userId?: string }) {
             </div>
 
             <div className="col-12">
-              <label className="form-label" style={{ fontWeight: 600 }}>Technology Tags (comma-separated)</label>
+              <label className="form-label" style={{ fontWeight: 600 }}>{t('Technology Tags (comma-separated)')}</label>
               <input
                 className="form-control"
                 list="tag-suggestions"
@@ -270,20 +270,20 @@ export default function ProjectsTab({ userId }: { userId?: string }) {
             </div>
 
             <div className="col-12">
-              <label className="form-label" style={{ fontWeight: 600 }}>Description (Markdown)</label>
+              <label className="form-label" style={{ fontWeight: 600 }}>{t('Description (Markdown)')}</label>
               <textarea
                 className="form-control"
                 rows={4}
                 value={form.description}
                 onChange={e => setForm({ ...form, description: e.target.value })}
-                placeholder="Key contributions and achievements..."
+                placeholder={t('Key contributions and achievements...')}
               />
             </div>
 
             {form.description && (
               <div className="col-12">
                 <div className="card p-3 bg-body">
-                  <small className="text-muted d-block mb-1">Preview:</small>
+                  <small className="text-muted d-block mb-1">{t('Preview')}:</small>
                   <Markdown>{form.description}</Markdown>
                 </div>
               </div>

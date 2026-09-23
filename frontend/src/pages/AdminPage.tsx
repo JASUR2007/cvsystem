@@ -341,9 +341,9 @@ export default function AdminPage() {
                     setPage(1)
                   }}
                 >
-                  <option value="">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="blocked">Blocked</option>
+                  <option value="">{t('All Status')}</option>
+                  <option value="active">{t('Active')}</option>
+                  <option value="blocked">{t('Blocked')}</option>
                 </select>
               </div>
 
@@ -355,7 +355,7 @@ export default function AdminPage() {
                   disabled={selected.length === 0}
                   onClick={() => action('block')}
                 >
-                  Block
+                  {t('Block')}
                 </button>
                 <button
                   type="button"
@@ -363,7 +363,7 @@ export default function AdminPage() {
                   disabled={selected.length === 0}
                   onClick={() => action('unblock')}
                 >
-                  Unblock
+                  {t('Unblock')}
                 </button>
                 <button
                   type="button"
@@ -371,10 +371,47 @@ export default function AdminPage() {
                   disabled={selected.length === 0}
                   onClick={() => action('delete')}
                 >
-                  Delete
+                  {t('Delete')}
                 </button>
               </div>
             </div>
+
+            {/* Role Management Panel for selected single user (MOVED TO TOP) */}
+            {selected.length === 1 && chosen && (
+              <div className="card mb-3 p-3 border bg-secondary-subtle">
+                <div className="d-flex align-items-center justify-content-between mb-3">
+                  <h3 className="h6 mb-0">
+                    {t('Roles for')} {chosen.firstName} {chosen.lastName} ({chosen.email})
+                  </h3>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setSelected([])}
+                    aria-label="Close"
+                  ></button>
+                </div>
+
+                <div className="d-flex flex-wrap gap-4">
+                  {['Candidate', 'Recruiter', 'Administrator'].map(role => (
+                    <label className="form-check-label d-flex align-items-center gap-2" key={role}>
+                      <input
+                        type="checkbox"
+                        className="form-check-input"
+                        checked={chosen.roles.includes(role)}
+                        onChange={e =>
+                          setRoles(
+                            e.target.checked
+                              ? [...chosen.roles, role]
+                              : chosen.roles.filter(item => item !== role)
+                          )
+                        }
+                      />
+                      <span>{t(role)}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <Status loading={users.loading} error={users.error} empty={users.data?.items.length === 0} />
 
@@ -396,11 +433,11 @@ export default function AdminPage() {
                             }
                           />
                         </th>
-                        <th>User</th>
-                        <th>Email</th>
-                        <th>Roles</th>
-                        <th>Status</th>
-                        <th style={{ textAlign: 'right' }}>Actions</th>
+                        <th>{t('User')}</th>
+                        <th>{t('Email')}</th>
+                        <th>{t('Roles')}</th>
+                        <th>{t('Status')}</th>
+                        <th style={{ textAlign: 'right' }}>{t('Actions')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -439,7 +476,7 @@ export default function AdminPage() {
                             <div className="d-flex flex-wrap gap-1">
                               {user.roles.map(r => (
                                 <span className="badge text-bg-light border" key={r}>
-                                  {r}
+                                  {t(r)}
                                 </span>
                               ))}
                             </div>
@@ -448,7 +485,7 @@ export default function AdminPage() {
                             <span
                               className={`badge ${user.isBlocked ? 'text-bg-danger' : 'text-bg-success'}`}
                             >
-                              {user.isBlocked ? 'Blocked' : 'Active'}
+                              {user.isBlocked ? t('Blocked') : t('Active')}
                             </span>
                           </td>
                           <td style={{ textAlign: 'right' }}>
@@ -460,7 +497,7 @@ export default function AdminPage() {
                                 setSelected([user.id])
                               }}
                             >
-                              Manage Roles
+                              {t('Manage Roles')}
                             </button>
                           </td>
                         </tr>
@@ -474,51 +511,15 @@ export default function AdminPage() {
             <div className="mt-3">
               <Pager page={page} total={users.data?.totalPages ?? 0} onPage={setPage} />
             </div>
-
-            {/* Role Management Panel for selected single user */}
-            {selected.length === 1 && chosen && (
-              <div className="card mt-4 p-4 border bg-secondary-subtle">
-                <div className="d-flex align-items-center justify-content-between mb-3">
-                  <h3 className="h6 mb-0">
-                    Roles for {chosen.firstName} {chosen.lastName} ({chosen.email})
-                  </h3>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    onClick={() => setSelected([])}
-                  ></button>
-                </div>
-
-                <div className="d-flex gap-4">
-                  {['Candidate', 'Recruiter', 'Administrator'].map(role => (
-                    <label className="form-check-label d-flex align-items-center gap-2" key={role}>
-                      <input
-                        type="checkbox"
-                        className="form-check-input"
-                        checked={chosen.roles.includes(role)}
-                        onChange={e =>
-                          setRoles(
-                            e.target.checked
-                              ? [...chosen.roles, role]
-                              : chosen.roles.filter(item => item !== role)
-                          )
-                        }
-                      />
-                      <span>{role}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         )}
 
         <ConfirmModal
           isOpen={isDeleteModalOpen}
-          title="Delete users"
+          title={t('Delete users')}
           message={`${t('Are you sure you want to delete')} ${selected.length} ${t('selected user(s)?')}`}
-          confirmText="Delete"
-          cancelText="Cancel"
+          confirmText={t('Delete')}
+          cancelText={t('Cancel')}
           confirmVariant="danger"
           onConfirm={executeDeleteUsers}
           onCancel={() => setIsDeleteModalOpen(false)}

@@ -147,21 +147,29 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Form Controls */
 .form-control, .form-select {
-  height: 42px;
   background-color: var(--bg-card);
-  border: 1px solid var(--border-primary);
+  border: 1.5px solid #cbd5e1 !important;
   color: var(--text-primary);
   border-radius: 8px;
   font-size: 14px;
-  padding: 0 14px;
+  padding: 8px 14px;
   transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+input.form-control, select.form-select {
+  height: 42px;
+}
+
+textarea.form-control {
+  min-height: 80px;
+  height: auto;
 }
 
 .form-control:focus, .form-select:focus {
   background-color: var(--bg-card);
   color: var(--text-primary);
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18) !important;
 }
 
 /* Dark theme specific fixes for inputs, cards, tables */
@@ -169,7 +177,7 @@ h1, h2, h3, h4, h5, h6 {
 [data-bs-theme="dark"] .form-select {
   background-color: var(--bg-card);
   color: var(--text-primary);
-  border-color: var(--border-primary);
+  border-color: #334155 !important;
 }
 
 [data-bs-theme="dark"] .card {
@@ -371,4 +379,10 @@ h1, h2, h3, h4, h5, h6 {
 @keyframes talenthub-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+@media (max-width: 1024px) {
+  .attr-btn-label {
+    display: none;
+  }
 }

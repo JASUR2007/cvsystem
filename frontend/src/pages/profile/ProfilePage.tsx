@@ -4,7 +4,6 @@ import { Status } from '../../shared/ui'
 import { useApi } from '../../shared/useApi'
 import InfoTab from './InfoTab'
 import ProjectsTab from './ProjectsTab'
-import ImageUploader from '../../shared/ImageUploader'
 import { imageUrl } from '../../shared/imageUrl'
 import { t } from '../../shared/i18n'
 import '../../profile.css'
@@ -19,6 +18,9 @@ export default function ProfilePage({ userId }: { userId?: string }) {
   const [dirty, setDirty] = useState(false)
   const [saveState, setSaveState] = useState('')
   const [savingManual, setSavingManual] = useState(false)
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const [photoError, setPhotoError] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const revision = useRef(0)
 
   useEffect(() => {
@@ -54,6 +56,45 @@ export default function ProfilePage({ userId }: { userId?: string }) {
     setForm({ ...form, [field]: value })
     setDirty(true)
     setSaveState(t('Unsaved changes'))
+  }
+
+  async function handlePhotoUpload(file: File) {
+    setPhotoError('')
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024) {
+      setPhotoError(t('Choose a JPEG, PNG or WebP image smaller than 5 MB.'))
+      return
+    }
+    setUploadingPhoto(true)
+    try {
+      let objectKey = ''
+      try {
+        const signed = await api<{ objectKey: string; uploadUrl: string; publicUrl: string | null }>(
+          `/files/presign${userId ? `?userId=${userId}` : ''}`,
+          { method: 'POST', body: JSON.stringify({ contentType: file.type }) }
+        )
+        const response = await fetch(signed.uploadUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': file.type },
+          body: file,
+        })
+        if (!response.ok) throw new Error('S3 presign upload rejected')
+        objectKey = signed.objectKey
+      } catch {
+        // Fallback to backend direct upload (bypasses S3 CORS / presign signature issues)
+        const formData = new FormData()
+        formData.append('file', file)
+        const uploaded = await api<{ objectKey: string; publicUrl: string | null }>(
+          `/files/upload${userId ? `?userId=${userId}` : ''}`,
+          { method: 'POST', body: formData }
+        )
+        objectKey = uploaded.objectKey
+      }
+      change('photoObjectKey', objectKey)
+    } catch (cause) {
+      setPhotoError(cause instanceof Error ? cause.message : 'Image upload failed.')
+    } finally {
+      setUploadingPhoto(false)
+    }
   }
 
   async function manualSave() {
@@ -95,13 +136,55 @@ export default function ProfilePage({ userId }: { userId?: string }) {
         <div className="profile-me-grid">
           {/* Left Avatar Card */}
           <div className="profile-avatar-card">
-            <div className="profile-large-avatar">
-              {imageUrl(form.photoObjectKey) ? (
-                <img src={imageUrl(form.photoObjectKey)!} alt="Profile photo" />
-              ) : (
-                <span>{(form.firstName[0] || 'U').toUpperCase()}{(form.lastName[0] || '').toUpperCase()}</span>
-              )}
+            <div className="profile-avatar-wrapper">
+              <div className="profile-large-avatar">
+                {imageUrl(form.photoObjectKey) ? (
+                  <img src={imageUrl(form.photoObjectKey)!} alt="Profile photo" />
+                ) : (
+                  <span>{(form.firstName[0] || 'U').toUpperCase()}{(form.lastName[0] || '').toUpperCase()}</span>
+                )}
+              </div>
+              <button
+                type="button"
+                className="profile-avatar-badge"
+                title={t('Change photo')}
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingPhoto}
+              >
+                {uploadingPhoto ? (
+                  <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{ width: 14, height: 14 }} />
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                    <circle cx="12" cy="13" r="4" />
+                  </svg>
+                )}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                style={{ display: 'none' }}
+                onChange={e => {
+                  const file = e.target.files?.[0]
+                  if (file) void handlePhotoUpload(file)
+                  e.target.value = ''
+                }}
+              />
             </div>
+
+            {form.photoObjectKey && (
+              <button
+                type="button"
+                className="btn btn-link btn-sm text-danger text-decoration-none mb-2"
+                onClick={() => change('photoObjectKey', null)}
+                style={{ fontSize: '0.8rem' }}
+              >
+                {t('Remove photo')}
+              </button>
+            )}
+
+            {photoError && <small className="text-danger mb-2" role="alert">{photoError}</small>}
 
             <h2 className="profile-display-name">
               {form.firstName} {form.lastName}
@@ -114,17 +197,6 @@ export default function ProfilePage({ userId }: { userId?: string }) {
               </svg>
               <span>{form.location || t('Location not set')}</span>
             </p>
-
-            <div style={{ width: '100%', marginTop: '0.5rem' }}>
-              <label className="form-label text-muted" style={{ fontSize: '0.75rem', fontWeight: 600 }}>
-                {t('Photo')}
-              </label>
-              <ImageUploader
-                value={form.photoObjectKey}
-                onChange={key => change('photoObjectKey', key)}
-                userId={userId}
-              />
-            </div>
           </div>
 
           {/* Right Settings Card */}
@@ -223,7 +295,7 @@ export default function ProfilePage({ userId }: { userId?: string }) {
                     <th>{t('Status')}</th>
                     <th>{t('Likes')}</th>
                     <th>{t('Updated')}</th>
-                    <th style={{ textAlign: 'right' }}>Actions</th>
+                    <th style={{ textAlign: 'right' }}>{t('Actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -255,7 +327,7 @@ export default function ProfilePage({ userId }: { userId?: string }) {
                           className="btn btn-outline-primary btn-sm"
                           onClick={e => e.stopPropagation()}
                         >
-                          View
+                          {t('View')}
                         </a>
                       </td>
                     </tr>

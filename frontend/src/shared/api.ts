@@ -54,6 +54,12 @@ export type CvAttribute = { value: AttributeValue; isRequired: boolean; isFilled
 export type CvDetail = { id: string; positionId: string; position: string; candidateId: string; firstName: string; lastName: string; location: string | null; photoObjectKey: string | null; status: 'Draft' | 'Published'; updatedAt: string; likes: number; canEdit: boolean; attributes: CvAttribute[]; projects: Project[] }
 export type PositionCvPage = { columns: PositionAttribute[]; items: { id: string; candidateId: string; candidate: string; updatedAt: string; likes: number; values: { attributeId: string; value: string | null }[] }[]; page: number; pageSize: number; totalItems: number }
 
-export function dateText(value: string) {
-  return new Date(value).toLocaleDateString()
+export function dateText(value: string | null | undefined): string {
+  if (!value) return ''
+  const d = new Date(value)
+  if (isNaN(d.getTime())) return String(value)
+  const day = String(d.getDate()).padStart(2, '0')
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const year = d.getFullYear()
+  return `${day}/${month}/${year}`
 }

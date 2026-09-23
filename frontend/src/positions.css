@@ -46,24 +46,25 @@
 .positions-search-wrapper {
   position: relative;
   flex: 2;
-  min-width: 0;
+  min-width: 200px;
 }
 
-.toolbar-search-icon {
+.positions-search-wrapper .toolbar-search-icon {
   position: absolute;
   left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   color: var(--bs-secondary-color);
   pointer-events: none;
+  z-index: 2;
 }
 
-.toolbar-search-input {
+.positions-search-wrapper .toolbar-search-input {
   height: 42px;
-  padding-left: 38px;
-  padding-right: 32px;
+  padding-left: 44px !important;
+  padding-right: 36px !important;
   font-size: 14px;
 }
 

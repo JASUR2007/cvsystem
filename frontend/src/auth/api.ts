@@ -4,6 +4,7 @@ export type CurrentUser = {
   firstName: string
   lastName: string
   roles: string[]
+  photoObjectKey?: string | null
 }
 
 type AuthResponse = {

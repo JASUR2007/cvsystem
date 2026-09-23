@@ -17,7 +17,8 @@ public sealed record CurrentUserResponse(
     string Email,
     string FirstName,
     string LastName,
-    IList<string> Roles);
+    IList<string> Roles,
+    string? PhotoObjectKey = null);
 
 public sealed record AuthResponse(string Token, CurrentUserResponse User);
 

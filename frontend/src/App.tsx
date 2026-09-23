@@ -105,6 +105,12 @@ function App() {
 
   useEffect(() => {
     getCurrentUser().then(setUser).catch(() => setUser(null))
+    function onUserUpdate() {
+      const u = getCachedUser()
+      if (u) setUser(u)
+    }
+    window.addEventListener('talenthub_user_updated', onUserUpdate)
+    return () => window.removeEventListener('talenthub_user_updated', onUserUpdate)
   }, [])
 
   useEffect(() => {

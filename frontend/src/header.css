@@ -333,6 +333,16 @@
   justify-content: center;
   font-size: 12px;
   font-weight: 700;
+  flex-shrink: 0;
+}
+
+.user-avatar-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
 .user-name-label {
@@ -589,6 +599,14 @@
     height: 22px;
     stroke-width: 2;
     transition: transform 0.15s ease, color 0.15s ease;
+  }
+
+  .bottom-nav-item .nav-avatar-img {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
   }
 
   .bottom-nav-item span {

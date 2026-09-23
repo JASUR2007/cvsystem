@@ -97,7 +97,15 @@ export default function ProfilePage({ userId }: { userId?: string }) {
     !userId && cachedUser && cachedUser.roles.includes('Candidate') && !cachedUser.roles.includes('Recruiter')
 
   useEffect(() => {
-    if (result.data && !dirty) queueMicrotask(() => setForm(result.data))
+    if (result.data && !dirty) {
+      queueMicrotask(() => setForm(result.data))
+      if (!userId && cachedUser && result.data.photoObjectKey !== cachedUser.photoObjectKey) {
+        const updated = { ...cachedUser, photoObjectKey: result.data.photoObjectKey }
+        localStorage.setItem('talenthub_user', JSON.stringify(updated))
+        sessionStorage.setItem('talenthub_user', JSON.stringify(updated))
+        window.dispatchEvent(new Event('talenthub_user_updated'))
+      }
+    }
   }, [result.data, dirty])
 
   useEffect(() => {
@@ -112,6 +120,12 @@ export default function ProfilePage({ userId }: { userId?: string }) {
           setForm(saved)
           setDirty(false)
           setSaveState(t('Saved'))
+          if (!userId && cachedUser) {
+            const updated = { ...cachedUser, photoObjectKey: saved.photoObjectKey, firstName: saved.firstName, lastName: saved.lastName }
+            localStorage.setItem('talenthub_user', JSON.stringify(updated))
+            sessionStorage.setItem('talenthub_user', JSON.stringify(updated))
+            window.dispatchEvent(new Event('talenthub_user_updated'))
+          }
         } else {
           setForm(current => (current ? { ...current, version: saved.version } : current))
           setSaveState(t('Unsaved changes'))
@@ -129,6 +143,12 @@ export default function ProfilePage({ userId }: { userId?: string }) {
     setForm({ ...form, [field]: value })
     setDirty(true)
     setSaveState(t('Unsaved changes'))
+    if (!userId && cachedUser && (field === 'photoObjectKey' || field === 'firstName' || field === 'lastName')) {
+      const updated = { ...cachedUser, [field]: value }
+      localStorage.setItem('talenthub_user', JSON.stringify(updated))
+      sessionStorage.setItem('talenthub_user', JSON.stringify(updated))
+      window.dispatchEvent(new Event('talenthub_user_updated'))
+    }
   }
 
   async function handlePhotoUpload(file: File) {

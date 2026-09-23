@@ -61,7 +61,7 @@ public class AuthService(
             throw new NotFoundException("Account is unavailable.");
 
         var roles = await userManager.GetRolesAsync(user);
-        return new CurrentUserResponse(user.Id, user.Email ?? string.Empty, user.FirstName, user.LastName, roles);
+        return new CurrentUserResponse(user.Id, user.Email ?? string.Empty, user.FirstName, user.LastName, roles, user.PhotoObjectKey);
     }
 
     public async Task<AuthResponse> ExchangeExternalCodeAsync(string code, CancellationToken cancellationToken = default)
@@ -150,7 +150,7 @@ public class AuthService(
     {
         var token = await tokenService.CreateAsync(user);
         var roles = await userManager.GetRolesAsync(user);
-        var userResponse = new CurrentUserResponse(user.Id, user.Email ?? string.Empty, user.FirstName, user.LastName, roles);
+        var userResponse = new CurrentUserResponse(user.Id, user.Email ?? string.Empty, user.FirstName, user.LastName, roles, user.PhotoObjectKey);
         return new AuthResponse(token, userResponse);
     }
 

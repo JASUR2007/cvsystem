@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, type FormEvent } from 'react'
 import type { CurrentUser } from '../auth/api'
+import { imageUrl } from './imageUrl'
 import { t } from './i18n'
 
 type HeaderProps = {
@@ -180,9 +181,17 @@ export default function Header({
           {user ? (
             <div className="user-profile-actions">
               <a className="user-badge" href="/profile" title={user.firstName + ' ' + (user.lastName || '')}>
-                <span className="user-avatar-initials">
-                  {(user.firstName[0] || 'U').toUpperCase()}
-                </span>
+                {user.photoObjectKey ? (
+                  <img
+                    className="user-avatar-img"
+                    src={imageUrl(user.photoObjectKey)!}
+                    alt={user.firstName}
+                  />
+                ) : (
+                  <span className="user-avatar-initials">
+                    {(user.firstName[0] || 'U').toUpperCase()}
+                  </span>
+                )}
                 <span className="user-name-label">{user.firstName}</span>
               </a>
               <button
@@ -296,7 +305,20 @@ export default function Header({
           <div className="mobile-auth-footer">
             {user ? (
               <div className="mobile-user-row">
-                <span className="user-name-label">{user.firstName} {user.lastName}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                  {user.photoObjectKey ? (
+                    <img
+                      className="user-avatar-img"
+                      src={imageUrl(user.photoObjectKey)!}
+                      alt={user.firstName}
+                    />
+                  ) : (
+                    <span className="user-avatar-initials">
+                      {(user.firstName[0] || 'U').toUpperCase()}
+                    </span>
+                  )}
+                  <span className="user-name-label">{user.firstName} {user.lastName}</span>
+                </div>
                 <button
                   type="button"
                   className="btn btn-outline-danger btn-sm w-100"
@@ -349,10 +371,18 @@ export default function Header({
       )}
 
       <a className={path.startsWith('/profile') || path === '/login' ? 'bottom-nav-item active' : 'bottom-nav-item'} href={user ? '/profile' : '/login'}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-          <circle cx="12" cy="7" r="4" />
-        </svg>
+        {user?.photoObjectKey ? (
+          <img
+            className="nav-avatar-img"
+            src={imageUrl(user.photoObjectKey)!}
+            alt={user.firstName}
+          />
+        ) : (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+        )}
         <span>{t('Profile')}</span>
       </a>
 

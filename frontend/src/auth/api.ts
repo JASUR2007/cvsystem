@@ -12,34 +12,69 @@ type AuthResponse = {
 }
 
 const tokenKey = 'talenthub_token'
+const userKey = 'talenthub_user'
 export const apiBase = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ?? ''
 
-export function getToken() {
-  return sessionStorage.getItem(tokenKey)
+export function getToken(): string | null {
+  return localStorage.getItem(tokenKey) || sessionStorage.getItem(tokenKey)
+}
+
+export function getCachedUser(): CurrentUser | null {
+  try {
+    const raw = localStorage.getItem(userKey) || sessionStorage.getItem(userKey)
+    return raw ? (JSON.parse(raw) as CurrentUser) : null
+  } catch {
+    return null
+  }
+}
+
+export function saveAuth(token: string, user: CurrentUser) {
+  localStorage.setItem(tokenKey, token)
+  localStorage.setItem(userKey, JSON.stringify(user))
+  sessionStorage.setItem(tokenKey, token)
+  sessionStorage.setItem(userKey, JSON.stringify(user))
 }
 
 export function saveToken(token: string) {
+  localStorage.setItem(tokenKey, token)
   sessionStorage.setItem(tokenKey, token)
+}
+
+export function clearAuth() {
+  localStorage.removeItem(tokenKey)
+  localStorage.removeItem(userKey)
+  sessionStorage.removeItem(tokenKey)
+  sessionStorage.removeItem(userKey)
 }
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
   const token = getToken()
-  if (!token) return null
-
-  const response = await fetch(`${apiBase}/api/auth/me`, {
-    headers: { Authorization: `Bearer ${token}` },
-  })
-
-  if (response.status === 401) {
-    sessionStorage.removeItem(tokenKey)
+  if (!token) {
+    clearAuth()
     return null
   }
 
-  if (!response.ok) {
-    throw new Error('Could not load your account.')
-  }
+  try {
+    const response = await fetch(`${apiBase}/api/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
 
-  return response.json() as Promise<CurrentUser>
+    if (response.status === 401) {
+      clearAuth()
+      return null
+    }
+
+    if (!response.ok) {
+      return getCachedUser()
+    }
+
+    const user = (await response.json()) as CurrentUser
+    localStorage.setItem(userKey, JSON.stringify(user))
+    sessionStorage.setItem(userKey, JSON.stringify(user))
+    return user
+  } catch {
+    return getCachedUser()
+  }
 }
 
 export async function submitAuth(mode: 'login' | 'register', data: Record<string, string>): Promise<AuthResponse> {
@@ -69,7 +104,9 @@ export async function signOut() {
         headers: { Authorization: `Bearer ${token}` },
       })
     } finally {
-      sessionStorage.removeItem(tokenKey)
+      clearAuth()
     }
+  } else {
+    clearAuth()
   }
 }

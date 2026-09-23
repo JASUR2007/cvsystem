@@ -3,7 +3,6 @@ import { dateText, type PositionListItem } from '../shared/api'
 import { Status } from '../shared/ui'
 import { useApi } from '../shared/useApi'
 import { t } from '../shared/i18n'
-import heroPerson from '../assets/hero-person.jpg'
 import '../home.css'
 
 type Stats = {
@@ -86,12 +85,12 @@ export default function HomePage() {
 
             <div className="floating-hero-pill pill-opportunities">
               <span>💼</span>
-              <span>Opportunities</span>
+              <span>{t('Opportunities')}</span>
             </div>
 
             <img
-              src={heroPerson}
-              alt="TalentHub Platform Recruiter"
+              src="/image/talent.png"
+              alt="TalentHub Platform"
               className="hero-person-img"
             />
           </div>

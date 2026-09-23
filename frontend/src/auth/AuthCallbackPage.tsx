@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../shared/api'
-import { saveToken, type CurrentUser } from './api'
+import { saveAuth, type CurrentUser } from './api'
 import { t } from '../shared/i18n'
 
 type AuthResponse = { token: string; user: CurrentUser }
@@ -16,7 +16,7 @@ export default function AuthCallbackPage({ onAuthenticated }: { onAuthenticated:
       return
     }
     api<AuthResponse>('/auth/external/exchange', { method: 'POST', body: JSON.stringify({ code }) })
-      .then(result => { saveToken(result.token); onAuthenticated(result.user); window.location.replace('/') })
+      .then(result => { saveAuth(result.token, result.user); onAuthenticated(result.user); window.location.replace('/') })
       .catch(cause => setError(cause instanceof Error ? cause.message : 'External sign-in failed.'))
   }, [onAuthenticated])
   return <section className="auth-shell"><div className="auth-panel"><h1>{t(error ? 'Sign-in failed' : 'Completing sign-in...')}</h1>{error && <><p role="alert">{error}</p><a href="/login">{t('Back to sign in')}</a></>}</div></section>

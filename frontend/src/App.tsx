@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import AuthPage from './auth/AuthPage'
 import AuthCallbackPage from './auth/AuthCallbackPage'
-import { getCurrentUser, signOut, type CurrentUser } from './auth/api'
+import { getCurrentUser, getCachedUser, signOut, type CurrentUser } from './auth/api'
 import { api, json } from './shared/api'
 import HomePage from './pages/HomePage'
 import PositionsPage from './pages/PositionsPage'
@@ -14,6 +14,7 @@ import ProfilePage from './pages/profile/ProfilePage'
 import CvPage from './pages/CvPage'
 import AdminPage from './pages/AdminPage'
 import SearchPage from './pages/SearchPage'
+import NotFoundPage from './pages/NotFoundPage'
 import Header from './shared/Header'
 import './index.css'
 import './App.css'
@@ -47,12 +48,7 @@ function Page({ user, onAuth }: { user: CurrentUser | null; onAuth: (user: Curre
   if (editAttribute) return <AttributeFormPage id={editAttribute[1]} />
   const cv = path.match(/^\/cvs\/([0-9a-f-]+)$/i)
   if (cv) return <CvPage id={cv[1]} user={user} />
-  return (
-    <section className="surface page-surface not-found-surface">
-      <h1>{t('Page not found')}</h1>
-      <a className="btn btn-primary" href="/">{t('Return home')}</a>
-    </section>
-  )
+  return <NotFoundPage />
 }
 
 function SignInPrompt() {
@@ -66,7 +62,7 @@ function SignInPrompt() {
 }
 
 function App() {
-  const [user, setUser] = useState<CurrentUser | null>(null)
+  const [user, setUser] = useState<CurrentUser | null>(() => getCachedUser())
   const [theme, setTheme] = useState(localStorage.getItem('talenthub_theme') || 'light')
   const [language, setLanguage] = useState(localStorage.getItem('talenthub_language') || 'en')
   const [settings, setSettings] = useState<Settings | null>(null)

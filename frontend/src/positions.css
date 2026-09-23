@@ -46,7 +46,7 @@
 .positions-search-wrapper {
   position: relative;
   flex: 2;
-  min-width: 240px;
+  min-width: 0;
 }
 
 .toolbar-search-icon {

@@ -1,8 +1,15 @@
 import { ApiError } from './api'
 import { t } from './i18n'
+import Spinner from './Spinner'
 
 export function Status({ loading, error, empty }: { loading: boolean; error: Error | null; empty?: boolean }) {
-  if (loading) return <div className="state" role="status">{t('Loading...')}</div>
+  if (loading) {
+    return (
+      <div className="state py-5 text-center" role="status">
+        <Spinner size="lg" label={t('Loading...')} />
+      </div>
+    )
+  }
   if (error) {
     const status = error instanceof ApiError ? error.status : 0
     return <div className="alert alert-danger" role="alert">{t(status === 403 ? 'You do not have access to this page.' : status === 404 ? 'The requested item was not found.' : status === 409 ? 'This data changed in another session. Reload to continue.' : error.message)}</div>

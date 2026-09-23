@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { apiBase, saveToken, submitAuth, type CurrentUser } from './api'
+import { apiBase, saveAuth, submitAuth, type CurrentUser } from './api'
 import { t } from '../shared/i18n'
 
 type Props = {
@@ -30,7 +30,7 @@ export default function AuthPage({ mode, onAuthenticated }: Props) {
 
     try {
       const result = await submitAuth(mode, data)
-      saveToken(result.token)
+      saveAuth(result.token, result.user)
       onAuthenticated(result.user)
       window.location.assign('/')
     } catch (cause) {

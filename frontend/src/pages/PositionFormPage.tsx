@@ -168,7 +168,7 @@ export default function PositionFormPage({ id }: { id?: string }) {
         <header className="pos-form-header">
           <h1 className="pos-form-title">{id ? t('Edit position') : t('Create position')}</h1>
           <p className="text-muted mb-0">
-            Define requirements, access criteria, and CV template structure for candidates.
+            {t('Define requirements, access criteria, and CV template structure for candidates.')}
           </p>
         </header>
 
@@ -182,7 +182,7 @@ export default function PositionFormPage({ id }: { id?: string }) {
               onClick={() => setStep(s.id)}
             >
               <span className="step-num-circle">{idx + 1}</span>
-              <span>{s.id}</span>
+              <span>{t(s.id)}</span>
             </button>
           ))}
         </nav>
@@ -260,8 +260,8 @@ export default function PositionFormPage({ id }: { id?: string }) {
                       onChange={() => setIsPublic(true)}
                     />
                     <div className="visibility-card-body">
-                      <strong>Public (visible to all candidates)</strong>
-                      <span>Any registered user can evaluate and submit a CV.</span>
+                      <strong>{t('Public (visible to all candidates)')}</strong>
+                      <span>{t('Any registered user can evaluate and submit a CV.')}</span>
                     </div>
                   </label>
 
@@ -273,8 +273,8 @@ export default function PositionFormPage({ id }: { id?: string }) {
                       onChange={() => setIsPublic(false)}
                     />
                     <div className="visibility-card-body">
-                      <strong>Restricted (filtered access)</strong>
-                      <span>Only candidates matching specific attribute rules can create CVs.</span>
+                      <strong>{t('Restricted (filtered access)')}</strong>
+                      <span>{t('Only candidates matching specific attribute rules can create CVs.')}</span>
                     </div>
                   </label>
                 </div>
@@ -298,7 +298,7 @@ export default function PositionFormPage({ id }: { id?: string }) {
               </div>
 
               <label className="text-muted" style={{ fontSize: '0.8125rem' }}>
-                Click to add attributes from the library to this CV template:
+                {t('Click to add attributes from the library to this CV template:')}
               </label>
 
               <div className="pos-attr-available-list">
@@ -327,7 +327,7 @@ export default function PositionFormPage({ id }: { id?: string }) {
                   ))}
               </div>
 
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 600 }}>Selected Attributes ({attributes.length})</h3>
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 600 }}>{t('Selected Attributes')} ({attributes.length})</h3>
 
               {attributes.length === 0 ? (
                 <p className="text-muted">{t('No extra attributes')}</p>
@@ -336,9 +336,9 @@ export default function PositionFormPage({ id }: { id?: string }) {
                   <table className="pos-selected-attrs-table">
                     <thead>
                       <tr>
-                        <th>Attribute</th>
-                        <th style={{ width: 100 }}>Required</th>
-                        <th style={{ width: 90, textAlign: 'right' }}>Order</th>
+                        <th>{t('Attribute')}</th>
+                        <th style={{ width: 100 }}>{t('Required')}</th>
+                        <th style={{ width: 90, textAlign: 'right' }}>{t('Order')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -410,12 +410,12 @@ export default function PositionFormPage({ id }: { id?: string }) {
             <div className="form-step-content">
               {isPublic ? (
                 <div className="alert alert-info">
-                  This position is configured as <strong>Public</strong>. Candidates do not need to satisfy special access filters to submit their CV. To configure access rules, switch visibility to <strong>Restricted</strong> in Step 1.
+                  {t('This position is configured as Public. Candidates do not need to satisfy special access filters to submit their CV. To configure access rules, switch visibility to Restricted in Step 1.')}
                 </div>
               ) : (
                 <>
                   <p className="text-muted">
-                    Candidates must meet all defined criteria in their profile to gain access to create a CV for this position.
+                    {t('Candidates must meet all defined criteria in their profile to gain access to create a CV for this position.')}
                   </p>
 
                   {rules.map((rule, index) => {
@@ -438,7 +438,7 @@ export default function PositionFormPage({ id }: { id?: string }) {
                           value={rule.attributeId}
                           onChange={e => update({ attributeId: e.target.value, operator: 'Equals', comparisonValue: '' })}
                         >
-                          <option value="">Select Attribute...</option>
+                          <option value="">{t('Select Attribute...')}</option>
                           {library.data?.items
                             .filter(item => !item.isBuiltIn)
                             .map(item => (
@@ -464,7 +464,7 @@ export default function PositionFormPage({ id }: { id?: string }) {
                             value={rule.comparisonValue}
                             onChange={e => update({ comparisonValue: e.target.value })}
                           >
-                            <option value="">Select option</option>
+                            <option value="">{t('Select option')}</option>
                             {definition.options.map(option => (
                               <option key={option.id} value={option.id}>
                                 {option.value}
@@ -477,9 +477,9 @@ export default function PositionFormPage({ id }: { id?: string }) {
                             value={rule.comparisonValue}
                             onChange={e => update({ comparisonValue: e.target.value })}
                           >
-                            <option value="">Select value</option>
-                            <option value="true">Yes</option>
-                            <option value="false">No</option>
+                            <option value="">{t('Select value')}</option>
+                            <option value="true">{t('Yes')}</option>
+                            <option value="false">{t('No')}</option>
                           </select>
                         ) : (
                           <input
@@ -488,7 +488,7 @@ export default function PositionFormPage({ id }: { id?: string }) {
                             step={type === 'Numeric' ? 'any' : undefined}
                             value={rule.comparisonValue}
                             onChange={e => update({ comparisonValue: e.target.value })}
-                            placeholder="Value"
+                            placeholder={t('Value')}
                           />
                         )}
 
@@ -508,7 +508,7 @@ export default function PositionFormPage({ id }: { id?: string }) {
                     className="btn btn-outline-primary btn-sm mt-2"
                     onClick={() => setRules([...rules, { attributeId: '', operator: 'Equals', comparisonValue: '' }])}
                   >
-                    + Add access rule
+                    {t('+ Add access rule')}
                   </button>
                 </>
               )}
@@ -519,7 +519,7 @@ export default function PositionFormPage({ id }: { id?: string }) {
           {step === 'Projects' && (
             <div className="form-step-content">
               <div className="form-field-group">
-                <label>Technology tags (comma separated)</label>
+                <label>{t('Technology tags (comma separated)')}</label>
                 <input
                   className="form-control"
                   value={tags}
@@ -527,7 +527,7 @@ export default function PositionFormPage({ id }: { id?: string }) {
                   placeholder="e.g. .NET, PostgreSQL, Docker"
                 />
                 <span className="helper-text">
-                  CV generator will automatically include candidate projects tagged with these technologies.
+                  {t('CV generator will automatically include candidate projects tagged with these technologies.')}
                 </span>
               </div>
 
@@ -541,7 +541,7 @@ export default function PositionFormPage({ id }: { id?: string }) {
                   value={maxProjects}
                   onChange={e => setMaxProjects(Number(e.target.value))}
                 />
-                <span className="helper-text">Maximum number of relevant projects included in the generated CV.</span>
+                <span className="helper-text">{t('Maximum number of relevant projects included in the generated CV.')}</span>
               </div>
             </div>
           )}
@@ -551,26 +551,26 @@ export default function PositionFormPage({ id }: { id?: string }) {
             <div className="form-step-content">
               <div className="pos-card">
                 <h2 style={{ fontSize: '1.4rem', fontWeight: 700, margin: '0 0 0.5rem 0' }}>
-                  {title || 'Untitled Position'}
+                  {title || t('Untitled Position')}
                 </h2>
                 <p className="text-muted mb-3">
-                  {company || 'No company'} · {level || 'Any level'} · {isPublic ? 'Public' : 'Restricted'}
+                  {company || t('No company')} · {level || t('Any level')} · {isPublic ? t('Public') : t('Restricted')}
                 </p>
-                <p style={{ lineHeight: 1.6 }}>{description || 'No description provided.'}</p>
+                <p style={{ lineHeight: 1.6 }}>{description || t('No description provided.')}</p>
 
-                <h4 style={{ fontSize: '1rem', fontWeight: 600, marginTop: '1.25rem' }}>Attributes ({attributes.length})</h4>
+                <h4 style={{ fontSize: '1rem', fontWeight: 600, marginTop: '1.25rem' }}>{t('Attributes')} ({attributes.length})</h4>
                 <div className="pos-attr-chips mb-3">
                   {attributes.map(a => (
                     <span className={`pos-attr-chip ${a.isRequired ? 'required' : ''}`} key={a.attributeId}>
                       {a.name} {a.isRequired && '*'}
                     </span>
                   ))}
-                  {attributes.length === 0 && <span className="text-muted">None</span>}
+                  {attributes.length === 0 && <span className="text-muted">{t('None')}</span>}
                 </div>
 
-                <h4 style={{ fontSize: '1rem', fontWeight: 600 }}>Project Constraints</h4>
+                <h4 style={{ fontSize: '1rem', fontWeight: 600 }}>{t('Project Constraints')}</h4>
                 <p className="text-muted mb-0">
-                  Up to {maxProjects} projects {tags ? `matching: ${tags}` : '(any tags)'}.
+                  {t('Up to')} {maxProjects} {t('projects')} {tags ? `${t('matching:')} ${tags}` : t('(any tags)')}.
                 </p>
               </div>
             </div>
@@ -587,13 +587,13 @@ export default function PositionFormPage({ id }: { id?: string }) {
             <div className="stepper-nav-buttons">
               {step !== 'General' && (
                 <button type="button" className="btn btn-outline-secondary" onClick={prevStep}>
-                  ← Back
+                  ← {t('Back')}
                 </button>
               )}
 
               {step !== 'Preview' ? (
                 <button type="button" className="btn btn-primary" onClick={nextStep}>
-                  Next →
+                  {t('Next')} →
                 </button>
               ) : (
                 <button type="submit" className="btn btn-success" disabled={saving}>

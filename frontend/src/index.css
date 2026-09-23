@@ -17,26 +17,26 @@
   --text-primary: #0F172A;
   --text-secondary: #334155;
   --text-muted: #64748B;
-  --border-primary: #E2E8F0;
+  --border-primary: #cbd5e1;
   --color-primary: #2563EB;
   --primary-light: rgba(37, 99, 235, 0.08);
   --primary-hover: #1D4ED8;
 
-  --bs-body-bg: var(--bg-primary);
+  --bs-body-bg: #8080801a;
   --bs-body-color: var(--text-primary);
   --bs-secondary-color: var(--text-muted);
-  --bs-border-color: var(--border-primary);
+  --bs-border-color: #cbd5e1;
   --bs-card-bg: #FFFFFF;
   --bs-modal-bg: #FFFFFF;
   --bs-table-bg: #FFFFFF;
-  --surface-bg: var(--bg-card);
+  --surface-bg: #FFFFFF;
   --surface-soft: var(--bg-secondary);
-  --surface-card: var(--bg-card);
+  --surface-card: #FFFFFF;
   --primary-color: var(--color-primary);
 
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 10px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 12px 20px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
@@ -72,15 +72,23 @@
   box-sizing: border-box;
 }
 
-body {
+html, body, #root, .app {
   margin: 0;
   padding: 0;
   min-width: 320px;
-  background-color: var(--bg-primary);
+  background-color: #8080801a !important;
   color: var(--text-primary);
   font-family: inherit;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+[data-bs-theme="dark"] html,
+[data-bs-theme="dark"] body,
+[data-bs-theme="dark"] #root,
+[data-bs-theme="dark"] .app {
+  background-color: #0B1120 !important;
+  color: var(--text-primary);
 }
 
 button, input, textarea, select {
@@ -208,32 +216,49 @@ textarea.form-control {
 /* Table Enhancements */
 .table {
   color: var(--text-primary);
-  --bs-table-bg: transparent;
-  --bs-table-hover-bg: rgba(37, 99, 235, 0.04);
+  background-color: #ffffff !important;
+  --bs-table-bg: #ffffff !important;
+  --bs-table-hover-bg: #f8fafc !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  width: 100% !important;
 }
 
 .table th {
-  background-color: var(--bg-secondary);
-  color: var(--text-muted);
-  font-size: 11.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border-primary);
-  white-space: nowrap;
+  background-color: #f8fafc !important;
+  color: #475569 !important;
+  font-size: 11.5px !important;
+  font-weight: 750 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  padding: 12px 16px !important;
+  border-top: none !important;
+  border-bottom: 2px solid #94a3b8 !important; /* Thick prominent divider under header */
+  white-space: nowrap !important;
+  vertical-align: middle !important;
 }
 
 .table td {
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--border-primary);
-  vertical-align: middle;
-  font-size: 14px;
+  padding: 13px 16px !important;
+  border-top: none !important;
+  border-bottom: 1px solid #cbd5e1 !important; /* Clearly visible line between rows */
+  vertical-align: middle !important;
+  font-size: 13.5px !important;
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid #cbd5e1 !important;
+  transition: background-color 0.12s ease-in-out;
+}
+
+.table tbody tr:hover td {
+  background-color: #f1f5f9 !important;
 }
 
 .click-row {
   cursor: pointer;
-  transition: background-color 0.12s;
 }
 
 /* Badge & Level Pill */
@@ -415,7 +440,7 @@ textarea.form-control {
   color: var(--text-primary) !important;
 }
 
-/* Cards & Surfaces: White in Light Theme */
+/* Cards & Surfaces: White in Light Theme with Crisp Border */
 .card,
 .surface,
 .page-surface,
@@ -426,11 +451,82 @@ textarea.form-control {
 .positions-table-card,
 .admin-kpi-card,
 .profile-avatar-card,
-.profile-content-card {
+.profile-content-card,
+.auth-card,
+.auth-panel {
   background-color: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
 }
 
-/* Tables: White in Light Theme */
+/* ==========================================================================
+   CHECKBOXES: Visible, High-Contrast Everywhere
+   ========================================================================== */
+.form-check-input,
+input[type="checkbox"].form-check-input,
+.table input[type="checkbox"],
+.toolbar input[type="checkbox"] {
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  min-height: 18px !important;
+  margin-top: 0 !important;
+  vertical-align: middle !important;
+  background-color: #ffffff !important;
+  border: 2px solid #64748b !important; /* Clearly visible, strong border */
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease-in-out !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06) !important;
+}
+
+.form-check-input:hover,
+input[type="checkbox"].form-check-input:hover {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18) !important;
+}
+
+.form-check-input:checked,
+input[type="checkbox"].form-check-input:checked {
+  background-color: #2563eb !important;
+  border-color: #2563eb !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e") !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: 80% !important;
+}
+
+.form-check-input:focus,
+input[type="checkbox"].form-check-input:focus {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25) !important;
+  outline: none !important;
+}
+
+[data-bs-theme="dark"] .form-check-input,
+[data-bs-theme="dark"] input[type="checkbox"].form-check-input {
+  background-color: #1e293b !important;
+  border: 2px solid #94a3b8 !important;
+}
+
+[data-bs-theme="dark"] .form-check-input:checked,
+[data-bs-theme="dark"] input[type="checkbox"].form-check-input:checked {
+  background-color: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+}
+
+/* ==========================================================================
+   TABLES: White with Clear Lines Between Rows
+   ========================================================================== */
+.table-responsive {
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 10px !important;
+  background-color: #ffffff !important;
+  overflow: hidden !important;
+  margin-bottom: 1rem !important;
+}
+
 .table,
 .table > :not(caption) > * > *,
 .table-responsive table,
@@ -438,6 +534,14 @@ textarea.form-control {
 .pos-selected-attrs-table {
   background-color: #ffffff !important;
   color: var(--text-primary);
+}
+
+.table td {
+  border-bottom: 1px solid #cbd5e1 !important;
+}
+
+.table th {
+  border-bottom: 2px solid #94a3b8 !important;
 }
 
 [data-bs-theme="dark"] .card,
@@ -450,7 +554,15 @@ textarea.form-control {
 [data-bs-theme="dark"] .positions-table-card,
 [data-bs-theme="dark"] .admin-kpi-card,
 [data-bs-theme="dark"] .profile-avatar-card,
-[data-bs-theme="dark"] .profile-content-card {
+[data-bs-theme="dark"] .profile-content-card,
+[data-bs-theme="dark"] .auth-card,
+[data-bs-theme="dark"] .auth-panel {
+  background-color: var(--bg-card) !important;
+  border: 1px solid #334155 !important;
+}
+
+[data-bs-theme="dark"] .table-responsive {
+  border-color: #334155 !important;
   background-color: var(--bg-card) !important;
 }
 
@@ -461,6 +573,16 @@ textarea.form-control {
 [data-bs-theme="dark"] .pos-selected-attrs-table {
   background-color: var(--bg-card) !important;
   color: var(--text-primary);
+}
+
+[data-bs-theme="dark"] .table td {
+  border-bottom: 1px solid #334155 !important;
+}
+
+[data-bs-theme="dark"] .table th {
+  border-bottom: 2px solid #475569 !important;
+  background-color: #1e293b !important;
+  color: #cbd5e1 !important;
 }
 
 /* Responsive labels for screens smaller than laptop (< 1200px) */

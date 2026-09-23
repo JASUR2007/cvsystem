@@ -148,11 +148,17 @@ builder.Services.AddAuthorization();
 var s3Endpoint = builder.Configuration["S3:Endpoint"];
 var s3AccessKey = builder.Configuration["S3:AccessKey"];
 var s3SecretKey = builder.Configuration["S3:SecretKey"];
+var s3Region = builder.Configuration["S3:Region"] ?? "uz";
 if (!string.IsNullOrWhiteSpace(s3Endpoint) && !string.IsNullOrWhiteSpace(s3AccessKey) && !string.IsNullOrWhiteSpace(s3SecretKey))
 {
     builder.Services.AddSingleton<IAmazonS3>(new AmazonS3Client(
         new BasicAWSCredentials(s3AccessKey, s3SecretKey),
-        new AmazonS3Config { ServiceURL = s3Endpoint, ForcePathStyle = true }));
+        new AmazonS3Config
+        {
+            ServiceURL = s3Endpoint,
+            ForcePathStyle = true,
+            AuthenticationRegion = s3Region
+        }));
 }
 
 // CORS

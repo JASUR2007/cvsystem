@@ -6,8 +6,14 @@ namespace backend.Services;
 
 public static class AttributeValueHelper
 {
-    public static bool ValidImageKey(string? key, Guid userId) =>
-        string.IsNullOrWhiteSpace(key) || key.StartsWith($"users/{userId}/", StringComparison.Ordinal);
+    public static bool ValidImageKey(string? key, Guid userId)
+    {
+        if (string.IsNullOrWhiteSpace(key)) return true;
+        var normalized = key.TrimStart('/');
+        return normalized.StartsWith($"users/{userId}/", StringComparison.Ordinal)
+            || normalized.StartsWith($"uploads/users/{userId}/", StringComparison.Ordinal)
+            || key.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase);
+    }
 
     public static string? Validate(AttributeDefinition attribute, AttributeValueInput input)
     {
@@ -17,7 +23,7 @@ public static class AttributeValueHelper
             AttributeType.Text when input.TextValue is not null && input.TextValue.Trim().Length > 2000 => "Value must be at most 2000 characters.",
             AttributeType.Numeric when input.NumberValue is not null && (input.NumberValue < -1000000 || input.NumberValue > 1000000) => "Numeric value out of range.",
             AttributeType.Period when input.PeriodStart is not null && input.PeriodEnd is not null && input.PeriodEnd < input.PeriodStart => "End date must follow start date.",
-            AttributeType.Image when input.ImageObjectKey is not null && input.ImageObjectKey.Trim().Length > 500 => "Image key is too long.",
+            AttributeType.Image when input.ImageObjectKey is not null && !input.ImageObjectKey.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase) && input.ImageObjectKey.Trim().Length > 500 => "Image key is too long.",
             AttributeType.Dropdown when input.SelectedOptionId is not null && !attribute.Options.Any(option => option.Id == input.SelectedOptionId) => "Invalid option.",
             _ => null
         };

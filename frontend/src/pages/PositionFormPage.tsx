@@ -4,6 +4,7 @@ import {
   json,
   type AttributeDetail,
   type AttributeListItem,
+  type AttributeType,
   type Page,
   type PositionDetail,
   type PositionLevel,
@@ -54,6 +55,75 @@ export default function PositionFormPage({ id }: { id?: string }) {
   const [step, setStep] = useState<StepId>('General')
   const [message, setMessage] = useState('')
   const [saving, setSaving] = useState(false)
+
+  // In-wizard Attribute Creation Modal State
+  const categoriesApi = useApi<string[]>('/attribute-categories')
+  const DEFAULT_CATEGORIES = [
+    'Technical Skills',
+    'Soft Skills',
+    'Certificates',
+    'Language',
+    'Education',
+    'Domain Knowledge',
+    'Personal Information',
+    'General',
+  ]
+  const availableCategories =
+    categoriesApi.data && categoriesApi.data.length > 0
+      ? Array.from(new Set([...categoriesApi.data, ...DEFAULT_CATEGORIES]))
+      : DEFAULT_CATEGORIES
+
+  const [showNewAttrModal, setShowNewAttrModal] = useState(false)
+  const [newAttrName, setNewAttrName] = useState('')
+  const [newAttrCategory, setNewAttrCategory] = useState('Technical Skills')
+  const [newAttrType, setNewAttrType] = useState<AttributeType>('String')
+  const [newAttrDesc, setNewAttrDesc] = useState('')
+  const [newAttrOptions, setNewAttrOptions] = useState<string[]>([''])
+  const [newAttrError, setNewAttrError] = useState('')
+  const [creatingAttr, setCreatingAttr] = useState(false)
+
+  async function handleCreateNewAttribute(e: FormEvent) {
+    e.preventDefault()
+    setNewAttrError('')
+    if (!newAttrName.trim()) {
+      setNewAttrError(t('Name is required'))
+      return
+    }
+    setCreatingAttr(true)
+    try {
+      const created = await api<AttributeDetail>(
+        '/attributes',
+        json('POST', {
+          name: newAttrName.trim(),
+          description: newAttrDesc.trim(),
+          category: newAttrCategory,
+          type: newAttrType,
+          options: newAttrType === 'Dropdown' ? newAttrOptions.map(o => o.trim()).filter(Boolean) : [],
+          version: 1,
+        })
+      )
+      await library.reload()
+      // Automatically add to position attributes
+      setAttributes(prev => [
+        ...prev,
+        {
+          attributeId: created.id,
+          name: created.name,
+          sortOrder: prev.length,
+          isRequired: true,
+        },
+      ])
+      setShowNewAttrModal(false)
+      setNewAttrName('')
+      setNewAttrDesc('')
+      setNewAttrType('String')
+      setNewAttrOptions([''])
+    } catch (cause) {
+      setNewAttrError(cause instanceof Error ? cause.message : t('Could not create attribute.'))
+    } finally {
+      setCreatingAttr(false)
+    }
+  }
 
   const ruleIds = rules.map(rule => rule.attributeId).filter(Boolean).join(',')
 
@@ -292,9 +362,15 @@ export default function PositionFormPage({ id }: { id?: string }) {
                   value={lookup}
                   onChange={e => setLookup(e.target.value)}
                 />
-                <a href="/attributes/new" className="btn btn-outline-secondary" target="_blank" rel="noreferrer">
-                  + {t('New attribute')}
-                </a>
+                <button
+                  type="button"
+                  className="btn btn-outline-primary fw-bold px-3 d-inline-flex align-items-center justify-content-center"
+                  style={{ fontSize: '1.25rem', lineHeight: 1, minWidth: '44px' }}
+                  title={t('New attribute')}
+                  onClick={() => setShowNewAttrModal(true)}
+                >
+                  +
+                </button>
               </div>
 
               <label className="text-muted" style={{ fontSize: '0.8125rem' }}>
@@ -604,6 +680,159 @@ export default function PositionFormPage({ id }: { id?: string }) {
           </footer>
         </form>
       </div>
+
+      {/* In-Wizard Attribute Creation Modal */}
+      {showNewAttrModal && (
+        <div
+          className="modal fade show d-block"
+          tabIndex={-1}
+          role="dialog"
+          aria-modal="true"
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 1050 }}
+          onClick={() => setShowNewAttrModal(false)}
+        >
+          <div
+            className="modal-dialog modal-dialog-centered"
+            role="document"
+            style={{ maxWidth: 540 }}
+            onClick={e => e.stopPropagation()}
+          >
+            <form className="modal-content shadow-lg border-0" onSubmit={handleCreateNewAttribute}>
+              <div className="modal-header border-bottom">
+                <h5 className="modal-title h5 mb-0" style={{ fontWeight: 600 }}>
+                  {t('Create attribute')}
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowNewAttrModal(false)}
+                  aria-label="Close"
+                ></button>
+              </div>
+
+              <div className="modal-body py-3">
+                {newAttrError && (
+                  <div className="alert alert-danger py-2 mb-3" role="alert">
+                    {newAttrError}
+                  </div>
+                )}
+
+                <div className="mb-3">
+                  <label className="form-label fw-semibold">{t('Name')} *</label>
+                  <input
+                    className="form-control"
+                    value={newAttrName}
+                    onChange={e => setNewAttrName(e.target.value)}
+                    required
+                    maxLength={160}
+                    placeholder={t('e.g. Docker, English Level, CAP')}
+                    autoFocus
+                  />
+                </div>
+
+                <div className="row g-2 mb-3">
+                  <div className="col-sm-6">
+                    <label className="form-label fw-semibold">{t('Category')}</label>
+                    <select
+                      className="form-select"
+                      value={newAttrCategory}
+                      onChange={e => setNewAttrCategory(e.target.value)}
+                    >
+                      {availableCategories.map(cat => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="col-sm-6">
+                    <label className="form-label fw-semibold">{t('Type')}</label>
+                    <select
+                      className="form-select"
+                      value={newAttrType}
+                      onChange={e => setNewAttrType(e.target.value as AttributeType)}
+                    >
+                      {['String', 'Text', 'Numeric', 'Date', 'Period', 'Boolean', 'Dropdown', 'Image'].map(tp => (
+                        <option key={tp} value={tp}>
+                          {tp}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {newAttrType === 'Dropdown' && (
+                  <div className="border rounded p-3 bg-light-subtle mb-3">
+                    <h6 className="fw-bold mb-2">{t('Dropdown Options')}</h6>
+                    <div className="d-grid gap-2 mb-2">
+                      {newAttrOptions.map((opt, idx) => (
+                        <div className="d-flex gap-2" key={idx}>
+                          <input
+                            className="form-control form-control-sm"
+                            value={opt}
+                            onChange={e =>
+                              setNewAttrOptions(
+                                newAttrOptions.map((o, p) => (p === idx ? e.target.value : o))
+                              )
+                            }
+                            placeholder={`${t('Option')} ${idx + 1}`}
+                            required
+                          />
+                          <button
+                            type="button"
+                            className="btn btn-outline-danger btn-sm"
+                            disabled={newAttrOptions.length <= 1}
+                            onClick={() => setNewAttrOptions(newAttrOptions.filter((_, p) => p !== idx))}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      className="btn btn-outline-primary btn-sm"
+                      onClick={() => setNewAttrOptions([...newAttrOptions, ''])}
+                    >
+                      + {t('Add option')}
+                    </button>
+                  </div>
+                )}
+
+                <div className="mb-2">
+                  <label className="form-label fw-semibold">{t('Description')}</label>
+                  <textarea
+                    className="form-control"
+                    rows={2}
+                    value={newAttrDesc}
+                    onChange={e => setNewAttrDesc(e.target.value)}
+                    placeholder={t('Provide guidance on how to evaluate or fill this attribute...')}
+                    maxLength={2000}
+                  />
+                </div>
+              </div>
+
+              <div className="modal-footer border-top">
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary btn-sm"
+                  onClick={() => setShowNewAttrModal(false)}
+                >
+                  {t('Cancel')}
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary btn-sm"
+                  disabled={creatingAttr}
+                >
+                  {creatingAttr ? t('Creating...') : t('Create attribute')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

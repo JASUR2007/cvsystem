@@ -11,7 +11,7 @@
 
 :root, [data-bs-theme="light"] {
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --bg-primary: #80808026;
+  --bg-primary: #8080801a;
   --bg-card: #FFFFFF;
   --bg-secondary: #F8FAFC;
   --text-primary: #0F172A;
@@ -26,6 +26,9 @@
   --bs-body-color: var(--text-primary);
   --bs-secondary-color: var(--text-muted);
   --bs-border-color: var(--border-primary);
+  --bs-card-bg: #FFFFFF;
+  --bs-modal-bg: #FFFFFF;
+  --bs-table-bg: #FFFFFF;
   --surface-bg: var(--bg-card);
   --surface-soft: var(--bg-secondary);
   --surface-card: var(--bg-card);
@@ -386,3 +389,102 @@ textarea.form-control {
     display: none;
   }
 }
+
+/* Modals: Clean white in Light Theme */
+.modal-content,
+.modal-dialog .modal-content,
+.custom-modal-dialog {
+  background-color: #ffffff !important;
+  color: var(--text-primary) !important;
+}
+
+.modal-header,
+.modal-body,
+.modal-footer {
+  background-color: #ffffff !important;
+  color: var(--text-primary) !important;
+}
+
+[data-bs-theme="dark"] .modal-content,
+[data-bs-theme="dark"] .modal-dialog .modal-content,
+[data-bs-theme="dark"] .custom-modal-dialog,
+[data-bs-theme="dark"] .modal-header,
+[data-bs-theme="dark"] .modal-body,
+[data-bs-theme="dark"] .modal-footer {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Cards & Surfaces: White in Light Theme */
+.card,
+.surface,
+.page-surface,
+.pos-form-card,
+.pos-card,
+.cv-sheet-card,
+.matrix-table-card,
+.positions-table-card,
+.admin-kpi-card,
+.profile-avatar-card,
+.profile-content-card {
+  background-color: #ffffff !important;
+}
+
+/* Tables: White in Light Theme */
+.table,
+.table > :not(caption) > * > *,
+.table-responsive table,
+.cv-kv-table,
+.pos-selected-attrs-table {
+  background-color: #ffffff !important;
+  color: var(--text-primary);
+}
+
+[data-bs-theme="dark"] .card,
+[data-bs-theme="dark"] .surface,
+[data-bs-theme="dark"] .page-surface,
+[data-bs-theme="dark"] .pos-form-card,
+[data-bs-theme="dark"] .pos-card,
+[data-bs-theme="dark"] .cv-sheet-card,
+[data-bs-theme="dark"] .matrix-table-card,
+[data-bs-theme="dark"] .positions-table-card,
+[data-bs-theme="dark"] .admin-kpi-card,
+[data-bs-theme="dark"] .profile-avatar-card,
+[data-bs-theme="dark"] .profile-content-card {
+  background-color: var(--bg-card) !important;
+}
+
+[data-bs-theme="dark"] .table,
+[data-bs-theme="dark"] .table > :not(caption) > * > *,
+[data-bs-theme="dark"] .table-responsive table,
+[data-bs-theme="dark"] .cv-kv-table,
+[data-bs-theme="dark"] .pos-selected-attrs-table {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary);
+}
+
+/* Responsive labels for screens smaller than laptop (< 992px) */
+@media (max-width: 991.98px) {
+  .btn-responsive-text {
+    display: none !important;
+  }
+  .admin-sidebar {
+    padding: 0.75rem 0.5rem !important;
+  }
+  .admin-brand-tag {
+    display: none !important;
+  }
+  .admin-nav-menu {
+    flex-direction: row !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+  }
+  .admin-nav-link {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.8125rem !important;
+  }
+  .admin-nav-link span {
+    display: none !important;
+  }
+}
+

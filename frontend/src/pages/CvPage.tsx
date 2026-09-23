@@ -228,7 +228,7 @@ export default function CvPage({ id, user }: { id: string; user: CurrentUser | n
               role="document"
               onClick={e => e.stopPropagation()}
             >
-              <div className="modal-content shadow-lg border-0 bg-card">
+              <div className="modal-content shadow-lg border-0">
                 <div className="modal-header border-bottom">
                   <h5 className="modal-title h6 mb-0" style={{ fontWeight: 600 }}>
                     {t('Edit')} {editing.name}

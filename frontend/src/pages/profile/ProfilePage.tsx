@@ -141,35 +141,22 @@ export default function ProfilePage({ userId }: { userId?: string }) {
     try {
       let objectKey = ''
       try {
-        const signed = await api<{ objectKey: string; uploadUrl: string; publicUrl: string | null }>(
-          `/files/presign${userId ? `?userId=${userId}` : ''}`,
-          { method: 'POST', body: JSON.stringify({ contentType: file.type }) }
+        // Direct upload to backend API (handles ACDN S3 via server-side AWS SDK and robust fallback)
+        const formData = new FormData()
+        formData.append('file', file)
+        const uploaded = await api<{ objectKey: string; publicUrl: string | null }>(
+          `/files/upload${userId ? `?userId=${userId}` : ''}`,
+          { method: 'POST', body: formData }
         )
-        const response = await fetch(signed.uploadUrl, {
-          method: 'PUT',
-          body: file,
-        })
-        if (!response.ok) throw new Error('S3 presign upload rejected')
-        objectKey = signed.objectKey
+        objectKey = uploaded.publicUrl || uploaded.objectKey
       } catch {
-        try {
-          // Fallback to backend direct upload (bypasses S3 CORS / presign signature issues)
-          const formData = new FormData()
-          formData.append('file', file)
-          const uploaded = await api<{ objectKey: string; publicUrl: string | null }>(
-            `/files/upload${userId ? `?userId=${userId}` : ''}`,
-            { method: 'POST', body: formData }
-          )
-          objectKey = uploaded.publicUrl || uploaded.objectKey
-        } catch {
-          // Client-side fallback: Data URL
-          objectKey = await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader()
-            reader.onload = () => resolve(reader.result as string)
-            reader.onerror = reject
-            reader.readAsDataURL(file)
-          })
-        }
+        // Client-side fallback: Data URL
+        objectKey = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result as string)
+          reader.onerror = reject
+          reader.readAsDataURL(file)
+        })
       }
       change('photoObjectKey', objectKey)
     } catch (cause) {

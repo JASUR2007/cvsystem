@@ -5,6 +5,8 @@ import { Status } from '../../shared/ui'
 import { useApi } from '../../shared/useApi'
 import { t } from '../../shared/i18n'
 
+import ConfirmModal from '../../shared/ConfirmModal'
+
 export default function InfoTab({ userId }: { userId?: string }) {
   const target = userId ? `?userId=${userId}` : ''
   const result = useApi<AttributeValue[]>(`/profile/attributes${target}`)
@@ -14,14 +16,15 @@ export default function InfoTab({ userId }: { userId?: string }) {
   const [editing, setEditing] = useState<AttributeValue | null>(null)
   const definition = useApi<AttributeDetail>(editing ? `/attributes/${editing.attributeId}` : null)
   const [message, setMessage] = useState('')
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
 
   async function add(id: string) {
     try {
       await api(`/profile/attributes/${id}${target}`, { method: 'POST' })
       result.reload()
-      setMessage('Attribute added.')
+      setMessage(t('Attribute added.'))
     } catch (cause) {
-      setMessage(cause instanceof Error ? cause.message : 'Could not add attribute.')
+      setMessage(cause instanceof Error ? cause.message : t('Could not add attribute.'))
     }
   }
 
@@ -31,21 +34,20 @@ export default function InfoTab({ userId }: { userId?: string }) {
       await api(`/profile/attributes/${editing.attributeId}${target}`, json('PUT', { version: editing.version, value: editing }))
       setEditing(null)
       result.reload()
-      setMessage('Value saved.')
+      setMessage(t('Value saved.'))
     } catch (cause) {
-      setMessage(cause instanceof Error ? cause.message : 'Could not save value.')
+      setMessage(cause instanceof Error ? cause.message : t('Could not save value.'))
     }
   }
 
-  async function remove() {
-    if (!window.confirm(`Remove ${selected.length} selected attribute(s)?`)) return
+  async function handleRemoveConfirm() {
     try {
       await Promise.all(selected.map(id => api(`/profile/attributes/${id}${target}`, { method: 'DELETE' })))
       setSelected([])
       result.reload()
-      setMessage('Attributes removed.')
+      setMessage(t('Attributes removed.'))
     } catch (cause) {
-      setMessage(cause instanceof Error ? cause.message : 'Could not remove attributes.')
+      setMessage(cause instanceof Error ? cause.message : t('Could not remove attributes.'))
     }
   }
 
@@ -60,7 +62,7 @@ export default function InfoTab({ userId }: { userId?: string }) {
         </div>
 
         {selected.length > 0 && (
-          <button className="btn btn-outline-danger btn-sm" onClick={remove}>
+          <button className="btn btn-outline-danger btn-sm" onClick={() => setIsDeleteModalOpen(true)}>
             {t('Delete')} ({selected.length})
           </button>
         )}
@@ -132,9 +134,9 @@ export default function InfoTab({ userId }: { userId?: string }) {
                     }
                   />
                 </th>
-                <th>Attribute</th>
-                <th>Value</th>
-                <th style={{ textAlign: 'right' }}>Action</th>
+                <th>{t('Attribute')}</th>
+                <th>{t('Value')}</th>
+                <th style={{ textAlign: 'right' }}>{t('Action')}</th>
               </tr>
             </thead>
             <tbody>
@@ -145,7 +147,7 @@ export default function InfoTab({ userId }: { userId?: string }) {
                   value.numberValue?.toString() ??
                   value.dateValue ??
                   value.booleanValue?.toString() ??
-                  (value.selectedOptionId ? 'Selected' : value.imageObjectKey ? 'Image' : null)
+                  (value.selectedOptionId ? t('Selected') : value.imageObjectKey ? t('Image') : null)
 
                 return (
                   <tr
@@ -178,7 +180,7 @@ export default function InfoTab({ userId }: { userId?: string }) {
                       {valStr ? (
                         <span>{valStr}</span>
                       ) : (
-                        <span className="val-empty">(empty)</span>
+                        <span className="val-empty">{t('(empty)')}</span>
                       )}
                     </td>
                     <td style={{ textAlign: 'right' }}>
@@ -190,7 +192,7 @@ export default function InfoTab({ userId }: { userId?: string }) {
                           setEditing(value)
                         }}
                       >
-                        {valStr ? t('Edit') : '+ Add'}
+                        {valStr ? t('Edit') : `+ ${t('Add')}`}
                       </button>
                     </td>
                   </tr>
@@ -243,6 +245,17 @@ export default function InfoTab({ userId }: { userId?: string }) {
           )}
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        title="Remove attributes"
+        message={`${t('Remove')} ${selected.length} ${t('selected attribute(s)?')}`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        confirmVariant="danger"
+        onConfirm={handleRemoveConfirm}
+        onCancel={() => setIsDeleteModalOpen(false)}
+      />
     </div>
   )
 }

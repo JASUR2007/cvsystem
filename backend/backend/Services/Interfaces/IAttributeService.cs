@@ -11,6 +11,7 @@ public interface IAttributeService
         int page, int pageSize, CancellationToken cancellationToken = default);
 
     Task<AttributeDetail> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<List<string>> GetCategoriesAsync(CancellationToken cancellationToken = default);
     Task<AttributeDetail> CreateAsync(AttributeRequest request, CancellationToken cancellationToken = default);
     Task<AttributeDetail> UpdateAsync(Guid id, AttributeRequest request, CancellationToken cancellationToken = default);
     Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);

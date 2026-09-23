@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { api, json, type Page } from '../shared/api'
 import { Pager, Status } from '../shared/ui'
 import { useApi } from '../shared/useApi'
+import { t } from '../shared/i18n'
+import ConfirmModal from '../shared/ConfirmModal'
 import '../admin.css'
 
 type User = {
@@ -53,6 +55,7 @@ export default function AdminPage() {
   const [page, setPage] = useState(1)
   const [selected, setSelected] = useState<string[]>([])
   const [message, setMessage] = useState('')
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
 
   const blockedParam = statusFilter === 'blocked' ? '&isBlocked=true' : statusFilter === 'active' ? '&isBlocked=false' : ''
   const roleParam = roleFilter ? `&role=${roleFilter}` : ''
@@ -63,22 +66,35 @@ export default function AdminPage() {
 
   const chosen = users.data?.items.find(u => u.id === selected[0])
 
-  async function action(kind: 'block' | 'unblock' | 'delete') {
-    if (kind === 'delete' && !window.confirm(`Delete ${selected.length} selected user(s)?`)) return
+  async function executeDeleteUsers() {
     try {
       await Promise.all(
-        selected.map(id =>
-          api(`/admin/users/${id}${kind === 'delete' ? '' : `/${kind}`}`, {
-            method: kind === 'delete' ? 'DELETE' : 'POST',
-          })
-        )
+        selected.map(id => api(`/admin/users/${id}`, { method: 'DELETE' }))
       )
       setSelected([])
       users.reload()
       stats.reload()
-      setMessage(`Users successfully updated (${kind}).`)
+      setMessage(t('Users successfully updated (delete).'))
     } catch (cause) {
-      setMessage(cause instanceof Error ? cause.message : 'Could not perform operation.')
+      setMessage(cause instanceof Error ? cause.message : t('Could not perform operation.'))
+    }
+  }
+
+  async function action(kind: 'block' | 'unblock' | 'delete') {
+    if (kind === 'delete') {
+      setIsDeleteModalOpen(true)
+      return
+    }
+    try {
+      await Promise.all(
+        selected.map(id => api(`/admin/users/${id}/${kind}`, { method: 'POST' }))
+      )
+      setSelected([])
+      users.reload()
+      stats.reload()
+      setMessage(t(`Users successfully updated (${kind}).`))
+    } catch (cause) {
+      setMessage(cause instanceof Error ? cause.message : t('Could not perform operation.'))
     }
   }
 
@@ -87,9 +103,9 @@ export default function AdminPage() {
     try {
       await api(`/admin/users/${chosen.id}/roles`, json('PUT', { roles }))
       users.reload()
-      setMessage('User roles updated successfully.')
+      setMessage(t('User roles updated successfully.'))
     } catch (cause) {
-      setMessage(cause instanceof Error ? cause.message : 'Could not update roles.')
+      setMessage(cause instanceof Error ? cause.message : t('Could not update roles.'))
     }
   }
 
@@ -97,7 +113,7 @@ export default function AdminPage() {
     <div className="admin-layout">
       {/* Sidebar Navigation */}
       <aside className="admin-sidebar">
-        <div className="admin-brand-tag">Administration</div>
+        <div className="admin-brand-tag">{t('Administration')}</div>
         <nav className="admin-nav-menu">
           <button
             type="button"
@@ -110,7 +126,7 @@ export default function AdminPage() {
               <rect x="14" y="14" width="7" height="7" />
               <rect x="3" y="14" width="7" height="7" />
             </svg>
-            <span>Dashboard</span>
+            <span>{t('Dashboard')}</span>
           </button>
 
           <button
@@ -124,7 +140,7 @@ export default function AdminPage() {
               <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
               <path d="M16 3.13a4 4 0 0 1 0 7.75" />
             </svg>
-            <span>Users</span>
+            <span>{t('Users')}</span>
           </button>
 
           <a href="/positions" className="admin-nav-link">
@@ -132,7 +148,7 @@ export default function AdminPage() {
               <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
               <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
             </svg>
-            <span>Positions</span>
+            <span>{t('Positions')}</span>
           </a>
 
           <a href="/attributes" className="admin-nav-link">
@@ -141,7 +157,7 @@ export default function AdminPage() {
               <polyline points="2 17 12 22 22 17" />
               <polyline points="2 12 12 17 22 12" />
             </svg>
-            <span>Attributes</span>
+            <span>{t('Attributes')}</span>
           </a>
         </nav>
       </aside>
@@ -158,8 +174,8 @@ export default function AdminPage() {
         {currentTab === 'dashboard' && (
           <div>
             <header className="admin-page-header">
-              <h1 className="admin-page-title">Admin Dashboard</h1>
-              <p className="text-muted mb-0">Platform performance, user demographics, and system overview.</p>
+              <h1 className="admin-page-title">{t('Admin Dashboard')}</h1>
+              <p className="text-muted mb-0">{t('Platform performance, user demographics, and system overview.')}</p>
             </header>
 
             <Status loading={stats.loading} error={stats.error} />
@@ -170,49 +186,49 @@ export default function AdminPage() {
                 <div className="admin-kpi-grid">
                   <div className="admin-kpi-card">
                     <span className="admin-kpi-num">{stats.data.totalUsers.toLocaleString()}</span>
-                    <span className="admin-kpi-label">Total Users</span>
+                    <span className="admin-kpi-label">{t('Total Users')}</span>
                   </div>
                   <div className="admin-kpi-card">
                     <span className="admin-kpi-num" style={{ color: '#2563EB' }}>
                       {stats.data.candidates.toLocaleString()}
                     </span>
-                    <span className="admin-kpi-label">Candidates</span>
+                    <span className="admin-kpi-label">{t('Candidates')}</span>
                   </div>
                   <div className="admin-kpi-card">
                     <span className="admin-kpi-num" style={{ color: '#059669' }}>
                       {stats.data.recruiters.toLocaleString()}
                     </span>
-                    <span className="admin-kpi-label">Recruiters</span>
+                    <span className="admin-kpi-label">{t('Recruiters')}</span>
                   </div>
                   <div className="admin-kpi-card">
                     <span className="admin-kpi-num" style={{ color: '#7C3AED' }}>
                       {stats.data.administrators.toLocaleString()}
                     </span>
-                    <span className="admin-kpi-label">Administrators</span>
+                    <span className="admin-kpi-label">{t('Administrators')}</span>
                   </div>
                   <div className="admin-kpi-card">
                     <span className="admin-kpi-num" style={{ color: '#DC2626' }}>
                       {stats.data.blockedUsers.toLocaleString()}
                     </span>
-                    <span className="admin-kpi-label">Blocked Users</span>
+                    <span className="admin-kpi-label">{t('Blocked Users')}</span>
                   </div>
                   <div className="admin-kpi-card">
                     <span className="admin-kpi-num" style={{ color: '#D97706' }}>
                       {stats.data.positions.toLocaleString()}
                     </span>
-                    <span className="admin-kpi-label">Positions</span>
+                    <span className="admin-kpi-label">{t('Positions')}</span>
                   </div>
                   <div className="admin-kpi-card">
                     <span className="admin-kpi-num" style={{ color: '#4B5563' }}>
                       {stats.data.draftCvs.toLocaleString()}
                     </span>
-                    <span className="admin-kpi-label">Draft CVs</span>
+                    <span className="admin-kpi-label">{t('Draft CVs')}</span>
                   </div>
                   <div className="admin-kpi-card">
                     <span className="admin-kpi-num" style={{ color: '#16A34A' }}>
                       {stats.data.publishedCvs.toLocaleString()}
                     </span>
-                    <span className="admin-kpi-label">Published CVs</span>
+                    <span className="admin-kpi-label">{t('Published CVs')}</span>
                   </div>
                 </div>
 
@@ -220,7 +236,7 @@ export default function AdminPage() {
                 <div className="admin-two-cols">
                   {/* Recent Users */}
                   <div className="card p-3 border shadow-sm bg-card">
-                    <h3 className="h6 mb-3" style={{ fontWeight: 600 }}>Recent Users</h3>
+                    <h3 className="h6 mb-3" style={{ fontWeight: 600 }}>{t('Recent Users')}</h3>
                     <div className="table-responsive">
                       <table className="table table-hover align-middle mb-0">
                         <tbody>
@@ -246,7 +262,7 @@ export default function AdminPage() {
 
                   {/* Recent Positions */}
                   <div className="card p-3 border shadow-sm bg-card">
-                    <h3 className="h6 mb-3" style={{ fontWeight: 600 }}>Recent Positions</h3>
+                    <h3 className="h6 mb-3" style={{ fontWeight: 600 }}>{t('Recent Positions')}</h3>
                     <div className="table-responsive">
                       <table className="table table-hover align-middle mb-0">
                         <tbody>
@@ -265,7 +281,7 @@ export default function AdminPage() {
                               </td>
                               <td style={{ textAlign: 'right' }}>
                                 <span className="badge bg-primary-subtle text-primary border border-primary-subtle">
-                                  {p.cvCount} CVs
+                                  {p.cvCount} {t('CVs')}
                                 </span>
                               </td>
                             </tr>
@@ -283,8 +299,8 @@ export default function AdminPage() {
         {currentTab === 'users' && (
           <div>
             <header className="admin-page-header">
-              <h1 className="admin-page-title">Users</h1>
-              <p className="text-muted mb-0">Manage platform users, inspect profiles, configure permissions, and toggle access.</p>
+              <h1 className="admin-page-title">{t('Users')}</h1>
+              <p className="text-muted mb-0">{t('Manage platform users, inspect profiles, configure permissions, and toggle access.')}</p>
             </header>
 
             {/* Filter toolbar */}
@@ -298,7 +314,7 @@ export default function AdminPage() {
                     setQuery(e.target.value)
                     setPage(1)
                   }}
-                  placeholder="Search users..."
+                  placeholder={t('Search users...')}
                 />
 
                 <select
@@ -310,10 +326,10 @@ export default function AdminPage() {
                     setPage(1)
                   }}
                 >
-                  <option value="">All Roles</option>
-                  <option value="Candidate">Candidate</option>
-                  <option value="Recruiter">Recruiter</option>
-                  <option value="Administrator">Administrator</option>
+                  <option value="">{t('All Roles')}</option>
+                  <option value="Candidate">{t('Candidates')}</option>
+                  <option value="Recruiter">{t('Recruiters')}</option>
+                  <option value="Administrator">{t('Administrators')}</option>
                 </select>
 
                 <select
@@ -496,6 +512,17 @@ export default function AdminPage() {
             )}
           </div>
         )}
+
+        <ConfirmModal
+          isOpen={isDeleteModalOpen}
+          title="Delete users"
+          message={`${t('Are you sure you want to delete')} ${selected.length} ${t('selected user(s)?')}`}
+          confirmText="Delete"
+          cancelText="Cancel"
+          confirmVariant="danger"
+          onConfirm={executeDeleteUsers}
+          onCancel={() => setIsDeleteModalOpen(false)}
+        />
       </main>
     </div>
   )

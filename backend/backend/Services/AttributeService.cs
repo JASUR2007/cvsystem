@@ -17,10 +17,27 @@ public class AttributeService(AppDbContext db) : IAttributeService
         "Language",
         "Technical Skills",
         "Soft Skills",
+        "Certificates",
         "Certification",
         "Education",
-        "Domain Knowledge"
+        "Domain Knowledge",
+        "General"
     ];
+
+    public async Task<List<string>> GetCategoriesAsync(CancellationToken cancellationToken = default)
+    {
+        var dbCategories = await db.Attributes.AsNoTracking()
+            .Select(a => a.Category)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        return Categories
+            .Union(dbCategories)
+            .Where(c => !string.IsNullOrWhiteSpace(c))
+            .Distinct()
+            .OrderBy(c => c)
+            .ToList();
+    }
 
     public async Task<PagedResult<AttributeListItem>> ListAsync(
         string? prefix, string? category, AttributeType? type, bool? recent,

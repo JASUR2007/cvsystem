@@ -4,6 +4,7 @@ import { Pager, Status } from '../shared/ui'
 import { useApi } from '../shared/useApi'
 import type { CurrentUser } from '../auth/api'
 import { t } from '../shared/i18n'
+import ConfirmModal from '../shared/ConfirmModal'
 
 export default function PositionsPage({ user }: { user: CurrentUser | null }) {
   const [query, setQuery] = useState('')
@@ -11,18 +12,18 @@ export default function PositionsPage({ user }: { user: CurrentUser | null }) {
   const [page, setPage] = useState(1)
   const [selected, setSelected] = useState<string[]>([])
   const [message, setMessage] = useState('')
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const canManage = user?.roles.some(role => role === 'Recruiter' || role === 'Administrator') ?? false
   const result = useApi<Page<PositionListItem>>(`/positions?q=${encodeURIComponent(query)}&level=${level}&page=${page}`)
 
-  async function removeSelected() {
-    if (!window.confirm(`Delete ${selected.length} selected position(s)?`)) return
+  async function handleDeleteConfirm() {
     try {
       await Promise.all(selected.map(id => api(`/positions/${id}`, { method: 'DELETE' })))
       setSelected([])
-      setMessage('Selected positions were deleted.')
+      setMessage(t('Selected positions were deleted.'))
       result.reload()
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Could not delete positions.')
+      setMessage(error instanceof Error ? error.message : t('Could not delete positions.'))
     }
   }
 
@@ -88,7 +89,7 @@ export default function PositionsPage({ user }: { user: CurrentUser | null }) {
         </select>
 
         {canManage && selected.length > 0 && (
-          <button className="btn btn-outline-danger btn-delete-selected" onClick={removeSelected}>
+          <button className="btn btn-outline-danger btn-delete-selected" onClick={() => setIsDeleteModalOpen(true)}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="3 6 5 6 21 6" />
               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
@@ -205,6 +206,17 @@ export default function PositionsPage({ user }: { user: CurrentUser | null }) {
 
       {/* Pagination */}
       <Pager page={page} total={result.data?.totalPages ?? 0} onPage={setPage} />
+
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        title="Delete positions"
+        message={`${t('Are you sure you want to delete')} ${selected.length} ${t('selected position(s)?')}`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        confirmVariant="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setIsDeleteModalOpen(false)}
+      />
     </section>
   )
 }

@@ -26,6 +26,14 @@ public sealed class AttributesController(IAttributeService attributeService) : C
     public Task<ActionResult<PagedResult<AttributeListItem>>> Recent(CancellationToken cancellationToken) =>
         List(null, null, null, true, 1, 10, cancellationToken);
 
+    [HttpGet("categories")]
+    [HttpGet("/api/attribute-categories")]
+    public async Task<ActionResult<List<string>>> Categories(CancellationToken cancellationToken)
+    {
+        var result = await attributeService.GetCategoriesAsync(cancellationToken);
+        return Ok(result);
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<AttributeDetail>> Get(Guid id, CancellationToken cancellationToken)
     {

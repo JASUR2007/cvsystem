@@ -12,8 +12,35 @@ export function Status({ loading, error, empty }: { loading: boolean; error: Err
 }
 
 export function Pager({ page, total, onPage }: { page: number; total: number; onPage: (page: number) => void }) {
-  if (total <= 1) return null
-  return <div className="pager"><button className="btn btn-outline-primary btn-sm" disabled={page <= 1} onClick={() => onPage(page - 1)}>{t('Previous')}</button><span>{page} / {total}</span><button className="btn btn-outline-primary btn-sm" disabled={page >= total} onClick={() => onPage(page + 1)}>{t('Next')}</button></div>
+  const safeTotal = Math.max(1, total)
+  return (
+    <div className="pager d-flex align-items-center justify-content-between flex-wrap gap-2 mt-4 pt-3 border-top">
+      <div className="text-muted small">
+        {t('Page')} <strong>{page}</strong> {t('of')} <strong>{safeTotal}</strong>
+      </div>
+      <div className="d-flex align-items-center gap-2">
+        <button
+          type="button"
+          className="btn btn-outline-secondary btn-sm"
+          disabled={page <= 1}
+          onClick={() => onPage(page - 1)}
+        >
+          ← {t('Previous')}
+        </button>
+        <span className="badge text-bg-light border px-3 py-2 font-monospace" style={{ fontSize: '0.875rem' }}>
+          {page} / {safeTotal}
+        </span>
+        <button
+          type="button"
+          className="btn btn-outline-secondary btn-sm"
+          disabled={page >= safeTotal}
+          onClick={() => onPage(page + 1)}
+        >
+          {t('Next')} →
+        </button>
+      </div>
+    </div>
+  )
 }
 
 export function PageTitle({ title, action }: { title: string; action?: React.ReactNode }) {

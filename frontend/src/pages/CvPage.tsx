@@ -74,7 +74,6 @@ export default function CvPage({ id, user }: { id: string; user: CurrentUser | n
       </a>
 
       <div className="cv-sheet-card">
-        {/* Header Block (Screen 11 Layout) */}
         <header className="cv-header-block">
           <div>
             <h1 className="cv-candidate-title">{cv.firstName} {cv.lastName}</h1>

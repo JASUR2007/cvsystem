@@ -29,7 +29,6 @@ export default function PositionCvsPage({ id }: { id: string }) {
         <span>{t('Back to positions')}</span>
       </a>
 
-      {/* Header and Toolbar (Screen 12 Layout) */}
       <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
         <div>
           <h1 className="h3 mb-1" style={{ fontWeight: 700, color: 'var(--text-primary)' }}>

@@ -169,7 +169,6 @@ export default function PositionDetailPage({ id, user }: { id: string; user: Cur
         )}
       </div>
 
-      {/* Overview Tab Content (Screen 5 Layout) */}
       {tab === 'Overview' && (
         <div className="pos-overview-grid">
           {/* Main Left Column */}

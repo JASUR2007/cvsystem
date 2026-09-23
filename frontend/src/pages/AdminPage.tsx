@@ -155,9 +155,6 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* =========================================================================
-            SCREEN 15: ADMIN DASHBOARD
-           ========================================================================= */}
         {currentTab === 'dashboard' && (
           <div>
             <header className="admin-page-header">
@@ -283,9 +280,6 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* =========================================================================
-            SCREEN 16: ADMIN USERS
-           ========================================================================= */}
         {currentTab === 'users' && (
           <div>
             <header className="admin-page-header">

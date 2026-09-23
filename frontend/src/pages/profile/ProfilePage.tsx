@@ -91,7 +91,6 @@ export default function ProfilePage({ userId }: { userId?: string }) {
       {/* Status indicator */}
       <Status loading={result.loading} error={result.error} />
 
-      {/* TAB 1: ME (Screen 7 Layout) */}
       {tab === 'Me' && form && (
         <div className="profile-me-grid">
           {/* Left Avatar Card */}
@@ -200,13 +199,10 @@ export default function ProfilePage({ userId }: { userId?: string }) {
         </div>
       )}
 
-      {/* TAB 2: INFO (Screen 8) */}
       {tab === 'Info' && <InfoTab userId={userId} />}
 
-      {/* TAB 3: PROJECTS (Screen 9) */}
       {tab === 'Projects' && <ProjectsTab userId={userId} />}
 
-      {/* TAB 4: CVS (Screen 10 Layout) */}
       {tab === 'CVs' && (
         <div className="profile-settings-card">
           <div className="profile-card-header">

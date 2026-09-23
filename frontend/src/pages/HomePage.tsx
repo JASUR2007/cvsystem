@@ -41,7 +41,6 @@ export default function HomePage() {
 
   return (
     <>
-      {/* Hero Section (Screen 1 Layout) */}
       <section className="home-hero">
         <div className="hero-copy">
           <span className="eyebrow" style={{ color: 'var(--color-primary)', fontWeight: 600, fontSize: '0.875rem' }}>

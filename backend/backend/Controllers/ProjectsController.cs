@@ -9,17 +9,19 @@ namespace backend.Controllers;
 [Authorize]
 public sealed class ProjectsController(IProjectService projectService) : ControllerBase
 {
+    [HttpGet("api/projects")]
     [HttpGet("api/profile/projects")]
     [HttpGet("api/users/{userId:guid}/projects")]
-    public async Task<ActionResult<List<ProjectView>>> List(Guid? userId, CancellationToken cancellationToken)
+    public async Task<ActionResult<List<ProjectView>>> List([FromQuery] Guid? userId, CancellationToken cancellationToken)
     {
         var result = await projectService.ListUserProjectsAsync(userId, cancellationToken);
         return Ok(result);
     }
 
+    [HttpPost("api/projects")]
     [HttpPost("api/profile/projects")]
     [HttpPost("api/users/{userId:guid}/projects")]
-    public async Task<ActionResult<ProjectView>> Create(Guid? userId, ProjectRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<ProjectView>> Create([FromQuery] Guid? userId, ProjectRequest request, CancellationToken cancellationToken)
     {
         var result = await projectService.CreateProjectAsync(userId, request, cancellationToken);
         return CreatedAtAction(nameof(List), new { userId }, result);

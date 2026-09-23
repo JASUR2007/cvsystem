@@ -93,8 +93,20 @@ export default function AttributesPage() {
           />{' '}
           {t('Recent')}
         </label>
+        {selected.length === 1 && (
+          <a
+            href={`/attributes/${selected[0]}/edit`}
+            className="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1 ms-auto"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg>
+            <span>{t('Edit')}</span>
+          </a>
+        )}
         <button
-          className="btn btn-outline-danger btn-sm ms-auto d-inline-flex align-items-center gap-1"
+          className={`btn btn-outline-danger btn-sm d-inline-flex align-items-center gap-1 ${selected.length !== 1 ? 'ms-auto' : ''}`}
           disabled={selected.length === 0}
           onClick={() => setIsDeleteModalOpen(true)}
         >
@@ -149,7 +161,6 @@ export default function AttributesPage() {
                 <th>{t('Category')}</th>
                 <th>{t('Type')}</th>
                 <th>{t('Usage')}</th>
-                <th style={{ textAlign: 'right' }}>{t('Actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -196,40 +207,6 @@ export default function AttributesPage() {
                     <span className={`badge ${item.usageCount > 0 ? 'text-bg-info' : 'text-bg-light border'}`}>
                       {item.usageCount}
                     </span>
-                  </td>
-                  <td style={{ textAlign: 'right' }} onClick={event => event.stopPropagation()}>
-                    {!item.isBuiltIn ? (
-                      <div className="d-inline-flex gap-1 justify-content-end">
-                        <a
-                          href={`/attributes/${item.id}/edit`}
-                          className="btn btn-outline-primary btn-sm py-1 px-2 d-inline-flex align-items-center gap-1"
-                          title={t('Edit')}
-                        >
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                          </svg>
-                          <span className="attr-btn-label">{t('Edit')}</span>
-                        </a>
-                        <button
-                          type="button"
-                          className="btn btn-outline-danger btn-sm py-1 px-2 d-inline-flex align-items-center gap-1"
-                          title={t('Delete')}
-                          onClick={() => {
-                            setSelected([item.id])
-                            setIsDeleteModalOpen(true)
-                          }}
-                        >
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <polyline points="3 6 5 6 21 6" />
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                          </svg>
-                          <span className="attr-btn-label">{t('Delete')}</span>
-                        </button>
-                      </div>
-                    ) : (
-                      <span className="text-muted small">—</span>
-                    )}
                   </td>
                 </tr>
               ))}

@@ -104,6 +104,14 @@ var authentication = builder.Services.AddAuthentication(JwtBearerDefaults.Authen
         };
         options.Events = new JwtBearerEvents
         {
+            OnMessageReceived = context =>
+            {
+                if (string.IsNullOrEmpty(context.Token) && context.Request.Cookies.TryGetValue("talenthub_token", out var cookieToken))
+                {
+                    context.Token = cookieToken;
+                }
+                return Task.CompletedTask;
+            },
             OnTokenValidated = async context =>
             {
                 var idValue = context.Principal?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;

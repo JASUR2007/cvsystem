@@ -56,6 +56,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
 
   try {
     const response = await fetch(`${apiBase}/api/auth/me`, {
+      credentials: 'include',
       headers: { Authorization: `Bearer ${token}` },
     })
 
@@ -80,6 +81,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
 export async function submitAuth(mode: 'login' | 'register', data: Record<string, string>): Promise<AuthResponse> {
   const response = await fetch(`${apiBase}/api/auth/${mode}`, {
     method: 'POST',
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
@@ -101,6 +103,7 @@ export async function signOut() {
     try {
       await fetch(`${apiBase}/api/auth/logout`, {
         method: 'POST',
+        credentials: 'include',
         headers: { Authorization: `Bearer ${token}` },
       })
     } finally {

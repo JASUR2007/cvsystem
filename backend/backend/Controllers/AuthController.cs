@@ -14,6 +14,7 @@ public sealed class AuthController(IAuthService authService, ICurrentUserService
     public async Task<ActionResult<AuthResponse>> Register(RegisterRequest request, CancellationToken cancellationToken)
     {
         var response = await authService.RegisterAsync(request, cancellationToken);
+        SetAuthCookie(response.Token);
         return Ok(response);
     }
 
@@ -21,6 +22,7 @@ public sealed class AuthController(IAuthService authService, ICurrentUserService
     public async Task<ActionResult<AuthResponse>> Login(LoginRequest request, CancellationToken cancellationToken)
     {
         var response = await authService.LoginAsync(request, cancellationToken);
+        SetAuthCookie(response.Token);
         return Ok(response);
     }
 
@@ -34,5 +36,25 @@ public sealed class AuthController(IAuthService authService, ICurrentUserService
 
     [Authorize]
     [HttpPost("logout")]
-    public IActionResult Logout() => NoContent();
+    public IActionResult Logout()
+    {
+        Response.Cookies.Delete("talenthub_token", new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.None
+        });
+        return NoContent();
+    }
+
+    private void SetAuthCookie(string token)
+    {
+        Response.Cookies.Append("talenthub_token", token, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.None,
+            Expires = DateTimeOffset.UtcNow.AddHours(1)
+        });
+    }
 }

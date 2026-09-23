@@ -19,7 +19,7 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
   if (options.body && !(options.body instanceof FormData)) headers.set('Content-Type', 'application/json')
   let response: Response
   try {
-    response = await fetch(`${base}/api${path}`, { ...options, headers })
+    response = await fetch(`${base}/api${path}`, { credentials: 'include', ...options, headers })
   } catch {
     throw new ApiError(0, 'Cannot connect to the server.')
   }

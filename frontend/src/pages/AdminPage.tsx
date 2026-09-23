@@ -351,7 +351,7 @@ export default function AdminPage() {
               <div className="admin-toolbar-actions">
                 <button
                   type="button"
-                  className="btn btn-outline-warning btn-sm"
+                  className="btn btn-admin-block btn-sm"
                   disabled={selected.length === 0}
                   onClick={() => action('block')}
                 >
@@ -437,7 +437,6 @@ export default function AdminPage() {
                         <th>{t('Email')}</th>
                         <th>{t('Roles')}</th>
                         <th>{t('Status')}</th>
-                        <th style={{ textAlign: 'right' }}>{t('Actions')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -487,18 +486,6 @@ export default function AdminPage() {
                             >
                               {user.isBlocked ? t('Blocked') : t('Active')}
                             </span>
-                          </td>
-                          <td style={{ textAlign: 'right' }}>
-                            <button
-                              type="button"
-                              className="btn btn-outline-secondary btn-sm"
-                              onClick={e => {
-                                e.stopPropagation()
-                                setSelected([user.id])
-                              }}
-                            >
-                              {t('Manage Roles')}
-                            </button>
                           </td>
                         </tr>
                       ))}

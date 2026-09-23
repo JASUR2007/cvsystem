@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { api, dateText, json, type CvListItem, type Profile } from '../../shared/api'
+import { getCachedUser, saveAuth } from '../../auth/api'
 import { Status } from '../../shared/ui'
 import { useApi } from '../../shared/useApi'
 import InfoTab from './InfoTab'
@@ -7,6 +8,57 @@ import ProjectsTab from './ProjectsTab'
 import { imageUrl } from '../../shared/imageUrl'
 import { t } from '../../shared/i18n'
 import '../../profile.css'
+
+const LOCATION_SUGGESTIONS = [
+  'Tashkent, Uzbekistan',
+  'Ташкент, Узбекистан',
+  'Toshkent, O\'zbekiston',
+  'Samarkand, Uzbekistan',
+  'Самарканд, Узбекистан',
+  'Samarqand, O\'zbekiston',
+  'Bukhara, Uzbekistan',
+  'Бухара, Узбекистан',
+  'Buxoro, O\'zbekiston',
+  'Andijan, Uzbekistan',
+  'Андижан, Узбекистан',
+  'Andijon, O\'zbekiston',
+  'Namangan, Uzbekistan',
+  'Наманган, Узбекистан',
+  'Namangan, O\'zbekiston',
+  'Fergana, Uzbekistan',
+  'Фергана, Узбекистан',
+  'Farg\'ona, O\'zbekiston',
+  'Nukus, Uzbekistan',
+  'Нукус, Узбекистан',
+  'Nukus, O\'zbekiston',
+  'Almaty, Kazakhstan',
+  'Алматы, Казахстан',
+  'Olmaota, Qozog\'iston',
+  'Astana, Kazakhstan',
+  'Астана, Казахстан',
+  'Ostona, Qozog\'iston',
+  'Bishkek, Kyrgyzstan',
+  'Бишкек, Кыргызстан',
+  'Bishkek, Qirg\'iziston',
+  'Moscow, Russia',
+  'Москва, Россия',
+  'Moskva, Rossiya',
+  'London, United Kingdom',
+  'Лондон, Великобритания',
+  'London, Buyuk Britaniya',
+  'Berlin, Germany',
+  'Берлин, Германия',
+  'Berlin, Germaniya',
+  'New York, USA',
+  'Нью-Йорк, США',
+  'Nyu-York, AQSH',
+  'Dubai, UAE',
+  'Дубай, ОАЭ',
+  'Dubay, BAA',
+  'Remote',
+  'Удаленно',
+  'Masofaviy'
+]
 
 export default function ProfilePage({ userId }: { userId?: string }) {
   const target = userId ? `?userId=${userId}` : ''
@@ -20,8 +72,15 @@ export default function ProfilePage({ userId }: { userId?: string }) {
   const [savingManual, setSavingManual] = useState(false)
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const [photoError, setPhotoError] = useState('')
+  const [detectingLocation, setDetectingLocation] = useState(false)
+  const [requestingRecruiter, setRequestingRecruiter] = useState(false)
+  const [recruiterMessage, setRecruiterMessage] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const revision = useRef(0)
+
+  const cachedUser = getCachedUser()
+  const isCandidateOnly =
+    !userId && cachedUser && cachedUser.roles.includes('Candidate') && !cachedUser.roles.includes('Recruiter')
 
   useEffect(() => {
     if (result.data && !dirty) queueMicrotask(() => setForm(result.data))
@@ -87,13 +146,94 @@ export default function ProfilePage({ userId }: { userId?: string }) {
           `/files/upload${userId ? `?userId=${userId}` : ''}`,
           { method: 'POST', body: formData }
         )
-        objectKey = uploaded.objectKey
+        objectKey = uploaded.publicUrl || uploaded.objectKey
       }
       change('photoObjectKey', objectKey)
     } catch (cause) {
       setPhotoError(cause instanceof Error ? cause.message : 'Image upload failed.')
     } finally {
       setUploadingPhoto(false)
+    }
+  }
+
+  function fallbackLocationDetection() {
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+      if (tz.includes('Tashkent') || tz.includes('Samarkand')) {
+        change('location', 'Tashkent, Uzbekistan')
+      } else if (tz.includes('Almaty')) {
+        change('location', 'Almaty, Kazakhstan')
+      } else if (tz.includes('Moscow')) {
+        change('location', 'Moscow, Russia')
+      } else if (tz.includes('London')) {
+        change('location', 'London, United Kingdom')
+      } else if (tz.includes('New_York')) {
+        change('location', 'New York, USA')
+      } else if (tz.includes('Berlin')) {
+        change('location', 'Berlin, Germany')
+      } else if (tz.includes('Dubai')) {
+        change('location', 'Dubai, UAE')
+      }
+    } finally {
+      setDetectingLocation(false)
+    }
+  }
+
+  async function handleDetectLocation() {
+    setDetectingLocation(true)
+    try {
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          async position => {
+            const { latitude, longitude } = position.coords
+            try {
+              const res = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=en,ru,uz`
+              )
+              const data = await res.json()
+              const city =
+                data.address?.city ||
+                data.address?.town ||
+                data.address?.village ||
+                data.address?.state ||
+                ''
+              const country = data.address?.country || ''
+              const detected = [city, country].filter(Boolean).join(', ')
+              if (detected) {
+                change('location', detected)
+                setDetectingLocation(false)
+                return
+              }
+            } catch {
+              // fallback
+            }
+            fallbackLocationDetection()
+          },
+          () => {
+            fallbackLocationDetection()
+          },
+          { timeout: 5000 }
+        )
+      } else {
+        fallbackLocationDetection()
+      }
+    } catch {
+      fallbackLocationDetection()
+    }
+  }
+
+  async function handleRequestRecruiter() {
+    setRequestingRecruiter(true)
+    setRecruiterMessage('')
+    try {
+      const res = await api<{ token: string; user: any }>('/profile/request-recruiter', { method: 'POST' })
+      saveAuth(res.token, res.user)
+      setRecruiterMessage(t('Recruiter role granted! You can now post positions and review CVs.'))
+      window.location.reload()
+    } catch (cause) {
+      setRecruiterMessage(cause instanceof Error ? cause.message : 'Could not request recruiter role.')
+    } finally {
+      setRequestingRecruiter(false)
     }
   }
 
@@ -197,6 +337,30 @@ export default function ProfilePage({ userId }: { userId?: string }) {
               </svg>
               <span>{form.location || t('Location not set')}</span>
             </p>
+
+            <div className="d-flex flex-wrap gap-1 justify-content-center mt-2">
+              {cachedUser?.roles.map(r => (
+                <span className="badge text-bg-light border" key={r}>
+                  {t(r)}
+                </span>
+              ))}
+            </div>
+
+            {isCandidateOnly && (
+              <div className="mt-3 p-2 rounded border bg-light text-start" style={{ fontSize: '0.8125rem' }}>
+                <div className="fw-semibold text-primary mb-1">{t('Looking to hire?')}</div>
+                <p className="text-muted small mb-2">{t('Get recruiter access to publish positions and search candidates.')}</p>
+                <button
+                  type="button"
+                  className="btn btn-outline-primary btn-sm w-100"
+                  onClick={handleRequestRecruiter}
+                  disabled={requestingRecruiter}
+                >
+                  {requestingRecruiter ? t('Requesting...') : t('Request Recruiter role')}
+                </button>
+                {recruiterMessage && <div className="text-success small mt-1">{recruiterMessage}</div>}
+              </div>
+            )}
           </div>
 
           {/* Right Settings Card */}
@@ -233,13 +397,42 @@ export default function ProfilePage({ userId }: { userId?: string }) {
 
               <div className="col-12">
                 <label className="form-label" style={{ fontWeight: 600 }}>{t('Location')}</label>
-                <input
-                  className="form-control"
-                  value={form.location ?? ''}
-                  onChange={e => change('location', e.target.value)}
-                  placeholder="e.g. Tashkent, Uzbekistan"
-                  maxLength={200}
-                />
+                <div className="input-group">
+                  <input
+                    className="form-control"
+                    list="location-suggestions"
+                    value={form.location ?? ''}
+                    onChange={e => change('location', e.target.value)}
+                    placeholder={t('e.g. Tashkent, Uzbekistan')}
+                    maxLength={200}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary d-inline-flex align-items-center gap-1"
+                    onClick={handleDetectLocation}
+                    disabled={detectingLocation}
+                    title={t('Detect current location')}
+                  >
+                    {detectingLocation ? (
+                      <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
+                    ) : (
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="2" x2="12" y2="6" />
+                        <line x1="12" y1="18" x2="12" y2="22" />
+                        <line x1="2" y1="12" x2="6" y2="12" />
+                        <line x1="18" y1="12" x2="22" y2="12" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    )}
+                    <span>{t('Detect')}</span>
+                  </button>
+                </div>
+                <datalist id="location-suggestions">
+                  {LOCATION_SUGGESTIONS.map(loc => (
+                    <option key={loc} value={loc} />
+                  ))}
+                </datalist>
               </div>
 
               <div className="col-12">
@@ -295,7 +488,6 @@ export default function ProfilePage({ userId }: { userId?: string }) {
                     <th>{t('Status')}</th>
                     <th>{t('Likes')}</th>
                     <th>{t('Updated')}</th>
-                    <th style={{ textAlign: 'right' }}>{t('Actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -306,7 +498,14 @@ export default function ProfilePage({ userId }: { userId?: string }) {
                       onClick={() => window.location.assign(`/cvs/${cv.id}`)}
                     >
                       <td>
-                        <strong style={{ color: 'var(--text-primary)' }}>{cv.position}</strong>
+                        <a
+                          href={`/cvs/${cv.id}`}
+                          className="fw-bold text-decoration-none"
+                          style={{ color: 'var(--text-primary)' }}
+                          onClick={e => e.stopPropagation()}
+                        >
+                          {cv.position}
+                        </a>
                       </td>
                       <td>
                         <span
@@ -320,15 +519,6 @@ export default function ProfilePage({ userId }: { userId?: string }) {
                       </td>
                       <td>
                         <small className="text-muted">{dateText(cv.updatedAt)}</small>
-                      </td>
-                      <td style={{ textAlign: 'right' }}>
-                        <a
-                          href={`/cvs/${cv.id}`}
-                          className="btn btn-outline-primary btn-sm"
-                          onClick={e => e.stopPropagation()}
-                        >
-                          {t('View')}
-                        </a>
                       </td>
                     </tr>
                   ))}

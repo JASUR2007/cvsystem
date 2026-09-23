@@ -61,11 +61,25 @@ export default function InfoTab({ userId }: { userId?: string }) {
           </p>
         </div>
 
-        {selected.length > 0 && (
-          <button className="btn btn-outline-danger btn-sm" onClick={() => setIsDeleteModalOpen(true)}>
-            {t('Delete')} ({selected.length})
-          </button>
-        )}
+        <div className="d-flex gap-2">
+          {selected.length === 1 && (
+            <button
+              type="button"
+              className="btn btn-outline-primary btn-sm"
+              onClick={() => {
+                const val = result.data?.find(v => v.attributeId === selected[0])
+                if (val) setEditing(val)
+              }}
+            >
+              {t('Edit')}
+            </button>
+          )}
+          {selected.length > 0 && (
+            <button className="btn btn-outline-danger btn-sm" onClick={() => setIsDeleteModalOpen(true)}>
+              {t('Delete')} ({selected.length})
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Attribute quick adder */}
@@ -136,7 +150,6 @@ export default function InfoTab({ userId }: { userId?: string }) {
                 </th>
                 <th>{t('Attribute')}</th>
                 <th>{t('Value')}</th>
-                <th style={{ textAlign: 'right' }}>{t('Action')}</th>
               </tr>
             </thead>
             <tbody>
@@ -182,18 +195,6 @@ export default function InfoTab({ userId }: { userId?: string }) {
                       ) : (
                         <span className="val-empty">{t('(empty)')}</span>
                       )}
-                    </td>
-                    <td style={{ textAlign: 'right' }}>
-                      <button
-                        type="button"
-                        className="btn btn-outline-primary btn-sm"
-                        onClick={e => {
-                          e.stopPropagation()
-                          setEditing(value)
-                        }}
-                      >
-                        {valStr ? t('Edit') : `+ ${t('Add')}`}
-                      </button>
                     </td>
                   </tr>
                 )

@@ -59,15 +59,20 @@ public class AcdnS3Service(IServiceProvider services, IConfiguration configurati
 
         var key = $"users/{targetUserId}/{Guid.NewGuid():N}{extension}";
 
+        // Buffer stream into memory so both S3 and fallback can safely read it repeatedly
+        using var ms = new MemoryStream();
+        await stream.CopyToAsync(ms, cancellationToken);
+
         if (IsConfigured)
         {
             try
             {
+                ms.Position = 0;
                 var request = new PutObjectRequest
                 {
                     BucketName = Bucket,
                     Key = key,
-                    InputStream = stream,
+                    InputStream = ms,
                     ContentType = contentType,
                     DisablePayloadSigning = true
                 };
@@ -83,21 +88,18 @@ public class AcdnS3Service(IServiceProvider services, IConfiguration configurati
         }
 
         // Guaranteed fallback to local static storage
-        var localPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", key.Replace('/', Path.DirectorySeparatorChar));
+        var localKey = $"uploads/users/{targetUserId}/{Guid.NewGuid():N}{extension}";
+        var localPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", localKey.Replace('/', Path.DirectorySeparatorChar));
         var dir = Path.GetDirectoryName(localPath);
         if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
         {
             Directory.CreateDirectory(dir);
         }
 
-        if (stream.CanSeek)
-        {
-            stream.Position = 0;
-        }
-
+        ms.Position = 0;
         await using var fileStream = File.Create(localPath);
-        await stream.CopyToAsync(fileStream, cancellationToken);
-        return new PresignResponse(key, string.Empty, $"/uploads/{key}");
+        await ms.CopyToAsync(fileStream, cancellationToken);
+        return new PresignResponse($"/{localKey}", string.Empty, $"/{localKey}");
     }
 
     public async Task DeleteFileAsync(string objectKey, CancellationToken cancellationToken = default)

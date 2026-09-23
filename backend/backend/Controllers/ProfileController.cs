@@ -1,8 +1,10 @@
 using backend.Auth;
 using backend.Common.Exceptions;
 using backend.DTOs.Profile;
+using backend.Entities;
 using backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers;
@@ -18,6 +20,50 @@ public sealed class ProfileController(IProfileService profileService, ICurrentUs
         var targetId = ResolveUserId(userId);
         var result = await profileService.GetProfileAsync(targetId, cancellationToken);
         return Ok(result);
+    }
+
+    [HttpPost("request-recruiter")]
+    public async Task<ActionResult<object>> RequestRecruiter(
+        [FromServices] UserManager<AppUser> userManager,
+        [FromServices] JwtTokenService jwtTokenService,
+        CancellationToken cancellationToken)
+    {
+        var id = currentUser.RequireUserId();
+        var user = await userManager.FindByIdAsync(id.ToString());
+        if (user is null) throw new NotFoundException("User not found.");
+
+        if (!await userManager.IsInRoleAsync(user, Roles.Recruiter))
+        {
+            var addResult = await userManager.AddToRoleAsync(user, Roles.Recruiter);
+            if (!addResult.Succeeded)
+            {
+                throw new ValidationException(string.Join(" ", addResult.Errors.Select(e => e.Description)));
+            }
+        }
+
+        var roles = await userManager.GetRolesAsync(user);
+        var newToken = await jwtTokenService.CreateAsync(user);
+
+        Response.Cookies.Append("talenthub_token", newToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.None,
+            Expires = DateTimeOffset.UtcNow.AddHours(1)
+        });
+
+        return Ok(new
+        {
+            token = newToken,
+            user = new
+            {
+                id = user.Id,
+                email = user.Email,
+                firstName = user.FirstName,
+                lastName = user.LastName,
+                roles = roles.ToList()
+            }
+        });
     }
 
     [HttpPut]

@@ -79,6 +79,28 @@ export default function ProjectsTab({ userId }: { userId?: string }) {
         </div>
 
         <div className="d-flex gap-2">
+          {selected.length === 1 && (
+            <button
+              type="button"
+              className="btn btn-outline-primary btn-sm"
+              onClick={() => {
+                const project = result.data?.find(p => p.id === selected[0])
+                if (project) {
+                  setForm({
+                    id: project.id,
+                    name: project.name,
+                    startedOn: project.startedOn,
+                    endedOn: project.endedOn ?? '',
+                    description: project.description,
+                    tags: project.tags.join(', '),
+                    version: project.version,
+                  })
+                }
+              }}
+            >
+              {t('Edit')}
+            </button>
+          )}
           {selected.length > 0 && (
             <button className="btn btn-outline-danger btn-sm" onClick={remove}>
               {t('Delete')} ({selected.length})
@@ -118,7 +140,6 @@ export default function ProjectsTab({ userId }: { userId?: string }) {
                 <th>{t('Name')}</th>
                 <th>{t('Period')}</th>
                 <th>{t('Tags')}</th>
-                <th style={{ textAlign: 'right' }}>{t('Actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -177,26 +198,6 @@ export default function ProjectsTab({ userId }: { userId?: string }) {
                           </span>
                         )}
                       </div>
-                    </td>
-                    <td style={{ textAlign: 'right' }}>
-                      <button
-                        type="button"
-                        className="btn btn-outline-secondary btn-sm"
-                        onClick={e => {
-                          e.stopPropagation()
-                          setForm({
-                            id: project.id,
-                            name: project.name,
-                            startedOn: project.startedOn,
-                            endedOn: project.endedOn ?? '',
-                            description: project.description,
-                            tags: project.tags.join(', '),
-                            version: project.version,
-                          })
-                        }}
-                      >
-                        {t('Edit')}
-                      </button>
                     </td>
                   </tr>
                 )

@@ -63,7 +63,8 @@ public sealed class FilesController(
     public async Task<IActionResult> Delete(string objectKey, CancellationToken cancellationToken)
     {
         var id = currentUser.RequireUserId();
-        if (!currentUser.IsAdmin && !objectKey.StartsWith($"users/{id}/", StringComparison.Ordinal))
+        var normalizedKey = objectKey.TrimStart('/');
+        if (!currentUser.IsAdmin && !normalizedKey.StartsWith($"users/{id}/", StringComparison.Ordinal) && !normalizedKey.StartsWith($"uploads/users/{id}/", StringComparison.Ordinal))
             throw new ForbiddenException();
 
         if (await db.Users.AnyAsync(user => user.PhotoObjectKey == objectKey, cancellationToken)

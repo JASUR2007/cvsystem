@@ -33,8 +33,7 @@ public class AcdnS3Service(IServiceProvider services, IConfiguration configurati
             BucketName = Bucket,
             Key = key,
             Verb = HttpVerb.PUT,
-            Expires = DateTime.UtcNow.AddMinutes(15),
-            ContentType = contentType
+            Expires = DateTime.UtcNow.AddMinutes(15)
         });
 
         var publicUrl = PublicBaseUrl is null ? null : $"{PublicBaseUrl}/{key}";
@@ -73,8 +72,7 @@ public class AcdnS3Service(IServiceProvider services, IConfiguration configurati
                     BucketName = Bucket,
                     Key = key,
                     InputStream = ms,
-                    ContentType = contentType,
-                    DisablePayloadSigning = true
+                    ContentType = contentType
                 };
 
                 await S3Client!.PutObjectAsync(request, cancellationToken);
@@ -88,29 +86,60 @@ public class AcdnS3Service(IServiceProvider services, IConfiguration configurati
         }
 
         // Guaranteed fallback to local static storage
-        var localKey = $"uploads/users/{targetUserId}/{Guid.NewGuid():N}{extension}";
-        var localPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", localKey.Replace('/', Path.DirectorySeparatorChar));
-        var dir = Path.GetDirectoryName(localPath);
-        if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+        try
         {
-            Directory.CreateDirectory(dir);
-        }
+            var localKey = $"uploads/users/{targetUserId}/{Guid.NewGuid():N}{extension}";
+            var localPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", localKey.Replace('/', Path.DirectorySeparatorChar));
+            var dir = Path.GetDirectoryName(localPath);
+            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
 
-        ms.Position = 0;
-        await using var fileStream = File.Create(localPath);
-        await ms.CopyToAsync(fileStream, cancellationToken);
-        return new PresignResponse($"/{localKey}", string.Empty, $"/{localKey}");
+            ms.Position = 0;
+            await using var fileStream = File.Create(localPath);
+            await ms.CopyToAsync(fileStream, cancellationToken);
+            return new PresignResponse($"/{localKey}", string.Empty, $"/{localKey}");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Warning: Local file write failed: {ex.Message}. Falling back to Base64 Data URI.");
+            var base64 = Convert.ToBase64String(ms.ToArray());
+            var dataUri = $"data:{contentType};base64,{base64}";
+            return new PresignResponse(dataUri, string.Empty, dataUri);
+        }
     }
 
     public async Task DeleteFileAsync(string objectKey, CancellationToken cancellationToken = default)
     {
-        if (!IsConfigured)
-            throw new ValidationException("Image storage is not configured.");
+        if (objectKey.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
+            return;
 
-        await S3Client!.DeleteObjectAsync(new DeleteObjectRequest
+        if (objectKey.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase) || objectKey.StartsWith("uploads/", StringComparison.OrdinalIgnoreCase))
         {
-            BucketName = Bucket,
-            Key = objectKey
-        }, cancellationToken);
+            var localKey = objectKey.TrimStart('/');
+            var localPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", localKey.Replace('/', Path.DirectorySeparatorChar));
+            if (File.Exists(localPath))
+            {
+                try { File.Delete(localPath); } catch { /* ignore */ }
+            }
+            return;
+        }
+
+        if (!IsConfigured)
+            return;
+
+        try
+        {
+            await S3Client!.DeleteObjectAsync(new DeleteObjectRequest
+            {
+                BucketName = Bucket,
+                Key = objectKey.TrimStart('/')
+            }, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Warning: S3 DeleteObjectAsync failed: {ex.Message}");
+        }
     }
 }

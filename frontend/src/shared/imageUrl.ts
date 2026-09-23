@@ -1,6 +1,6 @@
 export function imageUrl(key: string | null) {
   if (!key) return null
-  if (key.startsWith('http://') || key.startsWith('https://') || key.startsWith('blob:')) return key
+  if (key.startsWith('http://') || key.startsWith('https://') || key.startsWith('blob:') || key.startsWith('data:')) return key
   if (key.startsWith('/uploads/') || key.startsWith('uploads/')) {
     const apiBase = (import.meta.env.VITE_API_BASE_URL || 'https://cvsystem-jtnh.onrender.com')
       .replace(/\/api\/?$/, '')

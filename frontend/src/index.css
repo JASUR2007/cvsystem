@@ -11,7 +11,7 @@
 
 :root, [data-bs-theme="light"] {
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --bg-primary: #8080801a;
+  --bg-primary: #8080800f;
   --bg-card: #FFFFFF;
   --bg-secondary: #F8FAFC;
   --text-primary: #0F172A;
@@ -22,7 +22,7 @@
   --primary-light: rgba(37, 99, 235, 0.08);
   --primary-hover: #1D4ED8;
 
-  --bs-body-bg: #8080801a;
+  --bs-body-bg: #8080800f;
   --bs-body-color: var(--text-primary);
   --bs-secondary-color: var(--text-muted);
   --bs-border-color: #cbd5e1;
@@ -76,7 +76,7 @@ html, body, #root, .app {
   margin: 0;
   padding: 0;
   min-width: 320px;
-  background-color: #8080801a !important;
+  background-color: #8080800f !important;
   color: var(--text-primary);
   font-family: inherit;
   line-height: 1.5;

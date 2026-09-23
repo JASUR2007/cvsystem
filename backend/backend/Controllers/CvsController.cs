@@ -14,9 +14,10 @@ public sealed class CvsController(ICvService cvService, ICurrentUserService curr
 {
     [HttpGet("api/profile/cvs")]
     [HttpGet("api/users/{userId:guid}/cvs")]
-    public async Task<ActionResult<List<CvListItem>>> List(Guid? userId, CancellationToken cancellationToken)
+    [HttpGet("api/cvs")]
+    public async Task<ActionResult<List<CvListItem>>> List([FromQuery] Guid? userId, [FromQuery] Guid? candidateId, CancellationToken cancellationToken)
     {
-        var targetId = ResolveUserId(userId);
+        var targetId = ResolveUserId(userId ?? candidateId);
         var result = await cvService.ListCandidateCvsAsync(targetId, cancellationToken);
         return Ok(result);
     }
@@ -65,7 +66,7 @@ public sealed class CvsController(ICvService cvService, ICurrentUserService curr
     {
         var current = currentUser.RequireUserId();
         if (target is null || target == current) return current;
-        if (currentUser.IsAdmin) return target.Value;
+        if (currentUser.IsAdmin || currentUser.IsRecruiter) return target.Value;
         throw new ForbiddenException();
     }
 }

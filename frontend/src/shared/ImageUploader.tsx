@@ -17,11 +17,24 @@ export default function ImageUploader({ value, onChange, userId }: { value: stri
     }
     setUploading(true)
     try {
-      const signed = await api<Presign>(`/files/presign${userId ? `?userId=${userId}` : ''}`, { method: 'POST', body: JSON.stringify({ contentType: file.type }) })
-      const response = await fetch(signed.uploadUrl, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file })
-      if (!response.ok) throw new Error('Image upload failed. Check storage CORS configuration.')
+      let objectKey = ''
+      try {
+        const signed = await api<Presign>(`/files/presign${userId ? `?userId=${userId}` : ''}`, { method: 'POST', body: JSON.stringify({ contentType: file.type }) })
+        const response = await fetch(signed.uploadUrl, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file })
+        if (!response.ok) throw new Error('S3 presign upload rejected')
+        objectKey = signed.objectKey
+      } catch {
+        // Fallback to backend direct upload (bypasses S3 CORS / presign signature issues)
+        const formData = new FormData()
+        formData.append('file', file)
+        const uploaded = await api<{ objectKey: string; publicUrl: string | null }>(`/files/upload${userId ? `?userId=${userId}` : ''}`, {
+          method: 'POST',
+          body: formData,
+        })
+        objectKey = uploaded.objectKey
+      }
       setPreview(URL.createObjectURL(file))
-      onChange(signed.objectKey)
+      onChange(objectKey)
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'Image upload failed.') }
     finally { setUploading(false) }
   }

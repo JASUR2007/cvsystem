@@ -27,6 +27,38 @@ public sealed class FilesController(
         return Ok(result);
     }
 
+    [HttpPost("upload")]
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<PresignResponse>> Upload([FromForm] IFormFile? file, [FromQuery] Guid? userId, CancellationToken cancellationToken)
+    {
+        if (file is null || file.Length == 0)
+            throw new ValidationException("No file provided.");
+
+        if (file.Length > 5 * 1024 * 1024)
+            throw new ValidationException("File size exceeds 5 MB limit.");
+
+        var contentType = file.ContentType?.ToLowerInvariant() ?? "application/octet-stream";
+        var allowed = new[] { "image/jpeg", "image/png", "image/webp" };
+        if (!allowed.Contains(contentType))
+        {
+            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+            contentType = ext switch
+            {
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                ".webp" => "image/webp",
+                _ => throw new ValidationException("Only JPEG, PNG and WebP images are supported.")
+            };
+        }
+
+        var id = currentUser.RequireUserId();
+        var targetId = currentUser.IsAdmin && userId is not null ? userId.Value : id;
+
+        await using var stream = file.OpenReadStream();
+        var result = await storageService.UploadFileAsync(stream, contentType, file.FileName, targetId, cancellationToken);
+        return Ok(result);
+    }
+
     [HttpDelete("{**objectKey}")]
     public async Task<IActionResult> Delete(string objectKey, CancellationToken cancellationToken)
     {

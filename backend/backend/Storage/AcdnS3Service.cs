@@ -33,12 +33,44 @@ public class AcdnS3Service(IServiceProvider services, IConfiguration configurati
             BucketName = Bucket,
             Key = key,
             Verb = HttpVerb.PUT,
-            ContentType = contentType,
-            Expires = DateTime.UtcNow.AddMinutes(10)
+            Expires = DateTime.UtcNow.AddMinutes(15)
         });
 
         var publicUrl = PublicBaseUrl is null ? null : $"{PublicBaseUrl}/{key}";
         return new PresignResponse(key, uploadUrl, publicUrl);
+    }
+
+    public async Task<PresignResponse> UploadFileAsync(Stream stream, string contentType, string fileName, Guid targetUserId, CancellationToken cancellationToken = default)
+    {
+        if (!IsConfigured)
+            throw new ValidationException("Image storage is not configured.");
+
+        var extension = contentType switch
+        {
+            "image/jpeg" => ".jpg",
+            "image/png" => ".png",
+            "image/webp" => ".webp",
+            _ => Path.GetExtension(fileName).ToLowerInvariant() switch
+            {
+                ".jpg" or ".jpeg" => ".jpg",
+                ".png" => ".png",
+                ".webp" => ".webp",
+                _ => throw new ValidationException("Only JPEG, PNG and WebP images are supported.")
+            }
+        };
+
+        var key = $"users/{targetUserId}/{Guid.NewGuid():N}{extension}";
+        var request = new PutObjectRequest
+        {
+            BucketName = Bucket,
+            Key = key,
+            InputStream = stream,
+            ContentType = contentType
+        };
+
+        await S3Client!.PutObjectAsync(request, cancellationToken);
+        var publicUrl = PublicBaseUrl is null ? null : $"{PublicBaseUrl}/{key}";
+        return new PresignResponse(key, string.Empty, publicUrl);
     }
 
     public async Task DeleteFileAsync(string objectKey, CancellationToken cancellationToken = default)

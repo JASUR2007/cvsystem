@@ -10,12 +10,12 @@
 
 .auth-panel {
   background-color: var(--surface-bg);
-  padding: 48px 44px;
+  padding: 56px 60px;
   border-radius: var(--radius-lg);
   border: 1px solid var(--bs-border-color);
   box-shadow: var(--shadow-lg);
   width: 100%;
-  max-width: 580px;
+  max-width: 680px;
 }
 
 .auth-panel h1 {

@@ -230,7 +230,7 @@ export default function PositionDetailPage({ id, user }: { id: string; user: Cur
                   <span className="pos-attr-chip" key={tag}>{tag}</span>
                 ))}
                 {position.projectTags.length === 0 && (
-                  <span className="text-muted"><small>Any projects allowed</small></span>
+                  <span className="text-muted"><small>{t('Any projects allowed')}</small></span>
                 )}
               </div>
             </div>
@@ -242,11 +242,11 @@ export default function PositionDetailPage({ id, user }: { id: string; user: Cur
                 </div>
                 <div>
                   <h3 className="pos-company-title">{position.company || t('Company not specified')}</h3>
-                  <p className="pos-company-desc">Verified Hiring Organization</p>
+                  <p className="pos-company-desc">{t('Verified Hiring Organization')}</p>
                 </div>
               </div>
               <p className="text-muted" style={{ fontSize: '0.8125rem' }}>
-                Open position on TalentHub platform. Applicants can evaluate compatibility and generate tailored CV.
+                {t('Open position on TalentHub platform. Applicants can evaluate compatibility and generate tailored CV.')}
               </p>
             </div>
           </div>
@@ -287,7 +287,7 @@ export default function PositionDetailPage({ id, user }: { id: string; user: Cur
                 value={text}
                 onChange={event => setText(event.target.value)}
                 rows={3}
-                placeholder="Share a question or note regarding this position..."
+                placeholder={t('Share a question or note regarding this position...')}
               />
               <button type="button" className="btn btn-primary" onClick={post}>
                 {t('Post message')}
@@ -306,7 +306,7 @@ export default function PositionDetailPage({ id, user }: { id: string; user: Cur
         <div className="pos-card text-center p-5">
           <h2 className="pos-card-title justify-content-center mb-3">{t('Compare published CVs for this position.')}</h2>
           <p className="text-muted mb-4">
-            View structured candidate comparison matrix, filter by skills, and inspect match scores.
+            {t('View structured candidate comparison matrix, filter by skills, and inspect match scores.')}
           </p>
           <a className="btn btn-primary btn-lg" href={`/positions/${id}/cvs`}>
             {t('Open CV table')} →

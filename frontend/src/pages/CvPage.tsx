@@ -23,9 +23,9 @@ export default function CvPage({ id, user }: { id: string; user: CurrentUser | n
       await api(`/cvs/${id}/attributes/${editing.attributeId}`, json('PUT', { version: editing.version, value: editing }))
       setEditing(null)
       result.reload()
-      setMessage('Profile value saved.')
+      setMessage(t('Value saved.'))
     } catch (cause) {
-      setMessage(cause instanceof Error ? cause.message : 'Could not save value.')
+      setMessage(cause instanceof Error ? cause.message : t('Could not save value.'))
     } finally {
       setBusy(false)
     }
@@ -35,9 +35,9 @@ export default function CvPage({ id, user }: { id: string; user: CurrentUser | n
     try {
       await api(`/cvs/${id}/publish`, { method: 'POST' })
       result.reload()
-      setMessage('CV published successfully.')
+      setMessage(t('CV published successfully.'))
     } catch (cause) {
-      setMessage(cause instanceof Error ? cause.message : 'Could not publish CV.')
+      setMessage(cause instanceof Error ? cause.message : t('Could not publish CV.'))
     }
   }
 
@@ -95,7 +95,7 @@ export default function CvPage({ id, user }: { id: string; user: CurrentUser | n
 
             {canLike && (
               <button className="btn btn-outline-danger btn-sm" onClick={toggleLike}>
-                {likes.data?.liked ? '♥ Liked' : '♡ Like'} ({likes.data?.count ?? cv.likes})
+                {likes.data?.liked ? `♥ ${t('Liked')}` : `♡ ${t('Like')}`} ({likes.data?.count ?? cv.likes})
               </button>
             )}
           </div>
@@ -110,7 +110,7 @@ export default function CvPage({ id, user }: { id: string; user: CurrentUser | n
 
         {/* Section 1: Personal Information */}
         <section className="cv-section-block">
-          <h2 className="cv-section-title">Personal Information</h2>
+          <h2 className="cv-section-title">{t('Personal Information')}</h2>
           <table className="cv-kv-table">
             <tbody>
               <tr>
@@ -175,7 +175,7 @@ export default function CvPage({ id, user }: { id: string; user: CurrentUser | n
                             className="btn btn-outline-secondary btn-sm"
                             onClick={() => setEditing(val)}
                           >
-                            {isFilled ? t('Edit') : '+ Fill'}
+                            {isFilled ? t('Edit') : `+ ${t('Fill')}`}
                           </button>
                         )}
                       </div>

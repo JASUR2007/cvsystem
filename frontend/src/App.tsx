@@ -22,10 +22,8 @@ import './media.css'
 import { t } from './shared/i18n'
 
 type Settings = { language: string; theme: string; version: number }
-const rawPath = window.location.pathname.replace(/\/$/, '') || '/'
-const path = rawPath === '/index.html' ? '/' : rawPath
 
-function Page({ user, onAuth }: { user: CurrentUser | null; onAuth: (user: CurrentUser) => void }) {
+function Page({ path, user, onAuth }: { path: string; user: CurrentUser | null; onAuth: (user: CurrentUser) => void }) {
   if (path === '/') return <HomePage />
   if (path === '/login' || path === '/register') return <AuthPage mode={path === '/login' ? 'login' : 'register'} onAuthenticated={onAuth} />
   if (path === '/auth/callback') return <AuthCallbackPage onAuthenticated={onAuth} />
@@ -62,10 +60,48 @@ function SignInPrompt() {
 }
 
 function App() {
+  const [currentPath, setCurrentPath] = useState(() => {
+    const raw = window.location.pathname.replace(/\/$/, '') || '/'
+    return raw === '/index.html' ? '/' : raw
+  })
   const [user, setUser] = useState<CurrentUser | null>(() => getCachedUser())
   const [theme, setTheme] = useState(localStorage.getItem('talenthub_theme') || 'light')
   const [language, setLanguage] = useState(localStorage.getItem('talenthub_language') || 'en')
   const [settings, setSettings] = useState<Settings | null>(null)
+
+  useEffect(() => {
+    function handleLocation() {
+      const raw = window.location.pathname.replace(/\/$/, '') || '/'
+      setCurrentPath(raw === '/index.html' ? '/' : raw)
+      window.scrollTo(0, 0)
+    }
+    window.addEventListener('popstate', handleLocation)
+
+    function handleLinkClick(e: MouseEvent) {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+      const anchor = (e.target as HTMLElement).closest('a')
+      if (!anchor || !anchor.href) return
+      if (anchor.target && anchor.target !== '_self') return
+      if (anchor.hasAttribute('download')) return
+      const href = anchor.getAttribute('href')
+      if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return
+
+      const url = new URL(anchor.href)
+      if (url.origin === window.location.origin && !url.pathname.startsWith('/api')) {
+        e.preventDefault()
+        if (url.pathname !== window.location.pathname || url.search !== window.location.search) {
+          window.history.pushState(null, '', url.pathname + url.search)
+          handleLocation()
+        }
+      }
+    }
+    document.addEventListener('click', handleLinkClick)
+
+    return () => {
+      window.removeEventListener('popstate', handleLocation)
+      document.removeEventListener('click', handleLinkClick)
+    }
+  }, [])
 
   useEffect(() => {
     getCurrentUser().then(setUser).catch(() => setUser(null))
@@ -109,6 +145,7 @@ function App() {
   return (
     <div className="app">
       <Header
+        currentPath={currentPath}
         user={user}
         theme={theme}
         onThemeChange={val => preference('theme', val)}
@@ -117,7 +154,7 @@ function App() {
         onSignOut={() => signOut().catch(() => undefined).finally(() => setUser(null))}
       />
       <main className="main-content">
-        <Page user={user} onAuth={setUser} />
+        <Page path={currentPath} user={user} onAuth={setUser} />
       </main>
     </div>
   )

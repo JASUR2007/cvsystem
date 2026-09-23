@@ -140,7 +140,23 @@ const uz: Record<string, string> = {
   None: 'Yo‘q',
   Opportunities: 'Imkoniyatlar',
   Public: 'Ommaviy',
-  'The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.': 'Siz qidirayotgan sahifa o‘chirilgan, nomi o‘zgartirilgan yoki vaqtincha mavjud bo‘lmasligi mumkin.'
+  'The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.': 'Siz qidirayotgan sahifa o‘chirilgan, nomi o‘zgartirilgan yoki vaqtincha mavjud bo‘lmasligi mumkin.',
+  'Create attribute': 'Atribut yaratish',
+  'Search positions and CVs': 'Lavozimlar va CVlarni qidirish',
+  'Access Requirements': 'Kirish talablari',
+  'Any projects allowed': 'Har qanday loyihalar ruxsat etilgan',
+  'Verified Hiring Organization': 'Tasdiqlangan ish beruvchi tashkilot',
+  'Open position on TalentHub platform. Applicants can evaluate compatibility and generate tailored CV.': 'TalentHub platformasidagi ochiq lavozim. Nomzodlar moslikni baholashi va moslashtirilgan CV yaratishi mumkin.',
+  'Share a question or note regarding this position...': 'Ushbu lavozim bo‘yicha savol yoki izoh qoldiring...',
+  'View structured candidate comparison matrix, filter by skills, and inspect match scores.': 'Tuzilgan nomzodlarni taqqoslash matritsasini ko‘ring, ko‘nikmalar bo‘yicha filtrlang va moslik ballarini tekshiring.',
+  'Structured candidate matrix for position requirements comparison.': 'Lavozim talablari bo‘yicha nomzodlarni solishtirish matritsasi.',
+  'Sort: Newest': 'Saralash: Eng yangi',
+  'Sort: Most liked': 'Saralash: Eng ko‘p yoqtirilgan',
+  'Sort: Candidate name': 'Saralash: Nomzod ismi',
+  'Personal Information': 'Shaxsiy ma’lumotlar',
+  Fill: 'To‘ldirish',
+  'CV published successfully.': 'CV muvaffaqiyatli nashr etildi.',
+  'Edit this built-in field on the Me tab.': 'Ushbu tizimli maydonni "Men haqimda" sahifasida tahrirlang.',
 }
 
 const ru: Record<string, string> = {
@@ -279,7 +295,23 @@ const ru: Record<string, string> = {
   None: 'Нет',
   Opportunities: 'Возможности',
   Public: 'Публичная',
-  'The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.': 'Страница, которую вы ищете, возможно, была удалена, переименована или временно недоступна.'
+  'The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.': 'Страница, которую вы ищете, возможно, была удалена, переименована или временно недоступна.',
+  'Create attribute': 'Создать атрибут',
+  'Search positions and CVs': 'Поиск позиций и резюме',
+  'Access Requirements': 'Требования к доступу',
+  'Any projects allowed': 'Любые проекты разрешены',
+  'Verified Hiring Organization': 'Проверенная организация',
+  'Open position on TalentHub platform. Applicants can evaluate compatibility and generate tailored CV.': 'Открытая позиция на платформе TalentHub. Соискатели могут оценить соответствие и создать резюме.',
+  'Share a question or note regarding this position...': 'Задайте вопрос или оставьте заметку по этой позиции...',
+  'View structured candidate comparison matrix, filter by skills, and inspect match scores.': 'Просматривайте матрицу кандидатов, фильтруйте по навыкам и оценивайте баллы соответствия.',
+  'Structured candidate matrix for position requirements comparison.': 'Матрица кандидатов для сравнения требований к позиции.',
+  'Sort: Newest': 'Сортировка: Сначала новые',
+  'Sort: Most liked': 'Сортировка: Самые популярные',
+  'Sort: Candidate name': 'Сортировка: По имени кандидата',
+  'Personal Information': 'Личная информация',
+  Fill: 'Заполнить',
+  'CV published successfully.': 'Резюме успешно опубликовано.',
+  'Edit this built-in field on the Me tab.': 'Отредактируйте это системное поле во вкладке "О себе".',
 }
 
 export function t(value: string) {

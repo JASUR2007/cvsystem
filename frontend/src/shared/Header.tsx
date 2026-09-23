@@ -3,6 +3,7 @@ import type { CurrentUser } from '../auth/api'
 import { t } from './i18n'
 
 type HeaderProps = {
+  currentPath?: string
   user: CurrentUser | null
   theme: string
   onThemeChange: (theme: string) => void
@@ -18,6 +19,7 @@ const languages = [
 ]
 
 export default function Header({
+  currentPath,
   user,
   theme,
   onThemeChange,
@@ -29,7 +31,7 @@ export default function Header({
   const [langOpen, setLangOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const langRef = useRef<HTMLDivElement>(null)
-  const path = window.location.pathname
+  const path = currentPath || window.location.pathname
 
   const canManage = user?.roles.some(role => role === 'Recruiter' || role === 'Administrator') ?? false
   const isAdmin = user?.roles.includes('Administrator') ?? false

@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { api, json, type AttributeDetail, type AttributeType } from '../shared/api'
 import { PageTitle, Status } from '../shared/ui'
 import { useApi } from '../shared/useApi'
@@ -73,7 +73,7 @@ export default function AttributeFormPage({ id }: { id?: string }) {
 
   return (
     <section className="surface page-surface narrow" style={{ maxWidth: 720, margin: '0 auto' }}>
-      <PageTitle title={id ? 'Edit attribute' : 'Create attribute'} />
+      <PageTitle title={id ? t('Edit attribute') : t('Create attribute')} />
 
       {existing.data?.isBuiltIn && (
         <div className="alert alert-info" role="alert">

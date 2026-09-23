@@ -219,7 +219,7 @@ export default function InfoTab({ userId }: { userId?: string }) {
           </div>
 
           {['First Name', 'Last Name', 'Location', 'Personal Photo'].includes(editing.name) ? (
-            <p className="text-muted mb-3">Edit this built-in field on the Me tab.</p>
+            <p className="text-muted mb-3">{t('Edit this built-in field on the Me tab.')}</p>
           ) : (
             <>
               <Status loading={definition.loading} error={definition.error} />
@@ -248,10 +248,10 @@ export default function InfoTab({ userId }: { userId?: string }) {
 
       <ConfirmModal
         isOpen={isDeleteModalOpen}
-        title="Remove attributes"
+        title={t('Remove attributes')}
         message={`${t('Remove')} ${selected.length} ${t('selected attribute(s)?')}`}
-        confirmText="Delete"
-        cancelText="Cancel"
+        confirmText={t('Delete')}
+        cancelText={t('Cancel')}
         confirmVariant="danger"
         onConfirm={handleRemoveConfirm}
         onCancel={() => setIsDeleteModalOpen(false)}

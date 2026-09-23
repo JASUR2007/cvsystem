@@ -32,10 +32,10 @@ export default function PositionCvsPage({ id }: { id: string }) {
       <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
         <div>
           <h1 className="h3 mb-1" style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
-            Candidates ({result.data?.totalItems ?? 0})
+            {t('Candidates')} ({result.data?.totalItems ?? 0})
           </h1>
           <p className="text-muted mb-0" style={{ fontSize: '0.875rem' }}>
-            Structured candidate matrix for position requirements comparison.
+            {t('Structured candidate matrix for position requirements comparison.')}
           </p>
         </div>
 
@@ -46,9 +46,9 @@ export default function PositionCvsPage({ id }: { id: string }) {
             value={sort}
             onChange={e => setSort(e.target.value)}
           >
-            <option value="newest">Sort: Newest</option>
-            <option value="likes">Sort: Most liked</option>
-            <option value="candidate">Sort: Candidate name</option>
+            <option value="newest">{t('Sort: Newest')}</option>
+            <option value="likes">{t('Sort: Most liked')}</option>
+            <option value="candidate">{t('Sort: Candidate name')}</option>
           </select>
         </div>
       </div>

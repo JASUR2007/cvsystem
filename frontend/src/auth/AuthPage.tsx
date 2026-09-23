@@ -55,8 +55,8 @@ export default function AuthPage({ mode, onAuthenticated }: Props) {
       </form>
       <div className="social-auth">
         <div className="auth-divider"><span>{t('or continue with')}</span></div>
-        {providers?.google ? <a className="social-button" href={`${apiBase}/api/auth/external/google`}><GoogleIcon />{t('Continue with Google')}</a> : <button className="social-button" type="button" disabled><GoogleIcon />{t('Continue with Google')}</button>}
-        {providers?.github ? <a className="social-button" href={`${apiBase}/api/auth/external/github`}><GitHubIcon />{t('Continue with GitHub')}</a> : <button className="social-button" type="button" disabled><GitHubIcon />{t('Continue with GitHub')}</button>}
+        {providers?.google ? <a className="social-button" href={`${apiBase}/api/auth/external/google?returnUrl=${encodeURIComponent(window.location.origin)}`}><GoogleIcon />{t('Continue with Google')}</a> : <button className="social-button" type="button" disabled><GoogleIcon />{t('Continue with Google')}</button>}
+        {providers?.github ? <a className="social-button" href={`${apiBase}/api/auth/external/github?returnUrl=${encodeURIComponent(window.location.origin)}`}><GitHubIcon />{t('Continue with GitHub')}</a> : <button className="social-button" type="button" disabled><GitHubIcon />{t('Continue with GitHub')}</button>}
       </div>
       <div className="auth-switch">{t(mode === 'login' ? "Don't have an account?" : 'Already have an account?')} <a href={mode === 'login' ? '/register' : '/login'}>{t(mode === 'login' ? 'Register' : 'Sign in')}</a></div>
     </div>

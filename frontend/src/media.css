@@ -1,0 +1,5 @@
+.image-uploader{display:grid;gap:8px;justify-items:start;border:1px dashed #a9bdd9;border-radius:9px;padding:12px}
+.upload-preview{width:112px;height:112px;object-fit:cover;border-radius:9px;border:1px solid #dbe4f0}
+.profile-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.social-auth{display:grid;gap:9px;margin-top:22px}
+.social-auth span{text-align:center;color:#8a97aa;font-size:12px}

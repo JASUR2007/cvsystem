@@ -16,3 +16,6 @@ obj/
 
 # Logs
 *.log
+.env
+frontend/dist/
+frontend/node_modules/

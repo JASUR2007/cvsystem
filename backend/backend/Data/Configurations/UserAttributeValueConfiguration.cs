@@ -10,7 +10,7 @@ public class UserAttributeValueConfiguration : IEntityTypeConfiguration<UserAttr
     {
         builder.HasKey(x => new { x.UserId, x.AttributeId });
         builder.Property(x => x.NumberValue).HasPrecision(18, 4);
-        builder.Property(x => x.ImageObjectKey).HasMaxLength(500);
+        builder.Property(x => x.ImageObjectKey);
         builder.Property(x => x.Version).IsConcurrencyToken();
         builder.HasIndex(x => x.AttributeId);
         builder.HasOne(x => x.User).WithMany(x => x.AttributeValues).HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);

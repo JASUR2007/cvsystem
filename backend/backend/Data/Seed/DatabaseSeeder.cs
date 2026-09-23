@@ -15,6 +15,17 @@ public static class DatabaseSeeder
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await db.Database.MigrateAsync();
 
+        try
+        {
+            await db.Database.ExecuteSqlRawAsync(
+                "ALTER TABLE \"AspNetUsers\" ALTER COLUMN \"PhotoObjectKey\" TYPE text; " +
+                "ALTER TABLE \"UserAttributeValues\" ALTER COLUMN \"ImageObjectKey\" TYPE text;");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Warning: Migration ALTER COLUMN failed: {ex.Message}");
+        }
+
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
         foreach (var role in new[] { Roles.Candidate, Roles.Recruiter, Roles.Administrator })
         {

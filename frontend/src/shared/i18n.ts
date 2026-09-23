@@ -62,6 +62,72 @@ const uz: Record<string, string> = {
   Edit: 'Tahrirlash', 'Candidate profile': 'Nomzod profili'
 }
 
+const ru: Record<string, string> = {
+  Positions: 'Позиции', Attributes: 'Атрибуты', Profile: 'Профиль', Admin: 'Администрирование',
+  'Sign in': 'Войти', 'Sign out': 'Выйти', Search: 'Поиск', 'Search...': 'Поиск...',
+  'Main navigation': 'Главная навигация', Language: 'Язык', 'Toggle theme': 'Переключить тему',
+  'Page not found': 'Страница не найдена', 'Return home': 'Вернуться на главную',
+  'Sign in required': 'Требуется вход', 'Sign in to access your profile.': 'Войдите, чтобы открыть профиль.',
+  'Welcome back': 'С возвращением', 'Create your account': 'Создайте аккаунт',
+  'Sign in to continue your work.': 'Войдите, чтобы продолжить работу.',
+  'Join TalentHub and start your journey.': 'Присоединяйтесь к TalentHub и начните свой путь.',
+  'First name': 'Имя', 'Last name': 'Фамилия', Email: 'Электронная почта', Password: 'Пароль',
+  'Confirm password': 'Подтвердите пароль', 'Passwords do not match.': 'Пароли не совпадают.',
+  'Please wait...': 'Подождите...', 'Create account': 'Создать аккаунт',
+  'or continue with': 'или продолжите с помощью', 'Continue with Google': 'Продолжить с Google',
+  'Continue with GitHub': 'Продолжить с GitHub',
+  "Don't have an account?": 'Нет аккаунта?', 'Already have an account?': 'Уже есть аккаунт?',
+  Register: 'Регистрация', 'Sign-in failed': 'Не удалось войти',
+  'Completing sign-in...': 'Завершаем вход...', 'Back to sign in': 'Вернуться ко входу',
+  'My profile': 'Мой профиль', Me: 'Я', Info: 'Информация', Projects: 'Проекты', CVs: 'Резюме',
+  Location: 'Местоположение', Photo: 'Фото', 'Unsaved changes': 'Несохранённые изменения',
+  'Saving...': 'Сохранение...', Saved: 'Сохранено', Save: 'Сохранить', Cancel: 'Отмена', Delete: 'Удалить', Edit: 'Изменить', Create: 'Создать', Filter: 'Фильтр', Error: 'Ошибка', Loading: 'Загрузка',
+  'Changes save automatically after 7 seconds.': 'Изменения автоматически сохраняются через 7 секунд.',
+  'Reload profile': 'Перезагрузить профиль', Status: 'Статус', Likes: 'Отметки', Updated: 'Обновлено',
+  Position: 'Позиция', Draft: 'Черновик', Published: 'Опубликовано', Publish: 'Опубликовать', Like: 'Нравится', Liked: 'Отмечено',
+  'Location not set': 'Местоположение не указано', 'Professional information': 'Профессиональная информация',
+  'Relevant projects': 'Подходящие проекты', 'No matching projects.': 'Подходящих проектов нет.', Present: 'По настоящее время',
+  Empty: 'Пусто', 'Save to profile': 'Сохранить в профиль',
+  'Select an attribute to edit its value in your profile.': 'Выберите атрибут, чтобы изменить его значение в профиле.',
+  'Not set': 'Не указано', Yes: 'Да', No: 'Нет', 'Select...': 'Выберите...',
+  'Uploading...': 'Загрузка...', 'Remove image': 'Удалить изображение',
+  'Loading...': 'Загрузка...', 'No records found.': 'Записи не найдены.',
+  'You do not have access to this page.': 'У вас нет доступа к этой странице.',
+  'The requested item was not found.': 'Запрошенная запись не найдена.',
+  'This data changed in another session. Reload to continue.': 'Данные изменились в другой сессии. Перезагрузите страницу.',
+  Previous: 'Назад', Next: 'Далее',
+  'Find the right talent.': 'Найдите нужного специалиста.', 'Build the right future.': 'Создайте правильное будущее.',
+  'Structured positions and reusable candidate profiles make every CV relevant.': 'Структурированные позиции и повторно используемые профили кандидатов делают каждое резюме релевантным.',
+  'Search positions or candidates': 'Поиск позиций или кандидатов',
+  'Latest positions': 'Последние позиции', 'View all →': 'Посмотреть все →',
+  Title: 'Название', Company: 'Компания', Level: 'Уровень', Eligibility: 'Соответствие', Eligible: 'Подходит', 'Missing info': 'Не хватает данных', 'Not eligible': 'Не подходит',
+  'Position match': 'Соответствие позиции', years: 'года',
+  'Popular positions': 'Популярные позиции', 'Popular technologies': 'Популярные технологии',
+  'Platform statistics': 'Статистика платформы', Users: 'Пользователи', Candidates: 'Кандидаты', Recruiters: 'Рекрутеры',
+  'Published CVs': 'Опубликованные резюме', 'New CVs today': 'Новые резюме сегодня', 'CVs in last 24 hours': 'Резюме за 24 часа',
+  'Create position': 'Создать позицию', 'Search positions': 'Поиск позиций', 'All levels': 'Все уровни',
+  'Delete selected': 'Удалить выбранное', Overview: 'Обзор', Discussion: 'Обсуждение', Description: 'Описание',
+  'CV attributes': 'Атрибуты резюме', 'No extra attributes': 'Дополнительных атрибутов нет',
+  'Project requirements': 'Требования к проектам', 'Maximum projects': 'Максимум проектов', Access: 'Доступ',
+  'Public to authenticated candidates': 'Доступно авторизованным кандидатам', Restricted: 'Ограничено',
+  'Back to positions': 'Назад к позициям', 'Create CV': 'Создать резюме', 'Edit position': 'Изменить позицию',
+  'Company not specified': 'Компания не указана', 'Any level': 'Любой уровень',
+  'Write a message in Markdown': 'Напишите сообщение в Markdown', 'Post message': 'Отправить сообщение',
+  'to join the discussion.': 'чтобы участвовать в обсуждении.',
+  'Compare published CVs for this position.': 'Сравните опубликованные резюме для этой позиции.',
+  'Open CV table': 'Открыть таблицу резюме', 'Attribute library': 'Библиотека атрибутов', 'New attribute': 'Новый атрибут',
+  'Search by prefix': 'Поиск по началу названия', 'All categories': 'Все категории', 'All types': 'Все типы', Recent: 'Недавние',
+  Name: 'Название', Category: 'Категория', Type: 'Тип', Usage: 'Использование', 'Built-in': 'Системный',
+  'Position CVs': 'Резюме позиции', 'Search candidate': 'Поиск кандидата', 'All attributes': 'Все атрибуты',
+  'Filter value': 'Значение фильтра', Newest: 'Сначала новые', 'Most liked': 'Самые популярные', Candidate: 'Кандидат',
+  'Candidate profile': 'Профиль кандидата'
+, 'or continue with': '��� ���������� �����', 'Continue with Google': '���������� � Google', 'Continue with GitHub': '���������� � GitHub', 'Sign in': '�����', 'Register': '�����������', 'Create account': '������� �������', 'Email': '��. �����', 'Password': '������', 'First name': '���', 'Last name': '�������', 'Confirm password': '����������� ������', 'Welcome back': '� ������������', 'Create your account': '�������� �������', 'Don''t have an account?': '��� ��������?', 'Already have an account?': '��� ���� �������?', 'Sign in to continue your work.': '�������, ����� ����������.', 'Join TalentHub and start your journey.': '��������������� � TalentHub.', 'Please wait...': '����������, ���������...' }
+
 export function t(value: string) {
-  return localStorage.getItem('talenthub_language') === 'uz' ? uz[value] ?? value : value
+  const language = localStorage.getItem('talenthub_language')
+  if (language === 'ru') return ru[value] ?? value
+  if (language === 'uz') return uz[value] ?? value
+  return value
 }
+
+

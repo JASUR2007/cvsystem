@@ -135,6 +135,7 @@ await DatabaseInitializer.InitializeAsync(app.Services);
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    await DbSeeder.SeedAsync(app.Services);
 }
 
 app.UseHttpsRedirection();

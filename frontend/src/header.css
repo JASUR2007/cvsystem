@@ -1,0 +1,10 @@
+.topbar { display: flex; align-items: center; padding: 0 40px; height: 64px; background: var(--surface-bg); border-bottom: 1px solid var(--bs-border-color); gap: 24px; }
+.brand { font-size: 20px; font-weight: 600; text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; }
+.brand-mark svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; }
+.topbar nav { display: flex; gap: 16px; flex: 1; }
+.topbar nav a { text-decoration: none; color: var(--bs-secondary-color); font-weight: 500; }
+.topbar nav a.active { color: var(--bs-body-color); }
+.header-actions { display: flex; align-items: center; gap: 16px; }
+.header-search { position: relative; }
+.header-search svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; fill: none; stroke: var(--bs-secondary-color); stroke-width: 2; }
+.header-search input { padding-left: 32px; height: 36px; border-radius: 18px; border: 1px solid var(--bs-border-color); background: var(--surface-soft); color: inherit; width: 200px; }

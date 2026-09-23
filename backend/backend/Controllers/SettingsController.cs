@@ -29,7 +29,7 @@ public sealed class SettingsController(AppDbContext db) : ControllerBase
 
     private async Task<IActionResult> Update(SettingsUpdate request, bool language, CancellationToken cancellationToken)
     {
-        if (language && request.Value is not ("en" or "uz")) return BadRequest(new { message = "Unsupported language." });
+        if (language && request.Value is not ("en" or "ru" or "uz")) return BadRequest(new { message = "Unsupported language." });
         if (!language && request.Value is not ("light" or "dark")) return BadRequest(new { message = "Unsupported theme." });
         var id = ApiModels.UserId(User);
         var user = await db.Users.FirstOrDefaultAsync(item => item.Id == id, cancellationToken);

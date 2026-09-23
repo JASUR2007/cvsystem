@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -45,7 +46,11 @@ if (Encoding.UTF8.GetByteCount(jwtKey) < 32)
 }
 
 // Database & Identity
-builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    options.UseNpgsql(connectionString);
+    options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
+});
 builder.Services.AddIdentityCore<AppUser>(options =>
     {
         options.User.RequireUniqueEmail = true;
@@ -161,11 +166,12 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration["Authentication:GitHub:Clie
 
 builder.Services.AddAuthorization();
 
-// S3 Client
+// S3 Client (supports Cloudflare R2, ACDN, AWS S3)
 var s3Endpoint = builder.Configuration["S3:Endpoint"]?.Trim();
 var s3AccessKey = builder.Configuration["S3:AccessKey"]?.Trim();
 var s3SecretKey = builder.Configuration["S3:SecretKey"]?.Trim();
-var s3Region = builder.Configuration["S3:Region"] ?? "uz";
+var isR2 = s3Endpoint?.Contains("r2.cloudflarestorage.com", StringComparison.OrdinalIgnoreCase) == true;
+var s3Region = builder.Configuration["S3:Region"] ?? (isR2 ? "auto" : "uz");
 
 if (!string.IsNullOrWhiteSpace(s3Endpoint) && !string.IsNullOrWhiteSpace(s3AccessKey))
 {

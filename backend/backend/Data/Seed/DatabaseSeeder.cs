@@ -13,7 +13,14 @@ public static class DatabaseSeeder
     {
         using var scope = services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await db.Database.MigrateAsync();
+        try
+        {
+            await db.Database.MigrateAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Warning: db.Database.MigrateAsync encountered an issue: {ex.Message}");
+        }
 
         try
         {

@@ -121,7 +121,8 @@ const ru: Record<string, string> = {
   'Position CVs': 'Р РµР·СЋРјРµ РїРѕР·РёС†РёРё', 'Search candidate': 'РџРѕРёСЃРє РєР°РЅРґРёРґР°С‚Р°', 'All attributes': 'Р’СЃРµ Р°С‚СЂРёР±СѓС‚С‹',
   'Filter value': 'Р—РЅР°С‡РµРЅРёРµ С„РёР»СЊС‚СЂР°', Newest: 'РЎРЅР°С‡Р°Р»Р° РЅРѕРІС‹Рµ', 'Most liked': 'РЎР°РјС‹Рµ РїРѕРїСѓР»СЏСЂРЅС‹Рµ', Candidate: 'РљР°РЅРґРёРґР°С‚',
   'Candidate profile': 'РџСЂРѕС„РёР»СЊ РєР°РЅРґРёРґР°С‚Р°'
-, 'or continue with': 'Или продолжите через', 'Continue with Google': 'Продолжить с Google', 'Continue with GitHub': 'Продолжить с GitHub', 'Sign in': 'Войти', 'Register': 'Регистрация', 'Create account': 'Создать аккаунт', 'Email': 'Эл. почта', 'Password': 'Пароль', 'First name': 'Имя', 'Last name': 'Фамилия', 'Confirm password': 'Подтвердите пароль', 'Welcome back': 'С возвращением', 'Create your account': 'Создайте аккаунт', 'Don''t have an account?': 'Нет аккаунта?', 'Already have an account?': 'Уже есть аккаунт?', 'Sign in to continue your work.': 'Войдите, чтобы продолжить.', 'Join TalentHub and start your journey.': 'Присоединяйтесь к TalentHub.', 'Please wait...': 'Пожалуйста, подождите...' }
+
+}
 
 export function t(value: string) {
   const language = localStorage.getItem('talenthub_language')

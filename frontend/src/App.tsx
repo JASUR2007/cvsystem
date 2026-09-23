@@ -21,7 +21,8 @@ import './media.css'
 import { t } from './shared/i18n'
 
 type Settings = { language: string; theme: string; version: number }
-const path = window.location.pathname
+const rawPath = window.location.pathname.replace(/\/$/, '') || '/'
+const path = rawPath === '/index.html' ? '/' : rawPath
 
 function Page({ user, onAuth }: { user: CurrentUser | null; onAuth: (user: CurrentUser) => void }) {
   if (path === '/') return <HomePage />

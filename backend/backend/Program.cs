@@ -192,12 +192,39 @@ if (!string.IsNullOrWhiteSpace(s3Endpoint) && !string.IsNullOrWhiteSpace(s3Acces
 }
 
 // CORS
-var frontendOrigins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? [];
-if (frontendOrigins.Length > 0)
+var frontendOrigins = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+var frontendBaseUrl = builder.Configuration["Frontend:BaseUrl"];
+if (!string.IsNullOrWhiteSpace(frontendBaseUrl))
 {
-    builder.Services.AddCors(options => options.AddPolicy("frontend", policy =>
-        policy.WithOrigins(frontendOrigins).AllowAnyHeader().AllowAnyMethod()));
+    frontendOrigins.Add(frontendBaseUrl.Trim().TrimEnd('/'));
 }
+
+var configOrigins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>();
+if (configOrigins != null)
+{
+    foreach (var o in configOrigins.Where(s => !string.IsNullOrWhiteSpace(s)))
+    {
+        frontendOrigins.Add(o.Trim().TrimEnd('/'));
+    }
+}
+
+builder.Services.AddCors(options => options.AddPolicy("frontend", policy =>
+{
+    if (frontendOrigins.Count > 0)
+    {
+        policy.WithOrigins(frontendOrigins.ToArray())
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    }
+    else
+    {
+        policy.SetIsOriginAllowed(_ => true)
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    }
+}));
 
 // Controllers & OpenAPI
 builder.Services.AddControllers().AddJsonOptions(options =>
@@ -218,12 +245,8 @@ if (app.Environment.IsDevelopment())
     await DevelopmentDataSeeder.SeedAsync(app.Services);
 }
 
+app.UseCors("frontend");
 app.UseHttpsRedirection();
-
-if (frontendOrigins.Length > 0)
-{
-    app.UseCors("frontend");
-}
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -34,7 +34,7 @@ function Page({ user, onAuth }: { user: CurrentUser | null; onAuth: (user: Curre
   if (path === '/profile') return user ? <ProfilePage /> : <SignInPrompt />
   const adminProfile = path.match(/^\/profile\/([0-9a-f-]+)$/i)
   if (adminProfile) return user?.roles.includes('Administrator') ? <ProfilePage userId={adminProfile[1]} /> : <SignInPrompt />
-  if (path === '/admin' || path === '/admin/users') return <AdminPage />
+  if (path === '/admin' || path === '/admin/dashboard' || path === '/admin/users') return <AdminPage />
   if (path === '/search') return <SearchPage user={user} />
   const editPosition = path.match(/^\/positions\/([0-9a-f-]+)\/edit$/i)
   if (editPosition) return <PositionFormPage id={editPosition[1]} />

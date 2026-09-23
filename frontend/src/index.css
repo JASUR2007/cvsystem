@@ -3,20 +3,36 @@
 @import './home.css';
 @import './auth.css';
 @import './positions.css';
+@import './position-detail.css';
+@import './position-form.css';
+@import './profile.css';
+@import './cv-pages.css';
+@import './admin.css';
 
 :root, [data-bs-theme="light"] {
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --bs-body-bg: #80808024;
-  --bs-body-color: #0F172A;
-  --bs-secondary-color: #64748B;
-  --bs-border-color: #E2E8F0;
-  --surface-bg: #FFFFFF;
-  --surface-soft: #F8FAFC;
-  --surface-card: #FFFFFF;
-  --primary-color: #2563eb;
-  --primary-hover: #1d4ed8;
+  --bg-primary: #80808024;
+  --bg-card: #FFFFFF;
+  --bg-secondary: #F8FAFC;
+  --text-primary: #0F172A;
+  --text-secondary: #334155;
+  --text-muted: #64748B;
+  --border-primary: #E2E8F0;
+  --color-primary: #2563EB;
+  --primary-light: rgba(37, 99, 235, 0.08);
+  --primary-hover: #1D4ED8;
+
+  --bs-body-bg: var(--bg-primary);
+  --bs-body-color: var(--text-primary);
+  --bs-secondary-color: var(--text-muted);
+  --bs-border-color: var(--border-primary);
+  --surface-bg: var(--bg-card);
+  --surface-soft: var(--bg-secondary);
+  --surface-card: var(--bg-card);
+  --primary-color: var(--color-primary);
+
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
   --radius-sm: 6px;
   --radius-md: 10px;
@@ -24,18 +40,29 @@
 }
 
 [data-bs-theme="dark"] {
-  --bs-body-bg: #0B1120;
-  --bs-body-color: #F8FAFC;
-  --bs-secondary-color: #94A3B8;
-  --bs-border-color: #1E293B;
-  --surface-bg: #131E32;
-  --surface-soft: #1E293B;
-  --surface-card: #131E32;
-  --primary-color: #3b82f6;
-  --primary-hover: #60a5fa;
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  --bg-primary: #0B1120;
+  --bg-card: #131E32;
+  --bg-secondary: #1E293B;
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+  --border-primary: #1E293B;
+  --color-primary: #3B82F6;
+  --primary-light: rgba(59, 130, 246, 0.16);
+  --primary-hover: #60A5FA;
+
+  --bs-body-bg: var(--bg-primary);
+  --bs-body-color: var(--text-primary);
+  --bs-secondary-color: var(--text-muted);
+  --bs-border-color: var(--border-primary);
+  --surface-bg: var(--bg-card);
+  --surface-soft: var(--bg-secondary);
+  --surface-card: var(--bg-card);
+  --primary-color: var(--color-primary);
+
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 8px -1px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 12px 20px -3px rgba(0, 0, 0, 0.55);
 }
 
 * {
@@ -46,8 +73,8 @@ body {
   margin: 0;
   padding: 0;
   min-width: 320px;
-  background-color: var(--bs-body-bg);
-  color: var(--bs-body-color);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   font-family: inherit;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
@@ -59,8 +86,8 @@ button, input, textarea, select {
 
 /* Base Surface Card */
 .surface {
-  background-color: var(--surface-bg);
-  border: 1px solid var(--bs-border-color);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-primary);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   padding: 24px;
@@ -83,7 +110,7 @@ button, input, textarea, select {
 
 /* Headings */
 h1, h2, h3, h4, h5, h6 {
-  color: var(--bs-body-color);
+  color: var(--text-primary);
   font-weight: 700;
   letter-spacing: -0.02em;
 }
@@ -94,7 +121,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  color: var(--primary-color);
+  color: var(--color-primary);
   margin-bottom: 8px;
 }
 
@@ -109,8 +136,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-primary {
-  background-color: var(--primary-color);
-  border-color: var(--primary-color);
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
 .btn-primary:hover {
@@ -121,9 +148,9 @@ h1, h2, h3, h4, h5, h6 {
 /* Form Controls */
 .form-control, .form-select {
   height: 42px;
-  background-color: var(--surface-bg);
-  border: 1px solid var(--bs-border-color);
-  color: var(--bs-body-color);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  color: var(--text-primary);
   border-radius: 8px;
   font-size: 14px;
   padding: 0 14px;
@@ -131,34 +158,64 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .form-control:focus, .form-select:focus {
-  background-color: var(--surface-bg);
-  color: var(--bs-body-color);
-  border-color: var(--primary-color);
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* Dark theme specific fixes for inputs, cards, tables */
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border-primary);
+}
+
+[data-bs-theme="dark"] .card {
+  background-color: var(--bg-card);
+  border-color: var(--border-primary);
+  color: var(--text-primary);
+}
+
+[data-bs-theme="dark"] .bg-card {
+  background-color: var(--bg-card) !important;
+}
+
+[data-bs-theme="dark"] .bg-secondary-subtle {
+  background-color: var(--bg-secondary) !important;
+}
+
+[data-bs-theme="dark"] .table {
+  --bs-table-color: var(--text-primary);
+  --bs-table-bg: transparent;
+  --bs-table-border-color: var(--border-primary);
+  --bs-table-hover-bg: rgba(59, 130, 246, 0.08);
+  --bs-table-hover-color: var(--text-primary);
 }
 
 /* Table Enhancements */
 .table {
-  color: var(--bs-body-color);
+  color: var(--text-primary);
   --bs-table-bg: transparent;
   --bs-table-hover-bg: rgba(37, 99, 235, 0.04);
 }
 
 .table th {
-  background-color: var(--surface-soft);
-  color: var(--bs-secondary-color);
+  background-color: var(--bg-secondary);
+  color: var(--text-muted);
   font-size: 11.5px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   padding: 12px 16px;
-  border-bottom: 1px solid var(--bs-border-color);
+  border-bottom: 1px solid var(--border-primary);
   white-space: nowrap;
 }
 
 .table td {
   padding: 14px 16px;
-  border-bottom: 1px solid var(--bs-border-color);
+  border-bottom: 1px solid var(--border-primary);
   vertical-align: middle;
   font-size: 14px;
 }
@@ -175,8 +232,8 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 12px;
   font-weight: 600;
   border-radius: 12px;
-  background-color: rgba(37, 99, 235, 0.1);
-  color: var(--primary-color);
+  background-color: var(--primary-light);
+  color: var(--color-primary);
 }
 
 /* Not Found & Prompt */
@@ -193,7 +250,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .signin-prompt-surface p {
-  color: var(--bs-secondary-color);
+  color: var(--text-muted);
   margin-bottom: 24px;
 }
 

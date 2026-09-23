@@ -12,6 +12,13 @@ namespace backend.Controllers;
 [Route("api/admin")]
 public sealed class AdminController(IAdminUserService adminUserService) : ControllerBase
 {
+    [HttpGet("dashboard")]
+    public async Task<ActionResult<AdminDashboardResponse>> Dashboard(CancellationToken cancellationToken)
+    {
+        var result = await adminUserService.GetDashboardAsync(cancellationToken);
+        return Ok(result);
+    }
+
     [HttpGet("users")]
     public async Task<ActionResult<PagedResult<AdminUserView>>> Users(
         string? q, string? role, bool? isBlocked, int page = 1, int pageSize = 20,

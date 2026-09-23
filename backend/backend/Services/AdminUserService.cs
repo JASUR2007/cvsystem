@@ -1,4 +1,5 @@
 using backend.Auth;
+using backend.Common.Enums;
 using backend.Common.Exceptions;
 using backend.Common.Pagination;
 using backend.Data;
@@ -21,6 +22,61 @@ public class AdminUserService(
         Roles.Recruiter,
         Roles.Administrator
     ];
+
+    public async Task<AdminDashboardResponse> GetDashboardAsync(CancellationToken cancellationToken = default)
+    {
+        var totalUsers = await db.Users.CountAsync(cancellationToken);
+        var candidates = await (from link in db.UserRoles
+                                join r in db.Roles on link.RoleId equals r.Id
+                                where r.Name == Roles.Candidate
+                                select link.UserId).Distinct().CountAsync(cancellationToken);
+        var recruiters = await (from link in db.UserRoles
+                                join r in db.Roles on link.RoleId equals r.Id
+                                where r.Name == Roles.Recruiter
+                                select link.UserId).Distinct().CountAsync(cancellationToken);
+        var admins = await (from link in db.UserRoles
+                            join r in db.Roles on link.RoleId equals r.Id
+                            where r.Name == Roles.Administrator
+                            select link.UserId).Distinct().CountAsync(cancellationToken);
+        var blockedUsers = await db.Users.CountAsync(u => u.IsBlocked, cancellationToken);
+        var positions = await db.Positions.CountAsync(cancellationToken);
+        var draftCvs = await db.Cvs.CountAsync(cv => cv.Status == CvStatus.Draft, cancellationToken);
+        var publishedCvs = await db.Cvs.CountAsync(cv => cv.Status == CvStatus.Published, cancellationToken);
+
+        var recentUsers = await db.Users.AsNoTracking()
+            .OrderBy(u => u.Email)
+            .Take(5)
+            .Select(u => new AdminRecentUser(
+                u.Id,
+                u.FirstName + " " + u.LastName,
+                (from link in db.UserRoles
+                 join r in db.Roles on link.RoleId equals r.Id
+                 where link.UserId == u.Id
+                 select r.Name).FirstOrDefault() ?? "User"))
+            .ToListAsync(cancellationToken);
+
+        var recentPositions = await db.Positions.AsNoTracking()
+            .OrderByDescending(p => p.CreatedAt)
+            .Take(5)
+            .Select(p => new AdminRecentPosition(
+                p.Id,
+                p.Title,
+                p.Level == null ? null : p.Level.ToString(),
+                p.Cvs.Count(cv => cv.Status == CvStatus.Published)))
+            .ToListAsync(cancellationToken);
+
+        return new AdminDashboardResponse(
+            totalUsers,
+            candidates,
+            recruiters,
+            admins,
+            blockedUsers,
+            positions,
+            draftCvs,
+            publishedCvs,
+            recentUsers,
+            recentPositions);
+    }
 
     public async Task<PagedResult<AdminUserView>> ListUsersAsync(
         string? q, string? role, bool? isBlocked, int page, int pageSize,
@@ -61,62 +117,66 @@ public class AdminUserService(
             user.FirstName,
             user.LastName,
             user.IsBlocked,
-            roles.Where(r => r.UserId == user.Id).Select(r => r.Name!).ToList())).ToList();
+            roles.Where(r => r.UserId == user.Id).Select(r => r.Name).ToList()))
+            .ToList();
 
         return new PagedResult<AdminUserView>(items, currentPage, size, total);
     }
 
     public async Task<AdminUserView> GetUserAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
+        var user = await userManager.FindByIdAsync(id.ToString());
         if (user is null)
             throw new NotFoundException("User not found.");
 
-        var roles = await userManager.GetRolesAsync(user);
-        return new AdminUserView(user.Id, user.Email ?? string.Empty, user.FirstName, user.LastName, user.IsBlocked, roles.ToList());
+        var roles = (await userManager.GetRolesAsync(user)).ToList();
+        return new AdminUserView(user.Id, user.Email ?? string.Empty, user.FirstName, user.LastName, user.IsBlocked, roles);
     }
 
     public async Task SetBlockedAsync(Guid id, bool blocked, CancellationToken cancellationToken = default)
     {
-        if (id == currentUser.UserId && blocked)
+        if (id == currentUser.UserId)
             throw new ValidationException("You cannot block your own account.");
-
-        var user = await db.Users.FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
-        if (user is null)
-            throw new NotFoundException("User not found.");
-
-        user.IsBlocked = blocked;
-        user.AuthVersion++;
-        await db.SaveChangesAsync(cancellationToken);
-    }
-
-    public async Task<AdminUserView> UpdateRolesAsync(Guid id, List<string> roles, CancellationToken cancellationToken = default)
-    {
-        if (roles.Count == 0 || roles.Except(AllowedRoles).Any())
-            throw new ValidationException("Invalid roles specified.");
 
         var user = await userManager.FindByIdAsync(id.ToString());
         if (user is null)
             throw new NotFoundException("User not found.");
 
-        var currentRoles = await userManager.GetRolesAsync(user);
-        if (id == currentUser.UserId && !roles.Contains(Roles.Administrator))
-            throw new ValidationException("You cannot remove your own administrator role.");
+        user.IsBlocked = blocked;
+        await userManager.UpdateSecurityStampAsync(user);
+        var result = await userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+            throw new ConflictException("User state changed in another session.");
+    }
 
-        if (currentRoles.Contains(Roles.Administrator) && !roles.Contains(Roles.Administrator)
-            && await AdminCountAsync(cancellationToken) <= 1)
-            throw new ConflictException("The last administrator cannot be removed.");
+    public async Task<AdminUserView> UpdateRolesAsync(Guid id, List<string> roles, CancellationToken cancellationToken = default)
+    {
+        if (id == currentUser.UserId && !roles.Contains(Roles.Administrator))
+            throw new ValidationException("You cannot remove Administrator from your own account.");
+
+        if (roles.Any(role => !AllowedRoles.Contains(role)))
+            throw new ValidationException("One or more roles are invalid.");
+
+        var user = await userManager.FindByIdAsync(id.ToString());
+        if (user is null)
+            throw new NotFoundException("User not found.");
+
+        var isCurrentlyAdmin = await userManager.IsInRoleAsync(user, Roles.Administrator);
+        if (isCurrentlyAdmin && !roles.Contains(Roles.Administrator) && await AdminCountAsync(cancellationToken) <= 1)
+            throw new ConflictException("The system must have at least one active administrator.");
 
         await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
-        var removed = await userManager.RemoveFromRolesAsync(user, currentRoles.Except(roles));
-        if (!removed.Succeeded)
-            throw new ValidationException(string.Join(" ", removed.Errors.Select(e => e.Description)));
 
-        var added = await userManager.AddToRolesAsync(user, roles.Except(currentRoles));
-        if (!added.Succeeded)
-            throw new ValidationException(string.Join(" ", added.Errors.Select(e => e.Description)));
+        var existing = await userManager.GetRolesAsync(user);
+        var remove = await userManager.RemoveFromRolesAsync(user, existing);
+        if (!remove.Succeeded)
+            throw new ConflictException("Roles could not be cleared.");
 
-        user.AuthVersion++;
+        var add = await userManager.AddToRolesAsync(user, roles);
+        if (!add.Succeeded)
+            throw new ConflictException("Roles could not be assigned.");
+
+        user.SecurityStamp = Guid.NewGuid().ToString("N");
         var saved = await userManager.UpdateAsync(user);
         if (!saved.Succeeded)
             throw new ConflictException("Roles changed in another session.");

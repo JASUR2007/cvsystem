@@ -5,6 +5,8 @@ namespace backend.Services.Interfaces;
 
 public interface IAdminUserService
 {
+    Task<AdminDashboardResponse> GetDashboardAsync(CancellationToken cancellationToken = default);
+
     Task<PagedResult<AdminUserView>> ListUsersAsync(
         string? q, string? role, bool? isBlocked, int page, int pageSize,
         CancellationToken cancellationToken = default);

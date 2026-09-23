@@ -3,6 +3,8 @@ import { dateText, type PositionListItem } from '../shared/api'
 import { Status } from '../shared/ui'
 import { useApi } from '../shared/useApi'
 import { t } from '../shared/i18n'
+import heroPerson from '../assets/hero-person.jpg'
+import '../home.css'
 
 type Stats = {
   users: number
@@ -39,13 +41,15 @@ export default function HomePage() {
 
   return (
     <>
-      {/* Hero Section */}
+      {/* Hero Section (Screen 1 Layout) */}
       <section className="home-hero">
         <div className="hero-copy">
-          <span className="eyebrow">TalentHub Recruitment Platform</span>
+          <span className="eyebrow" style={{ color: 'var(--color-primary)', fontWeight: 600, fontSize: '0.875rem' }}>
+            TalentHub Recruitment Platform
+          </span>
           <h1>
-            Find the right talent. <br />
-            <span className="hero-gradient-text">Build the right future.</span>
+            {t('Find the right talent.')} <br />
+            <span className="hero-gradient-text">{t('Build the right future.')}</span>
           </h1>
           <p>
             {t('Structured positions and reusable candidate profiles make every CV relevant.')}
@@ -65,66 +69,62 @@ export default function HomePage() {
           </form>
         </div>
 
-        {/* Right-side Mockup Preview Card */}
+        {/* Right-side Hero Visual Presentation with Recruiter Image & Floating Badges */}
         <div className="hero-preview-wrapper" aria-hidden="true">
           <div className="hero-backdrop-glow" />
-          <div className="candidate-preview-card">
-            <div className="candidate-card-top">
-              <div className="candidate-avatar-info">
-                <div className="preview-avatar">JK</div>
-                <div className="preview-candidate-meta">
-                  <strong>Jasur Karimov</strong>
-                  <span>Backend Developer</span>
+
+          <div className="hero-image-frame">
+            {/* Floating Pills */}
+            <div className="floating-hero-pill pill-candidates">
+              <span>🎓</span>
+              <span>{t('Candidates')}</span>
+            </div>
+
+            <div className="floating-hero-pill pill-recruiters">
+              <span>👥</span>
+              <span>{t('Recruiters')}</span>
+            </div>
+
+            <div className="floating-hero-pill pill-opportunities">
+              <span>💼</span>
+              <span>Opportunities</span>
+            </div>
+
+            <img
+              src={heroPerson}
+              alt="TalentHub Platform Recruiter"
+              className="hero-person-img"
+            />
+          </div>
+
+          {/* Floating mini candidate match preview */}
+          <div className="hero-mini-card">
+            <div className="mini-card-row">
+              <div className="mini-card-user">
+                <div className="mini-card-avatar">JK</div>
+                <div>
+                  <strong style={{ fontSize: '0.875rem', display: 'block' }}>Jasur Karimov</strong>
+                  <small className="text-muted">Backend Developer</small>
                 </div>
               </div>
-              <span className="eligibility-badge">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                {t('Eligible')}
+              <span className="badge text-bg-success" style={{ fontSize: '0.7rem' }}>
+                ✓ {t('Eligible')}
               </span>
             </div>
 
-            <div className="match-score-section">
-              <div className="match-score-header">
-                <span>{t('Position match')}</span>
-                <strong>92%</strong>
-              </div>
-              <div className="match-progress-track">
-                <div className="match-progress-fill" />
-              </div>
+            <div className="d-flex justify-content-between align-items-center mb-1" style={{ fontSize: '0.75rem' }}>
+              <span className="text-muted">{t('Position match')}</span>
+              <strong style={{ color: '#059669' }}>92%</strong>
             </div>
-
-            <div className="preview-attributes-grid">
-              <div className="preview-attr-box">
-                <span>English</span>
-                <strong>C1</strong>
-              </div>
-              <div className="preview-attr-box">
-                <span>Docker</span>
-                <strong>{t('Yes')}</strong>
-              </div>
-              <div className="preview-attr-box">
-                <span>.NET</span>
-                <strong>3 {t('years')}</strong>
-              </div>
-              <div className="preview-attr-box">
-                <span>PostgreSQL</span>
-                <strong>{t('Yes')}</strong>
-              </div>
-            </div>
-
-            <div className="preview-tags-row">
-              <span className="preview-tag-pill">CV</span>
-              <span className="preview-tag-pill">{t('Attributes')}</span>
-              <span className="preview-tag-pill">{t('Positions')}</span>
+            <div className="match-bar-track">
+              <div className="match-bar-fill" />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Latest Positions (Full-width) */}
-      <section className="surface home-latest">
+      {/* Latest Positions (Full-width Table) */}
+      <section className="home-latest">
         <div className="section-head">
           <h2>{t('Latest positions')}</h2>
           <a href="/positions">{t('View all →')}</a>
@@ -132,12 +132,13 @@ export default function HomePage() {
         <Status loading={latest.loading} error={latest.error} empty={latest.data?.length === 0} />
         {latest.data && latest.data.length > 0 && (
           <div className="table-responsive">
-            <table className="table table-hover align-middle">
+            <table className="table table-hover align-middle mb-0">
               <thead>
                 <tr>
                   <th>{t('Title')}</th>
                   <th>{t('Company')}</th>
                   <th>{t('Level')}</th>
+                  <th>{t('CVs')}</th>
                   <th>{t('Updated')}</th>
                 </tr>
               </thead>
@@ -149,11 +150,22 @@ export default function HomePage() {
                     onClick={() => window.location.assign(`/positions/${position.id}`)}
                   >
                     <td>
-                      <a href={`/positions/${position.id}`}>{position.title}</a>
+                      <a
+                        href={`/positions/${position.id}`}
+                        style={{ fontWeight: 600, color: 'var(--color-primary)', textDecoration: 'none' }}
+                        onClick={e => e.stopPropagation()}
+                      >
+                        {position.title}
+                      </a>
                     </td>
                     <td>{position.company || '—'}</td>
                     <td>
-                      <span className="level-pill">{position.level || '—'}</span>
+                      <span className="badge text-bg-light border">{position.level || '—'}</span>
+                    </td>
+                    <td>
+                      <span className="badge bg-primary-subtle text-primary border border-primary-subtle">
+                        {position.cvCount}
+                      </span>
                     </td>
                     <td>{dateText(position.updatedAt)}</td>
                   </tr>
@@ -164,82 +176,73 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* Popular Positions + Platform Statistics Grid */}
+      {/* 2-Column: Popular Positions + Platform Statistics */}
       <div className="home-grid">
         {/* Popular Positions */}
-        <section className="surface">
+        <section className="home-card">
           <div className="section-head">
             <h2>{t('Popular positions')}</h2>
           </div>
           <Status loading={popular.loading} error={popular.error} empty={popular.data?.length === 0} />
-          {popular.data && popular.data.length > 0 && (
-            <div className="popular-positions-list">
-              {popular.data.map((position, index) => (
-                <a className="popular-row" href={`/positions/${position.id}`} key={position.id}>
-                  <div className="popular-row-left">
-                    <span className="popular-rank">{String(index + 1).padStart(2, '0')}</span>
-                    <span className="popular-title">{position.title}</span>
-                  </div>
-                  <span className="popular-cv-count">{position.cvCount} CVs</span>
-                </a>
-              ))}
-            </div>
-          )}
+          <div className="popular-list">
+            {popular.data?.map(item => (
+              <a href={`/positions/${item.id}`} key={item.id} className="popular-item">
+                <span className="popular-title">{item.title}</span>
+                <span className="popular-cv-count">{item.cvCount} CVs</span>
+              </a>
+            ))}
+          </div>
         </section>
 
         {/* Platform Statistics */}
-        <section className="surface">
+        <section className="home-card">
           <div className="section-head">
             <h2>{t('Platform statistics')}</h2>
           </div>
           <Status loading={stats.loading} error={stats.error} />
           {stats.data && (
             <div className="stats-grid">
-              <div className="stat-card-item">
-                <strong>{stats.data.users}</strong>
-                <span>{t('Users')}</span>
+              <div className="stat-item">
+                <span className="stat-number">{stats.data.users.toLocaleString()}</span>
+                <span className="stat-label">{t('Users')}</span>
               </div>
-              <div className="stat-card-item">
-                <strong>{stats.data.candidates}</strong>
-                <span>{t('Candidates')}</span>
+              <div className="stat-item">
+                <span className="stat-number" style={{ color: '#2563EB' }}>
+                  {stats.data.candidates.toLocaleString()}
+                </span>
+                <span className="stat-label">{t('Candidates')}</span>
               </div>
-              <div className="stat-card-item">
-                <strong>{stats.data.recruiters}</strong>
-                <span>{t('Recruiters')}</span>
+              <div className="stat-item">
+                <span className="stat-number" style={{ color: '#059669' }}>
+                  {stats.data.recruiters.toLocaleString()}
+                </span>
+                <span className="stat-label">{t('Recruiters')}</span>
               </div>
-              <div className="stat-card-item">
-                <strong>{stats.data.positions}</strong>
-                <span>{t('Positions')}</span>
-              </div>
-              <div className="stat-card-item">
-                <strong>{stats.data.publishedCvs}</strong>
-                <span>{t('Published CVs')}</span>
-              </div>
-              <div className="stat-card-item">
-                <strong>{stats.data.cvsLast24Hours}</strong>
-                <span>{t('New CVs today')}</span>
+              <div className="stat-item">
+                <span className="stat-number" style={{ color: '#7C3AED' }}>
+                  {stats.data.publishedCvs.toLocaleString()}
+                </span>
+                <span className="stat-label">{t('Published CVs')}</span>
               </div>
             </div>
           )}
         </section>
       </div>
 
-      {/* Popular Technologies (Full-width) */}
-      <section className="surface technologies">
+      {/* Popular Technologies / Tag Cloud */}
+      <section className="home-technologies">
         <div className="section-head">
           <h2>{t('Popular technologies')}</h2>
         </div>
         <Status loading={tags.loading} error={tags.error} empty={tags.data?.length === 0} />
-        {tags.data && tags.data.length > 0 && (
-          <div className="tag-list">
-            {tags.data.map(tag => (
-              <a className="tech-tag-chip" href={`/search?q=${encodeURIComponent(tag.name)}`} key={tag.name}>
-                <span>{tag.name}</span>
-                <span className="tech-tag-count">{tag.count}</span>
-              </a>
-            ))}
-          </div>
-        )}
+        <div className="tag-cloud">
+          {tags.data?.map(tag => (
+            <a href={`/positions?q=${encodeURIComponent(tag.name)}`} key={tag.name} className="tag-chip">
+              <span>{tag.name}</span>
+              <span className="tag-count">({tag.count})</span>
+            </a>
+          ))}
+        </div>
       </section>
     </>
   )

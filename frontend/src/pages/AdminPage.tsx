@@ -1,36 +1,508 @@
 import { useState } from 'react'
 import { api, json, type Page } from '../shared/api'
-import { PageTitle, Pager, Status } from '../shared/ui'
+import { Pager, Status } from '../shared/ui'
 import { useApi } from '../shared/useApi'
+import '../admin.css'
 
-type User = { id: string; email: string; firstName: string; lastName: string; isBlocked: boolean; roles: string[] }
-type Stats = { users: number; blocked: number; positions: number; attributes: number; published: number; drafts: number }
+type User = {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  isBlocked: boolean
+  roles: string[]
+}
+
+type RecentUser = {
+  id: string
+  name: string
+  role: string
+}
+
+type RecentPosition = {
+  id: string
+  title: string
+  level: string | null
+  cvCount: number
+}
+
+type DashboardData = {
+  totalUsers: number
+  candidates: number
+  recruiters: number
+  administrators: number
+  blockedUsers: number
+  positions: number
+  draftCvs: number
+  publishedCvs: number
+  recentUsers: RecentUser[]
+  recentPositions: RecentPosition[]
+}
 
 export default function AdminPage() {
+  const initialTab = window.location.pathname === '/admin/users' ? 'users' : 'dashboard'
+  const [currentTab, setCurrentTab] = useState<'dashboard' | 'users'>(initialTab)
+
+  // Dashboard Stats API
+  const stats = useApi<DashboardData>('/admin/dashboard')
+
+  // Users Management State
   const [query, setQuery] = useState('')
+  const [roleFilter, setRoleFilter] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
   const [page, setPage] = useState(1)
   const [selected, setSelected] = useState<string[]>([])
   const [message, setMessage] = useState('')
-  const stats = useApi<Stats>('/admin/dashboard')
-  const users = useApi<Page<User>>(`/admin/users?q=${encodeURIComponent(query)}&page=${page}`)
-  const chosen = users.data?.items.find(user => user.id === selected[0])
+
+  const blockedParam = statusFilter === 'blocked' ? '&isBlocked=true' : statusFilter === 'active' ? '&isBlocked=false' : ''
+  const roleParam = roleFilter ? `&role=${roleFilter}` : ''
+
+  const users = useApi<Page<User>>(
+    `/admin/users?q=${encodeURIComponent(query)}${roleParam}${blockedParam}&page=${page}`
+  )
+
+  const chosen = users.data?.items.find(u => u.id === selected[0])
 
   async function action(kind: 'block' | 'unblock' | 'delete') {
     if (kind === 'delete' && !window.confirm(`Delete ${selected.length} selected user(s)?`)) return
     try {
-      await Promise.all(selected.map(id => api(`/admin/users/${id}${kind === 'delete' ? '' : `/${kind}`}`, { method: kind === 'delete' ? 'DELETE' : 'POST' })))
+      await Promise.all(
+        selected.map(id =>
+          api(`/admin/users/${id}${kind === 'delete' ? '' : `/${kind}`}`, {
+            method: kind === 'delete' ? 'DELETE' : 'POST',
+          })
+        )
+      )
       setSelected([])
       users.reload()
       stats.reload()
-      setMessage('Users updated.')
-    } catch (cause) { setMessage(cause instanceof Error ? cause.message : 'Could not update users.') }
+      setMessage(`Users successfully updated (${kind}).`)
+    } catch (cause) {
+      setMessage(cause instanceof Error ? cause.message : 'Could not perform operation.')
+    }
   }
 
   async function setRoles(roles: string[]) {
     if (!chosen) return
-    try { await api(`/admin/users/${chosen.id}/roles`, json('PUT', { roles })); users.reload(); setMessage('Roles updated. The user must sign in again.') }
-    catch (cause) { setMessage(cause instanceof Error ? cause.message : 'Could not update roles.') }
+    try {
+      await api(`/admin/users/${chosen.id}/roles`, json('PUT', { roles }))
+      users.reload()
+      setMessage('User roles updated successfully.')
+    } catch (cause) {
+      setMessage(cause instanceof Error ? cause.message : 'Could not update roles.')
+    }
   }
 
-  return <><section className="surface page-surface"><PageTitle title="Admin dashboard" /><Status loading={stats.loading} error={stats.error} /><div className="stats-grid">{stats.data && Object.entries(stats.data).map(([label, value]) => <div key={label}><strong>{value}</strong><span>{label}</span></div>)}</div></section><section className="surface page-surface"><PageTitle title="Users" /><div className="toolbar"><input className="form-control" value={query} onChange={event => { setQuery(event.target.value); setPage(1) }} placeholder="Search users" /><button className="btn btn-outline-warning" disabled={selected.length === 0} onClick={() => action('block')}>Block</button><button className="btn btn-outline-success" disabled={selected.length === 0} onClick={() => action('unblock')}>Unblock</button><button className="btn btn-outline-danger" disabled={selected.length === 0} onClick={() => action('delete')}>Delete</button></div>{message && <div className="alert alert-info">{message}</div>}<Status loading={users.loading} error={users.error} empty={users.data?.items.length === 0} />{users.data && users.data.items.length > 0 && <div className="table-responsive"><table className="table table-hover"><thead><tr><th><input type="checkbox" aria-label="Select all" checked={selected.length === users.data.items.length} onChange={event => setSelected(event.target.checked ? users.data!.items.map(user => user.id) : [])} /></th><th>User</th><th>Email</th><th>Roles</th><th>Status</th></tr></thead><tbody>{users.data.items.map(user => <tr key={user.id} className="click-row" onClick={() => setSelected([user.id])}><td><input type="checkbox" aria-label={`Select ${user.email}`} checked={selected.includes(user.id)} onChange={event => setSelected(event.target.checked ? [...selected, user.id] : selected.filter(id => id !== user.id))} /></td><td><a href={`/profile/${user.id}`} onClick={event => event.stopPropagation()}>{user.firstName} {user.lastName}</a></td><td>{user.email}</td><td>{user.roles.join(', ')}</td><td><span className={`badge ${user.isBlocked ? 'text-bg-danger' : 'text-bg-success'}`}>{user.isBlocked ? 'Blocked' : 'Active'}</span></td></tr>)}</tbody></table></div>}<Pager page={page} total={users.data?.totalPages ?? 0} onPage={setPage} />{selected.length === 1 && chosen && <div className="edit-panel"><h3>Roles for {chosen.email}</h3><div className="choice-list">{['Candidate','Recruiter','Administrator'].map(role => <label className="check-line" key={role}><input type="checkbox" checked={chosen.roles.includes(role)} onChange={event => setRoles(event.target.checked ? [...chosen.roles, role] : chosen.roles.filter(item => item !== role))} /> {role}</label>)}</div></div>}</section></>
+  return (
+    <div className="admin-layout">
+      {/* Sidebar Navigation */}
+      <aside className="admin-sidebar">
+        <div className="admin-brand-tag">Administration</div>
+        <nav className="admin-nav-menu">
+          <button
+            type="button"
+            className={`admin-nav-link ${currentTab === 'dashboard' ? 'active' : ''}`}
+            onClick={() => setCurrentTab('dashboard')}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="3" width="7" height="7" />
+              <rect x="14" y="3" width="7" height="7" />
+              <rect x="14" y="14" width="7" height="7" />
+              <rect x="3" y="14" width="7" height="7" />
+            </svg>
+            <span>Dashboard</span>
+          </button>
+
+          <button
+            type="button"
+            className={`admin-nav-link ${currentTab === 'users' ? 'active' : ''}`}
+            onClick={() => setCurrentTab('users')}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+            <span>Users</span>
+          </button>
+
+          <a href="/positions" className="admin-nav-link">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+            </svg>
+            <span>Positions</span>
+          </a>
+
+          <a href="/attributes" className="admin-nav-link">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polygon points="12 2 2 7 12 12 22 7 12 2" />
+              <polyline points="2 17 12 22 22 17" />
+              <polyline points="2 12 12 17 22 12" />
+            </svg>
+            <span>Attributes</span>
+          </a>
+        </nav>
+      </aside>
+
+      {/* Main Content Area */}
+      <main className="admin-content">
+        {message && (
+          <div className="alert alert-info alert-dismissible fade show" role="alert">
+            {message}
+            <button type="button" className="btn-close" onClick={() => setMessage('')}></button>
+          </div>
+        )}
+
+        {/* =========================================================================
+            SCREEN 15: ADMIN DASHBOARD
+           ========================================================================= */}
+        {currentTab === 'dashboard' && (
+          <div>
+            <header className="admin-page-header">
+              <h1 className="admin-page-title">Admin Dashboard</h1>
+              <p className="text-muted mb-0">Platform performance, user demographics, and system overview.</p>
+            </header>
+
+            <Status loading={stats.loading} error={stats.error} />
+
+            {stats.data && (
+              <>
+                {/* 8 KPI Cards */}
+                <div className="admin-kpi-grid">
+                  <div className="admin-kpi-card">
+                    <span className="admin-kpi-num">{stats.data.totalUsers.toLocaleString()}</span>
+                    <span className="admin-kpi-label">Total Users</span>
+                  </div>
+                  <div className="admin-kpi-card">
+                    <span className="admin-kpi-num" style={{ color: '#2563EB' }}>
+                      {stats.data.candidates.toLocaleString()}
+                    </span>
+                    <span className="admin-kpi-label">Candidates</span>
+                  </div>
+                  <div className="admin-kpi-card">
+                    <span className="admin-kpi-num" style={{ color: '#059669' }}>
+                      {stats.data.recruiters.toLocaleString()}
+                    </span>
+                    <span className="admin-kpi-label">Recruiters</span>
+                  </div>
+                  <div className="admin-kpi-card">
+                    <span className="admin-kpi-num" style={{ color: '#7C3AED' }}>
+                      {stats.data.administrators.toLocaleString()}
+                    </span>
+                    <span className="admin-kpi-label">Administrators</span>
+                  </div>
+                  <div className="admin-kpi-card">
+                    <span className="admin-kpi-num" style={{ color: '#DC2626' }}>
+                      {stats.data.blockedUsers.toLocaleString()}
+                    </span>
+                    <span className="admin-kpi-label">Blocked Users</span>
+                  </div>
+                  <div className="admin-kpi-card">
+                    <span className="admin-kpi-num" style={{ color: '#D97706' }}>
+                      {stats.data.positions.toLocaleString()}
+                    </span>
+                    <span className="admin-kpi-label">Positions</span>
+                  </div>
+                  <div className="admin-kpi-card">
+                    <span className="admin-kpi-num" style={{ color: '#4B5563' }}>
+                      {stats.data.draftCvs.toLocaleString()}
+                    </span>
+                    <span className="admin-kpi-label">Draft CVs</span>
+                  </div>
+                  <div className="admin-kpi-card">
+                    <span className="admin-kpi-num" style={{ color: '#16A34A' }}>
+                      {stats.data.publishedCvs.toLocaleString()}
+                    </span>
+                    <span className="admin-kpi-label">Published CVs</span>
+                  </div>
+                </div>
+
+                {/* 2-Column Lists: Recent Users & Recent Positions */}
+                <div className="admin-two-cols">
+                  {/* Recent Users */}
+                  <div className="card p-3 border shadow-sm bg-card">
+                    <h3 className="h6 mb-3" style={{ fontWeight: 600 }}>Recent Users</h3>
+                    <div className="table-responsive">
+                      <table className="table table-hover align-middle mb-0">
+                        <tbody>
+                          {stats.data.recentUsers.map(u => (
+                            <tr key={u.id}>
+                              <td>
+                                <a
+                                  href={`/profile/${u.id}`}
+                                  style={{ fontWeight: 600, color: 'var(--text-primary)', textDecoration: 'none' }}
+                                >
+                                  {u.name}
+                                </a>
+                              </td>
+                              <td style={{ textAlign: 'right' }}>
+                                <span className="badge text-bg-light border">{u.role}</span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Recent Positions */}
+                  <div className="card p-3 border shadow-sm bg-card">
+                    <h3 className="h6 mb-3" style={{ fontWeight: 600 }}>Recent Positions</h3>
+                    <div className="table-responsive">
+                      <table className="table table-hover align-middle mb-0">
+                        <tbody>
+                          {stats.data.recentPositions.map(p => (
+                            <tr key={p.id}>
+                              <td>
+                                <a
+                                  href={`/positions/${p.id}`}
+                                  style={{ fontWeight: 600, color: 'var(--text-primary)', textDecoration: 'none' }}
+                                >
+                                  {p.title}
+                                </a>
+                              </td>
+                              <td>
+                                {p.level && <span className="badge text-bg-secondary">{p.level}</span>}
+                              </td>
+                              <td style={{ textAlign: 'right' }}>
+                                <span className="badge bg-primary-subtle text-primary border border-primary-subtle">
+                                  {p.cvCount} CVs
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* =========================================================================
+            SCREEN 16: ADMIN USERS
+           ========================================================================= */}
+        {currentTab === 'users' && (
+          <div>
+            <header className="admin-page-header">
+              <h1 className="admin-page-title">Users</h1>
+              <p className="text-muted mb-0">Manage platform users, inspect profiles, configure permissions, and toggle access.</p>
+            </header>
+
+            {/* Filter toolbar */}
+            <div className="admin-users-toolbar">
+              <div className="d-flex flex-wrap align-items-center gap-2 flex-grow-1">
+                <input
+                  className="form-control form-control-sm"
+                  style={{ maxWidth: 260 }}
+                  value={query}
+                  onChange={e => {
+                    setQuery(e.target.value)
+                    setPage(1)
+                  }}
+                  placeholder="Search users..."
+                />
+
+                <select
+                  className="form-select form-select-sm"
+                  style={{ width: 'auto' }}
+                  value={roleFilter}
+                  onChange={e => {
+                    setRoleFilter(e.target.value)
+                    setPage(1)
+                  }}
+                >
+                  <option value="">All Roles</option>
+                  <option value="Candidate">Candidate</option>
+                  <option value="Recruiter">Recruiter</option>
+                  <option value="Administrator">Administrator</option>
+                </select>
+
+                <select
+                  className="form-select form-select-sm"
+                  style={{ width: 'auto' }}
+                  value={statusFilter}
+                  onChange={e => {
+                    setStatusFilter(e.target.value)
+                    setPage(1)
+                  }}
+                >
+                  <option value="">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="blocked">Blocked</option>
+                </select>
+              </div>
+
+              {/* Toolbar Actions for selected items */}
+              <div className="admin-toolbar-actions">
+                <button
+                  type="button"
+                  className="btn btn-outline-warning btn-sm"
+                  disabled={selected.length === 0}
+                  onClick={() => action('block')}
+                >
+                  Block
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-outline-success btn-sm"
+                  disabled={selected.length === 0}
+                  onClick={() => action('unblock')}
+                >
+                  Unblock
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-outline-danger btn-sm"
+                  disabled={selected.length === 0}
+                  onClick={() => action('delete')}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+
+            <Status loading={users.loading} error={users.error} empty={users.data?.items.length === 0} />
+
+            {/* Users Table */}
+            {users.data && users.data.items.length > 0 && (
+              <div className="card border shadow-sm bg-card overflow-hidden">
+                <div className="table-responsive">
+                  <table className="table table-hover align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th style={{ width: 44 }}>
+                          <input
+                            type="checkbox"
+                            className="form-check-input"
+                            aria-label="Select all"
+                            checked={selected.length === users.data.items.length}
+                            onChange={e =>
+                              setSelected(e.target.checked ? users.data!.items.map(u => u.id) : [])
+                            }
+                          />
+                        </th>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Roles</th>
+                        <th>Status</th>
+                        <th style={{ textAlign: 'right' }}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {users.data.items.map(user => (
+                        <tr
+                          key={user.id}
+                          className="click-row"
+                          onClick={() => setSelected([user.id])}
+                        >
+                          <td onClick={e => e.stopPropagation()}>
+                            <input
+                              type="checkbox"
+                              className="form-check-input"
+                              aria-label={`Select ${user.email}`}
+                              checked={selected.includes(user.id)}
+                              onChange={e =>
+                                setSelected(
+                                  e.target.checked
+                                    ? [...selected, user.id]
+                                    : selected.filter(id => id !== user.id)
+                                )
+                              }
+                            />
+                          </td>
+                          <td>
+                            <a
+                              href={`/profile/${user.id}`}
+                              style={{ fontWeight: 600, color: 'var(--text-primary)', textDecoration: 'none' }}
+                              onClick={e => e.stopPropagation()}
+                            >
+                              {user.firstName} {user.lastName}
+                            </a>
+                          </td>
+                          <td className="text-muted">{user.email}</td>
+                          <td>
+                            <div className="d-flex flex-wrap gap-1">
+                              {user.roles.map(r => (
+                                <span className="badge text-bg-light border" key={r}>
+                                  {r}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                          <td>
+                            <span
+                              className={`badge ${user.isBlocked ? 'text-bg-danger' : 'text-bg-success'}`}
+                            >
+                              {user.isBlocked ? 'Blocked' : 'Active'}
+                            </span>
+                          </td>
+                          <td style={{ textAlign: 'right' }}>
+                            <button
+                              type="button"
+                              className="btn btn-outline-secondary btn-sm"
+                              onClick={e => {
+                                e.stopPropagation()
+                                setSelected([user.id])
+                              }}
+                            >
+                              Manage Roles
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-3">
+              <Pager page={page} total={users.data?.totalPages ?? 0} onPage={setPage} />
+            </div>
+
+            {/* Role Management Panel for selected single user */}
+            {selected.length === 1 && chosen && (
+              <div className="card mt-4 p-4 border bg-secondary-subtle">
+                <div className="d-flex align-items-center justify-content-between mb-3">
+                  <h3 className="h6 mb-0">
+                    Roles for {chosen.firstName} {chosen.lastName} ({chosen.email})
+                  </h3>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setSelected([])}
+                  ></button>
+                </div>
+
+                <div className="d-flex gap-4">
+                  {['Candidate', 'Recruiter', 'Administrator'].map(role => (
+                    <label className="form-check-label d-flex align-items-center gap-2" key={role}>
+                      <input
+                        type="checkbox"
+                        className="form-check-input"
+                        checked={chosen.roles.includes(role)}
+                        onChange={e =>
+                          setRoles(
+                            e.target.checked
+                              ? [...chosen.roles, role]
+                              : chosen.roles.filter(item => item !== role)
+                          )
+                        }
+                      />
+                      <span>{role}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+    </div>
+  )
 }

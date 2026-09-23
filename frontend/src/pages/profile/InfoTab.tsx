@@ -217,33 +217,53 @@ export default function InfoTab({ userId }: { userId?: string }) {
         </div>
       )}
 
-      {/* Inline Edit Panel Modal/Card */}
+      {/* Edit Attribute Modal */}
       {editing && (
-        <div className="card mt-4 p-3 bg-secondary-subtle border">
-          <div className="d-flex align-items-center justify-content-between mb-3">
-            <h3 className="h6 mb-0">
-              {t('Edit')} {editing.name}
-            </h3>
-            <button
-              type="button"
-              className="btn-close btn-sm"
-              onClick={() => setEditing(null)}
-              aria-label="Close"
-            ></button>
-          </div>
+        <div
+          className="modal fade show d-block"
+          tabIndex={-1}
+          role="dialog"
+          aria-modal="true"
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 1050 }}
+          onClick={() => setEditing(null)}
+        >
+          <div
+            className="modal-dialog modal-dialog-centered"
+            style={{ maxWidth: 540 }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="modal-content shadow-lg border-0">
+              <div className="modal-header border-bottom">
+                <h3 className="modal-title h5 mb-0" style={{ fontWeight: 600 }}>
+                  {t('Edit')} {editing.name}
+                </h3>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setEditing(null)}
+                  aria-label="Close"
+                ></button>
+              </div>
 
-          {['First Name', 'Last Name', 'Location', 'Personal Photo'].includes(editing.name) ? (
-            <p className="text-muted mb-3">{t('Edit this built-in field on the Me tab.')}</p>
-          ) : (
-            <>
-              <Status loading={definition.loading} error={definition.error} />
-              <AttributeEditor
-                value={editing}
-                options={definition.data?.options}
-                onChange={setEditing}
-                userId={userId}
-              />
-              <div className="d-flex justify-content-end gap-2 mt-3">
+              <div className="modal-body py-3">
+                {['First Name', 'Last Name', 'Location', 'Personal Photo'].includes(editing.name) ? (
+                  <p className="text-muted mb-0">{t('Edit this built-in field on the Me tab.')}</p>
+                ) : (
+                  <>
+                    <Status loading={definition.loading} error={definition.error} />
+                    <div className="mb-2">
+                      <AttributeEditor
+                        value={editing}
+                        options={definition.data?.options}
+                        onChange={setEditing}
+                        userId={userId}
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <div className="modal-footer border-top">
                 <button
                   type="button"
                   className="btn btn-outline-secondary btn-sm"
@@ -251,12 +271,14 @@ export default function InfoTab({ userId }: { userId?: string }) {
                 >
                   {t('Cancel')}
                 </button>
-                <button type="button" className="btn btn-primary btn-sm" onClick={save}>
-                  {t('Save to profile')}
-                </button>
+                {!['First Name', 'Last Name', 'Location', 'Personal Photo'].includes(editing.name) && (
+                  <button type="button" className="btn btn-primary btn-sm" onClick={save}>
+                    {t('Save to profile')}
+                  </button>
+                )}
               </div>
-            </>
-          )}
+            </div>
+          </div>
         </div>
       )}
 

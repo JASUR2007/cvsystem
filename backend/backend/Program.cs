@@ -145,20 +145,50 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration["Authentication:GitHub:Clie
 builder.Services.AddAuthorization();
 
 // S3 Client
-var s3Endpoint = builder.Configuration["S3:Endpoint"];
-var s3AccessKey = builder.Configuration["S3:AccessKey"];
-var s3SecretKey = builder.Configuration["S3:SecretKey"];
+var s3Endpoint = builder.Configuration["S3:Endpoint"]?.Trim();
+var s3AccessKey = builder.Configuration["S3:AccessKey"]?.Trim();
+var s3SecretKey = builder.Configuration["S3:SecretKey"]?.Trim();
 var s3Region = builder.Configuration["S3:Region"] ?? "uz";
+
+if (!string.IsNullOrWhiteSpace(s3Endpoint) && !string.IsNullOrWhiteSpace(s3AccessKey))
+{
+    if (!s3Endpoint.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+        && !s3Endpoint.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+    {
+        if (s3AccessKey.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+            || s3AccessKey.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        {
+            (s3Endpoint, s3AccessKey) = (s3AccessKey, s3Endpoint);
+        }
+        else if (s3Endpoint.StartsWith("S3-", StringComparison.OrdinalIgnoreCase))
+        {
+            s3AccessKey = s3Endpoint;
+            s3Endpoint = "https://storage.acdn.uz";
+        }
+        else
+        {
+            s3Endpoint = "https://" + s3Endpoint;
+        }
+    }
+}
+
 if (!string.IsNullOrWhiteSpace(s3Endpoint) && !string.IsNullOrWhiteSpace(s3AccessKey) && !string.IsNullOrWhiteSpace(s3SecretKey))
 {
-    builder.Services.AddSingleton<IAmazonS3>(new AmazonS3Client(
-        new BasicAWSCredentials(s3AccessKey, s3SecretKey),
-        new AmazonS3Config
-        {
-            ServiceURL = s3Endpoint,
-            ForcePathStyle = true,
-            AuthenticationRegion = s3Region
-        }));
+    try
+    {
+        builder.Services.AddSingleton<IAmazonS3>(new AmazonS3Client(
+            new BasicAWSCredentials(s3AccessKey, s3SecretKey),
+            new AmazonS3Config
+            {
+                ServiceURL = s3Endpoint,
+                ForcePathStyle = true,
+                AuthenticationRegion = s3Region
+            }));
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine($"Warning: Failed to initialize AmazonS3Client: {ex.Message}");
+    }
 }
 
 // CORS

@@ -182,20 +182,23 @@ export default function ProfilePage({ userId }: { userId?: string }) {
   function fallbackLocationDetection() {
     try {
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+      const lang = localStorage.getItem('talenthub_language') || 'ru'
       if (tz.includes('Tashkent') || tz.includes('Samarkand')) {
-        change('location', 'Tashkent, Uzbekistan')
+        change('location', lang === 'uz' ? "Toshkent, O'zbekiston" : lang === 'ru' ? 'Ташкент, Узбекистан' : 'Tashkent, Uzbekistan')
       } else if (tz.includes('Almaty')) {
-        change('location', 'Almaty, Kazakhstan')
+        change('location', lang === 'uz' ? "Olmaota, Qozog'iston" : lang === 'ru' ? 'Алматы, Казахстан' : 'Almaty, Kazakhstan')
       } else if (tz.includes('Moscow')) {
-        change('location', 'Moscow, Russia')
+        change('location', lang === 'uz' ? 'Moskva, Rossiya' : lang === 'ru' ? 'Москва, Россия' : 'Moscow, Russia')
       } else if (tz.includes('London')) {
-        change('location', 'London, United Kingdom')
+        change('location', lang === 'uz' ? 'London, Buyuk Britaniya' : lang === 'ru' ? 'Лондон, Великобритания' : 'London, United Kingdom')
       } else if (tz.includes('New_York')) {
-        change('location', 'New York, USA')
+        change('location', lang === 'uz' ? 'Nyu-York, AQSH' : lang === 'ru' ? 'Нью-Йорк, США' : 'New York, USA')
       } else if (tz.includes('Berlin')) {
-        change('location', 'Berlin, Germany')
+        change('location', lang === 'uz' ? 'Berlin, Germaniya' : lang === 'ru' ? 'Берлин, Германия' : 'Berlin, Germany')
       } else if (tz.includes('Dubai')) {
-        change('location', 'Dubai, UAE')
+        change('location', lang === 'uz' ? 'Dubay, BAA' : lang === 'ru' ? 'Дубай, ОАЭ' : 'Dubai, UAE')
+      } else {
+        change('location', lang === 'uz' ? "Toshkent, O'zbekiston" : lang === 'ru' ? 'Ташкент, Узбекистан' : 'Tashkent, Uzbekistan')
       }
     } finally {
       setDetectingLocation(false)
@@ -204,6 +207,8 @@ export default function ProfilePage({ userId }: { userId?: string }) {
 
   async function handleDetectLocation() {
     setDetectingLocation(true)
+    const lang = localStorage.getItem('talenthub_language') || 'ru'
+    const acceptLang = lang === 'uz' ? 'uz,ru,en' : lang === 'ru' ? 'ru,uz,en' : 'en,ru,uz'
     try {
       if ('geolocation' in navigator) {
         navigator.geolocation.getCurrentPosition(
@@ -211,7 +216,7 @@ export default function ProfilePage({ userId }: { userId?: string }) {
             const { latitude, longitude } = position.coords
             try {
               const res = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=en,ru,uz`
+                `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=${acceptLang}`
               )
               const data = await res.json()
               const city =

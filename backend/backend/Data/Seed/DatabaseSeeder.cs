@@ -56,6 +56,9 @@ public static class DatabaseSeeder
             lastName: "Karimov",
             roles: [Roles.Administrator, Roles.Recruiter, Roles.Candidate]);
 
+        // Seed rich domain data (Attributes including CAP, Acme Corp Position, Candidate CVs, Projects, Discussions)
+        await DevelopmentDataSeeder.SeedAsync(scope.ServiceProvider);
+
         var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
         var adminEmail = configuration["BootstrapAdmin:Email"];
         var adminPassword = configuration["BootstrapAdmin:Password"];

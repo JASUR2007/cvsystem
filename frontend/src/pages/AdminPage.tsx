@@ -280,7 +280,7 @@ export default function AdminPage() {
                                 </a>
                               </td>
                               <td style={{ textAlign: 'right' }}>
-                                <span className="badge text-bg-light border">{u.role}</span>
+                                <span className="badge text-bg-light border">{t(u.role)}</span>
                               </td>
                             </tr>
                           ))}

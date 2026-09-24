@@ -10,7 +10,8 @@ public sealed record RegisterRequest(
 
 public sealed record LoginRequest(
     [Required, EmailAddress] string Email,
-    [Required] string Password);
+    [Required] string Password,
+    bool RememberMe = false);
 
 public sealed record CurrentUserResponse(
     Guid Id,

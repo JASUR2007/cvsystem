@@ -51,7 +51,7 @@ public class AuthService(
         if (user.IsBlocked)
             throw new ForbiddenException("Account is unavailable.");
 
-        return await CreateAuthResponseAsync(user);
+        return await CreateAuthResponseAsync(user, request.RememberMe);
     }
 
     public async Task<CurrentUserResponse> GetCurrentUserAsync(Guid userId, CancellationToken cancellationToken = default)
@@ -83,7 +83,7 @@ public class AuthService(
 
         await transaction.CommitAsync(cancellationToken);
 
-        return await CreateAuthResponseAsync(user);
+        return await CreateAuthResponseAsync(user, rememberMe: true);
     }
 
     public object GetExternalProvidersStatus() => new
@@ -146,9 +146,9 @@ public class AuthService(
         return code;
     }
 
-    private async Task<AuthResponse> CreateAuthResponseAsync(AppUser user)
+    private async Task<AuthResponse> CreateAuthResponseAsync(AppUser user, bool rememberMe = false)
     {
-        var token = await tokenService.CreateAsync(user);
+        var token = await tokenService.CreateAsync(user, rememberMe);
         var roles = await userManager.GetRolesAsync(user);
         var userResponse = new CurrentUserResponse(user.Id, user.Email ?? string.Empty, user.FirstName, user.LastName, roles, user.PhotoObjectKey);
         return new AuthResponse(token, userResponse);

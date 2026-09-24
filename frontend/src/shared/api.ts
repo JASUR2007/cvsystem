@@ -1,4 +1,4 @@
-import { getToken } from '../auth/api'
+import { getToken, clearAuth } from '../auth/api'
 
 const base = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ?? ''
 
@@ -27,6 +27,10 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
   if (response.status === 204) return undefined as T
   const data = await response.json().catch(() => null)
   if (!response.ok) {
+    if (response.status === 401) {
+      clearAuth()
+      window.dispatchEvent(new CustomEvent('talenthub_unauthorized'))
+    }
     const errors = data?.errors
     const detail = Array.isArray(errors) ? errors.join(' ') : errors && typeof errors === 'object' ? Object.values(errors).flat().join(' ') : ''
     throw new ApiError(response.status, data?.message ?? (detail || data?.title || `Request failed (${response.status}).`), data)

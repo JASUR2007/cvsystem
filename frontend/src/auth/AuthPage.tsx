@@ -10,6 +10,7 @@ type Props = {
 export default function AuthPage({ mode, onAuthenticated }: Props) {
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [rememberMe, setRememberMe] = useState(true)
   const [providers, setProviders] = useState<{ google: boolean; github: boolean } | null>(null)
 
   useEffect(() => { fetch(`${apiBase}/api/auth/providers`).then(response => response.json()).then(setProviders).catch(() => undefined) }, [])
@@ -29,8 +30,12 @@ export default function AuthPage({ mode, onAuthenticated }: Props) {
     }
 
     try {
-      const result = await submitAuth(mode, data)
-      saveAuth(result.token, result.user)
+      const payload = {
+        ...data,
+        rememberMe: mode === 'login' ? rememberMe : true,
+      }
+      const result = await submitAuth(mode, payload)
+      saveAuth(result.token, result.user, mode === 'login' ? rememberMe : true)
       onAuthenticated(result.user)
       window.location.assign('/')
     } catch (cause) {
@@ -50,6 +55,19 @@ export default function AuthPage({ mode, onAuthenticated }: Props) {
         <label>{t('Email')}<input name="email" type="email" autoComplete="email" required /></label>
         <label>{t('Password')}<input name="password" type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} minLength={mode === 'register' ? 8 : undefined} required /></label>
         {mode === 'register' && <label>{t('Confirm password')}<input name="confirmPassword" type="password" autoComplete="new-password" minLength={8} required /></label>}
+        {mode === 'login' && (
+          <div className="auth-remember-row">
+            <label className="auth-checkbox-label">
+              <input
+                type="checkbox"
+                name="rememberMe"
+                checked={rememberMe}
+                onChange={e => setRememberMe(e.target.checked)}
+              />
+              <span>{t('Remember me')}</span>
+            </label>
+          </div>
+        )}
         {error && <div className="auth-error" role="alert">{error}</div>}
         <button className="auth-submit" disabled={submitting}>{t(submitting ? 'Please wait...' : mode === 'login' ? 'Sign in' : 'Create account')}</button>
       </form>

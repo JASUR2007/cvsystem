@@ -22,7 +22,7 @@ public sealed class AuthController(IAuthService authService, ICurrentUserService
     public async Task<ActionResult<AuthResponse>> Login(LoginRequest request, CancellationToken cancellationToken)
     {
         var response = await authService.LoginAsync(request, cancellationToken);
-        SetAuthCookie(response.Token);
+        SetAuthCookie(response.Token, request.RememberMe);
         return Ok(response);
     }
 
@@ -47,14 +47,14 @@ public sealed class AuthController(IAuthService authService, ICurrentUserService
         return NoContent();
     }
 
-    private void SetAuthCookie(string token)
+    private void SetAuthCookie(string token, bool rememberMe = false)
     {
         Response.Cookies.Append("talenthub_token", token, new CookieOptions
         {
             HttpOnly = true,
             Secure = true,
             SameSite = SameSiteMode.None,
-            Expires = DateTimeOffset.UtcNow.AddHours(1)
+            Expires = rememberMe ? DateTimeOffset.UtcNow.AddDays(30) : DateTimeOffset.UtcNow.AddHours(2)
         });
     }
 }

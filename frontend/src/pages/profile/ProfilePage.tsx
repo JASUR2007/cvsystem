@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { api, dateText, json, type CvListItem, type Profile } from '../../shared/api'
-import { getCachedUser, saveAuth } from '../../auth/api'
+import { getCachedUser, saveAuth, clearAuth } from '../../auth/api'
 import { Status } from '../../shared/ui'
 import { useApi } from '../../shared/useApi'
 import InfoTab from './InfoTab'
@@ -95,6 +95,14 @@ export default function ProfilePage({ userId }: { userId?: string }) {
   const cachedUser = getCachedUser()
   const isCandidateOnly =
     !userId && cachedUser && cachedUser.roles.includes('Candidate') && !cachedUser.roles.includes('Recruiter')
+
+  useEffect(() => {
+    const errorStatus = (result.error as any)?.status || (cvs.error as any)?.status
+    if (errorStatus === 401) {
+      clearAuth()
+      window.location.assign('/login')
+    }
+  }, [result.error, cvs.error])
 
   useEffect(() => {
     if (result.data && !dirty) {

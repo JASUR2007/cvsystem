@@ -9,7 +9,7 @@ namespace backend.Auth;
 
 public sealed class JwtTokenService(IConfiguration configuration, UserManager<AppUser> userManager)
 {
-    public async Task<string> CreateAsync(AppUser user)
+    public async Task<string> CreateAsync(AppUser user, bool rememberMe = false)
     {
         var roles = await userManager.GetRolesAsync(user);
         var claims = new List<Claim>
@@ -27,11 +27,13 @@ public sealed class JwtTokenService(IConfiguration configuration, UserManager<Ap
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
             SecurityAlgorithms.HmacSha256);
 
+        var expires = rememberMe ? DateTime.UtcNow.AddDays(30) : DateTime.UtcNow.AddHours(2);
+
         var token = new JwtSecurityToken(
             issuer: configuration["Jwt:Issuer"],
             audience: configuration["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(1),
+            expires: expires,
             signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);

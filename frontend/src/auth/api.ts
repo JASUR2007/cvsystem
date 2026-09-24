@@ -29,16 +29,28 @@ export function getCachedUser(): CurrentUser | null {
   }
 }
 
-export function saveAuth(token: string, user: CurrentUser) {
-  localStorage.setItem(tokenKey, token)
-  localStorage.setItem(userKey, JSON.stringify(user))
-  sessionStorage.setItem(tokenKey, token)
-  sessionStorage.setItem(userKey, JSON.stringify(user))
+export function saveAuth(token: string, user: CurrentUser, remember = true) {
+  if (remember) {
+    localStorage.setItem(tokenKey, token)
+    localStorage.setItem(userKey, JSON.stringify(user))
+    sessionStorage.removeItem(tokenKey)
+    sessionStorage.removeItem(userKey)
+  } else {
+    sessionStorage.setItem(tokenKey, token)
+    sessionStorage.setItem(userKey, JSON.stringify(user))
+    localStorage.removeItem(tokenKey)
+    localStorage.removeItem(userKey)
+  }
 }
 
-export function saveToken(token: string) {
-  localStorage.setItem(tokenKey, token)
-  sessionStorage.setItem(tokenKey, token)
+export function saveToken(token: string, remember = true) {
+  if (remember) {
+    localStorage.setItem(tokenKey, token)
+    sessionStorage.removeItem(tokenKey)
+  } else {
+    sessionStorage.setItem(tokenKey, token)
+    localStorage.removeItem(tokenKey)
+  }
 }
 
 export function clearAuth() {
@@ -63,6 +75,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
 
     if (response.status === 401) {
       clearAuth()
+      window.dispatchEvent(new CustomEvent('talenthub_unauthorized'))
       return null
     }
 
@@ -71,15 +84,19 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     }
 
     const user = (await response.json()) as CurrentUser
-    localStorage.setItem(userKey, JSON.stringify(user))
-    sessionStorage.setItem(userKey, JSON.stringify(user))
+    if (localStorage.getItem(tokenKey)) {
+      localStorage.setItem(userKey, JSON.stringify(user))
+    }
+    if (sessionStorage.getItem(tokenKey)) {
+      sessionStorage.setItem(userKey, JSON.stringify(user))
+    }
     return user
   } catch {
     return getCachedUser()
   }
 }
 
-export async function submitAuth(mode: 'login' | 'register', data: Record<string, string>): Promise<AuthResponse> {
+export async function submitAuth(mode: 'login' | 'register', data: Record<string, any>): Promise<AuthResponse> {
   const response = await fetch(`${apiBase}/api/auth/${mode}`, {
     method: 'POST',
     credentials: 'include',

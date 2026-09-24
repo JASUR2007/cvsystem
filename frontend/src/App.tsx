@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import AuthPage from './auth/AuthPage'
 import AuthCallbackPage from './auth/AuthCallbackPage'
-import { getCurrentUser, getCachedUser, signOut, type CurrentUser } from './auth/api'
+import { getCurrentUser, getCachedUser, signOut, clearAuth, type CurrentUser } from './auth/api'
 import { api, json } from './shared/api'
 import HomePage from './pages/HomePage'
 import PositionsPage from './pages/PositionsPage'
@@ -109,8 +109,24 @@ function App() {
       const u = getCachedUser()
       if (u) setUser(u)
     }
+    function onUnauthorized() {
+      clearAuth()
+      setUser(null)
+      if (
+        window.location.pathname.startsWith('/profile') ||
+        window.location.pathname.startsWith('/admin') ||
+        window.location.pathname.startsWith('/positions/new') ||
+        window.location.pathname.startsWith('/attributes/new')
+      ) {
+        window.location.assign('/login')
+      }
+    }
     window.addEventListener('talenthub_user_updated', onUserUpdate)
-    return () => window.removeEventListener('talenthub_user_updated', onUserUpdate)
+    window.addEventListener('talenthub_unauthorized', onUnauthorized)
+    return () => {
+      window.removeEventListener('talenthub_user_updated', onUserUpdate)
+      window.removeEventListener('talenthub_unauthorized', onUnauthorized)
+    }
   }, [])
 
   useEffect(() => {

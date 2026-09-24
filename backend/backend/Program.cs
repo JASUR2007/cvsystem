@@ -205,7 +205,9 @@ if (!string.IsNullOrWhiteSpace(s3Endpoint) && !string.IsNullOrWhiteSpace(s3Acces
             {
                 ServiceURL = s3Endpoint,
                 ForcePathStyle = true,
-                AuthenticationRegion = s3Region
+                AuthenticationRegion = s3Region,
+                RequestChecksumCalculation = RequestChecksumCalculation.WHEN_REQUIRED,
+                ResponseChecksumValidation = ResponseChecksumValidation.WHEN_REQUIRED
             }));
     }
     catch (Exception ex)

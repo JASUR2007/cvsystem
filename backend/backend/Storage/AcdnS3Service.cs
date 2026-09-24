@@ -99,7 +99,9 @@ public class AcdnS3Service(IServiceProvider services, IConfiguration configurati
                     BucketName = Bucket,
                     Key = key,
                     InputStream = ms,
-                    ContentType = contentType
+                    ContentType = contentType,
+                    UseChunkEncoding = false,
+                    DisablePayloadSigning = true
                 };
 
                 await S3Client!.PutObjectAsync(request, cancellationToken);

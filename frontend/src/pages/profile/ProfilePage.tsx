@@ -397,7 +397,9 @@ export default function ProfilePage({ userId }: { userId?: string }) {
             {isRecruiter && (
               <div className="mt-3 p-2 rounded border border-success-subtle bg-success-subtle text-start" style={{ fontSize: '0.8125rem' }}>
                 <div className="d-flex align-items-center gap-1 fw-semibold text-success">
-                  <span>✓</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
                   <span>{t('Recruiter')} ({t('Approved')})</span>
                 </div>
               </div>
@@ -409,7 +411,13 @@ export default function ProfilePage({ userId }: { userId?: string }) {
                   <div className="mt-3 p-2 rounded border border-warning-subtle bg-warning-subtle text-start" style={{ fontSize: '0.8125rem' }}>
                     <div className="d-flex align-items-center justify-content-between mb-1">
                       <span className="fw-semibold text-warning-emphasis">{t('Recruiter role')}</span>
-                      <span className="badge bg-warning text-dark">⏳ {t('Pending')}</span>
+                      <span className="badge bg-warning text-dark d-inline-flex align-items-center gap-1">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <circle cx="12" cy="12" r="10" />
+                          <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                        {t('Pending')}
+                      </span>
                     </div>
                     <p className="text-muted small mb-0">{t('Your request for the recruiter role is currently pending administrator review.')}</p>
                     {recruiterMessage && <div className="text-success small mt-1">{recruiterMessage}</div>}
@@ -418,7 +426,14 @@ export default function ProfilePage({ userId }: { userId?: string }) {
                   <div className="mt-3 p-2 rounded border border-danger-subtle bg-danger-subtle text-start" style={{ fontSize: '0.8125rem' }}>
                     <div className="d-flex align-items-center justify-content-between mb-1">
                       <span className="fw-semibold text-danger-emphasis">{t('Recruiter role')}</span>
-                      <span className="badge bg-danger">✕ {t('Rejected')}</span>
+                      <span className="badge bg-danger d-inline-flex align-items-center gap-1">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <circle cx="12" cy="12" r="10" />
+                          <line x1="15" y1="9" x2="9" y2="15" />
+                          <line x1="9" y1="9" x2="15" y2="15" />
+                        </svg>
+                        {t('Rejected')}
+                      </span>
                     </div>
                     <p className="text-muted small mb-2">{t('Your previous request was rejected by an administrator.')}</p>
                     <button

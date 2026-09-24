@@ -5,6 +5,7 @@ import { Status } from '../shared/ui'
 import { useApi } from '../shared/useApi'
 import type { CurrentUser } from '../auth/api'
 import { t } from '../shared/i18n'
+import PositionCvsPage from './PositionCvsPage'
 import '../position-detail.css'
 
 type Post = {
@@ -324,14 +325,21 @@ export default function PositionDetailPage({ id, user }: { id: string; user: Cur
 
       {/* CVs Tab Content (Recruiter/Admin view) */}
       {tab === 'CVs' && (
-        <div className="pos-card text-center p-5">
-          <h2 className="pos-card-title justify-content-center mb-3">{t('Compare published CVs for this position.')}</h2>
-          <p className="text-muted mb-4">
-            {t('View structured candidate comparison matrix, filter by skills, and inspect match scores.')}
-          </p>
-          <a className="btn btn-primary btn-lg" href={`/positions/${id}/cvs`}>
-            {t('Open CV table')} →
-          </a>
+        <div className="pos-card p-4">
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <span className="text-muted small">
+              {t('Structured candidate matrix for position requirements comparison.')}
+            </span>
+            <a className="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1" href={`/positions/${id}/cvs`}>
+              <span>{t('Open full-page')}</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                <polyline points="15 3 21 3 21 9"/>
+                <line x1="10" y1="14" x2="21" y2="3"/>
+              </svg>
+            </a>
+          </div>
+          <PositionCvsPage id={id} embedded={true} />
         </div>
       )}
     </div>

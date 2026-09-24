@@ -68,10 +68,10 @@
 .profile-large-avatar {
   width: 120px;
   height: 120px;
-  border-radius: 9999px;
+  border-radius: 50%;
   object-fit: cover;
-  border: 3px solid var(--bg-card);
-  box-shadow: var(--shadow-md);
+  border: 3.5px solid #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15), var(--shadow-md);
   margin-bottom: 0;
   background-color: var(--primary-light);
   display: flex;
@@ -81,6 +81,14 @@
   font-weight: 700;
   color: var(--color-primary);
   overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+[data-bs-theme="dark"] .profile-large-avatar {
+  border-color: #60a5fa !important;
+  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.25), var(--shadow-md) !important;
+  background-color: #1e293b !important;
+  color: #60a5fa !important;
 }
 
 .profile-avatar-badge {

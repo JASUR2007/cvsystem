@@ -5,7 +5,7 @@ import { useApi } from '../shared/useApi'
 import { t } from '../shared/i18n'
 import '../cv-pages.css'
 
-export default function PositionCvsPage({ id }: { id: string }) {
+export default function PositionCvsPage({ id, embedded = false }: { id: string; embedded?: boolean }) {
   const [query, setQuery] = useState('')
   const [attributeId, setAttributeId] = useState('')
   const [operation, setOperation] = useState('Equals')
@@ -19,15 +19,17 @@ export default function PositionCvsPage({ id }: { id: string }) {
   )
 
   return (
-    <div className="position-cvs-container">
+    <div className={`position-cvs-container ${embedded ? 'embedded-cvs-view' : ''}`}>
       {/* Navigation */}
-      <a className="back-nav-link" href={`/positions/${id}`}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <line x1="19" y1="12" x2="5" y2="12" />
-          <polyline points="12 19 5 12 12 5" />
-        </svg>
-        <span>{t('Back to positions')}</span>
-      </a>
+      {!embedded && (
+        <a className="back-nav-link" href={`/positions/${id}`}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
+          </svg>
+          <span>{t('Back to positions')}</span>
+        </a>
+      )}
 
       <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
         <div>
@@ -158,7 +160,10 @@ export default function PositionCvsPage({ id }: { id: string }) {
                       return (
                         <td key={col.attributeId}>
                           {isMissing ? (
-                            <span className="missing-badge">⚠ {t('Empty')}</span>
+                            <span className="missing-badge text-muted" style={{ fontSize: '0.85rem' }}>
+                              <span style={{ opacity: 0.6, marginRight: '4px' }}>—</span>
+                              {t('Empty')}
+                            </span>
                           ) : (
                             <span>
                               {col.type === 'Boolean' || valItem.value === 'true' || valItem.value === 'false'
@@ -173,7 +178,12 @@ export default function PositionCvsPage({ id }: { id: string }) {
                     })}
 
                     <td style={{ textAlign: 'right' }}>
-                      <span style={{ color: '#E11D48', fontWeight: 600 }}>♥ {cv.likes}</span>
+                      <span className="d-inline-flex align-items-center gap-1" style={{ color: '#E11D48', fontWeight: 600 }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                        </svg>
+                        {cv.likes}
+                      </span>
                     </td>
                   </tr>
                 ))}

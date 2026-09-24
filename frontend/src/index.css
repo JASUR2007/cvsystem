@@ -625,28 +625,68 @@ input[type="checkbox"].form-check-input:focus {
   color: #FFFFFF !important;
 }
 
-/* Responsive labels for screens smaller than laptop (< 1200px) */
-@media (max-width: 1199.98px) {
-  .btn-responsive-text {
-    display: none !important;
-  }
-  .admin-sidebar {
-    padding: 0.75rem 0.5rem !important;
-  }
-  .admin-brand-tag {
-    display: none !important;
-  }
-  .admin-nav-menu {
-    flex-direction: row !important;
-    justify-content: center !important;
-    gap: 0.5rem !important;
-  }
-  .admin-nav-link {
-    padding: 0.5rem 0.75rem !important;
-    font-size: 0.8125rem !important;
-  }
-  .admin-nav-link span {
-    display: none !important;
-  }
+/* ==========================================================================
+   PAGER STYLES: High Contrast Light & Dark Themes
+   ========================================================================== */
+.pager-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 8px;
+  background-color: #f1f5f9;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
 }
+
+[data-bs-theme="dark"] .pager-indicator {
+  background-color: #1e293b !important;
+  color: #FFFFFF !important;
+  border-color: #334155 !important;
+}
+
+[data-bs-theme="dark"] .pager .btn-outline-secondary {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+
+[data-bs-theme="dark"] .pager .btn-outline-secondary:hover:not(:disabled) {
+  background-color: #24354f !important;
+  border-color: #475569 !important;
+  color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] .pager .btn-outline-secondary:disabled {
+  background-color: rgba(30, 41, 59, 0.5) !important;
+  border-color: #334155 !important;
+  color: #64748b !important;
+}
+
+[data-bs-theme="dark"] .pager .text-muted {
+  color: #94a3b8 !important;
+}
+
+[data-bs-theme="dark"] .pager .text-muted strong {
+  color: #FFFFFF !important;
+}
+
+/* ==========================================================================
+   GLOBAL DARK MODE HOVER OVERRIDES: NEVER WHITE!
+   ========================================================================== */
+[data-bs-theme="dark"] .click-row:hover td,
+[data-bs-theme="dark"] .table tbody tr:hover td,
+[data-bs-theme="dark"] .table-hover tbody tr:hover td,
+[data-bs-theme="dark"] .table-hover tbody tr:hover > *,
+[data-bs-theme="dark"] tr.click-row:hover td {
+  background-color: #24354f !important;
+  color: #FFFFFF !important;
+}
+
+[data-bs-theme="dark"] .click-row:hover td a,
+[data-bs-theme="dark"] .table tbody tr:hover td a {
+  color: #93c5fd !important;
+}
+
 

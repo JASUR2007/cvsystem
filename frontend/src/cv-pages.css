@@ -121,6 +121,11 @@
   padding: 1.5rem 1rem 3rem;
 }
 
+.embedded-cvs-view {
+  padding: 0 !important;
+  max-width: 100% !important;
+}
+
 .candidates-toolbar {
   display: flex;
   flex-direction: column;

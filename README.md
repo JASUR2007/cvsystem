@@ -1,36 +1,177 @@
-# TalentHub CV Management System
+﻿# TalentHub — CV Management System
 
-ASP.NET Core 10, EF Core, PostgreSQL, React, TypeScript and Bootstrap. Recruiters maintain shared position templates and attributes; candidates keep master profile values and generate one CV per eligible position. CVs can be published after required values are filled.
+[![.NET 10](https://img.shields.io/badge/.NET-10.0-512bd4?style=flat&logo=dotnet)](https://dotnet.microsoft.com/)
+[![React](https://img.shields.io/badge/React-19-61dafb?style=flat&logo=react)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?style=flat&logo=typescript)](https://www.typescriptlang.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169e1?style=flat&logo=postgresql)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ed?style=flat&logo=docker)](https://www.docker.com/)
 
-## Quick start with Docker
+**TalentHub** is an enterprise-grade CV and applicant tracking management system designed for modern recruiting teams and job seekers. It features dynamic candidate skill-matrix evaluation, customizable position attributes, interactive candidate comparison, discussions, and multi-tenant role-based access control.
 
-Copy `.env.example` to `.env`, replace `POSTGRES_PASSWORD` and `JWT_KEY`, then run `docker compose up --build`. Open `http://localhost:8080`. PostgreSQL migrations and built-in attributes are applied automatically. To create the first administrator, set `BOOTSTRAP_ADMIN_EMAIL` and `BOOTSTRAP_ADMIN_PASSWORD` before startup. Normal registration creates a Candidate; an administrator can grant Recruiter access from the Users page.
+---
 
-If port 8080 is occupied, change `FRONTEND_PORT` and the port in `FRONTEND_BASE_URL` together.
+## 🌐 Live Deployment
 
-The default Docker setup works without social sign-in or image storage. Their controls are shown when the corresponding services are configured.
+- **Frontend Application**: [https://cvsystem-frontend.onrender.com](https://cvsystem-frontend.onrender.com)
+- **Default Administrator Account**:
+  - **Email**: `makej1318@gmail.com`
+  - **Password**: `Password123!`
 
-## Local development
+---
 
-Use PostgreSQL and set `ConnectionStrings__Default`, `Jwt__Key` (at least 32 bytes), `Jwt__Issuer` and `Jwt__Audience`. Development defaults are in `backend/backend/appsettings.Development.json`; they are local-only values. Run `dotnet run --project backend/backend --launch-profile http`, then `npm ci` and `npm run dev` in `frontend`. The Vite dev server proxies `/api` to port 5015. Run `dotnet build backend/backend/backend.csproj`, `npm run build` and `npm run lint` to check both apps.
+## ✨ Key Features
 
-## Social sign-in
+### 1. Multi-Role Authorization & Security (RBAC)
+- **Administrator**: Full system management, user role assignments, moderation, audit logging.
+- **Recruiter**: Create and manage job openings, configure dynamic attribute schemas, inspect applicant comparison matrices, evaluate candidate CVs.
+- **Candidate**: Browse positions, build structured CVs matching position attributes, submit applications, participate in discussion threads.
+- **Secure Authentication**: ASP.NET Core Identity with JWT bearer tokens, refresh tokens, Google OAuth2, and GitHub OAuth2 integration.
 
-Set `Authentication__Google__ClientId` and `Authentication__Google__ClientSecret`, or the corresponding `Authentication__GitHub__*` variables. Register these provider callback URLs:
+### 2. Candidate Evaluation Matrix & Dynamic Attributes
+- Define custom attributes per position (Text, Number, Boolean, Select).
+- Real-time tabular candidate comparison matrix with filtering (Equals, GreaterThan, LessThan, Contains).
+- Embedded CV overview directly inside position detail tabs with quick-access full-screen mode.
 
-- Google: `https://YOUR_BACKEND_HOST/signin-google`
-- GitHub: `https://YOUR_BACKEND_HOST/signin-github`
+### 3. Modern User Experience
+- **Responsive Adaptive Design**: Optimized for desktops, tablets, and mobile phones with custom bottom navigation bar and mobile card lists.
+- **Light & Dark Theme**: Full theme switching with automatic system preference detection and accessible contrast ratios.
+- **Internationalization (i18n)**: Multi-language support (English, Russian, Latvian).
+- **Rich Media & Cloud Storage**: Cloudflare R2 / AWS S3 integration for avatar and attachment uploads.
+- **Discussion Boards**: Markdown-enabled discussion feeds for position Q&A.
 
-For local Docker replace the host with `http://localhost:8080`. Set `Frontend__BaseUrl` to the public frontend origin. OAuth signs into a short-lived external cookie, then issues a one-time exchange code to the frontend; the API exchanges it for the same JWT used by password login. An existing account with the same email is not automatically linked to a social provider.
+---
 
-## External S3-compatible images
+## 🏗️ Architecture & Tech Stack
 
-Set `S3__Endpoint`, `S3__AccessKey`, `S3__SecretKey`, `S3__Bucket` and `S3__PublicBaseUrl`. Set the frontend build variable `VITE_S3_PUBLIC_BASE_URL` to the same public base URL. The frontend asks the backend for a presigned URL and uploads JPEG, PNG or WebP directly to S3. Configure the bucket's CORS policy to allow `PUT` from the frontend origin and allow the public image origin for `GET`. No image bytes are stored in the API or PostgreSQL.
+```text
+┌────────────────────────────────────────────────────────┐
+│                   TalentHub Frontend                   │
+│      React 19 + TypeScript + Vite + Bootstrap 5        │
+└───────────────────────────┬────────────────────────────┘
+                            │ HTTPS / REST API / JWT
+┌───────────────────────────▼────────────────────────────┐
+│                    TalentHub Backend                   │
+│             ASP.NET Core Web API (.NET 10)             │
+│   EF Core, ASP.NET Identity, AWSSDK.S3, OAuth2         │
+└───────────────────┬────────────────────────┬───────────┘
+                    │                        │
+┌───────────────────▼────────────┐  ┌────────▼───────────┐
+│           PostgreSQL           │  │   Cloudflare R2    │
+│  Relational Data & Migrations  │  │ S3 Object Storage  │
+└────────────────────────────────┘  └────────────────────┘
+```
 
-## Render deployment
+### Backend
+- **Framework**: ASP.NET Core (.NET 10)
+- **Database ORM**: Entity Framework Core 10 (`Npgsql.EntityFrameworkCore.PostgreSQL`)
+- **Authentication**: JWT Bearer, ASP.NET Core Identity, Google & GitHub OAuth
+- **Storage**: Amazon S3 Compatible Client (`AWSSDK.S3`) connected to Cloudflare R2
+- **Documentation**: Swagger / OpenAPI
 
-Create a Render PostgreSQL database, a Docker web service using `backend/Dockerfile` with root directory `backend`, and a static site with root directory `frontend`, build command `npm ci && npm run build`, publish directory `dist`, and a rewrite from `/*` to `/index.html`. Add the backend URL as the static site's `VITE_API_BASE_URL` build variable. Add the backend environment variables `ConnectionStrings__Default`, `Jwt__Key`, `Jwt__Issuer`, `Jwt__Audience`, `Frontend__BaseUrl` and `Cors__Origins__0` (the exact frontend origin). Set `ASPNETCORE_URLS` to `http://+:10000` if the Render service requires port 10000. Add OAuth and S3 variables only when those services are configured. Use HTTPS public URLs for OAuth callbacks and origins.
+### Frontend
+- **Framework**: React 19, TypeScript, Vite
+- **Styling**: Bootstrap 5 + Custom Scoped CSS Design System
+- **Icons**: Monochrome SVG Vector Icons
+- **State & Data**: Custom React hooks with optimistic updates and caching
 
-If TLS terminates at a reverse proxy, configure ASP.NET Core to trust that proxy's forwarded headers so OAuth callback URLs use the public HTTPS scheme. `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true` works in cloud setups with changing proxy IPs, but trusts forwarded headers from any source; restrict proxy IPs when the hosting topology permits it.
+---
 
-The API applies migrations at startup. Its health endpoint is `/api/health`. Do not use the development connection string or JWT key in production.
+## 🚀 Getting Started
+
+### Prerequisites
+- [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/)
+- Alternatively, for manual local execution:
+  - [.NET 10 SDK](https://dotnet.microsoft.com/download)
+  - [Node.js 20+](https://nodejs.org/) & [pnpm](https://pnpm.io/)
+  - [PostgreSQL 15+](https://www.postgresql.org/)
+
+---
+
+### Running with Docker Compose (Recommended)
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/JASUR2007/cvsystem.git
+   cd cvsystem
+   ```
+
+2. Configure environment variables:
+   ```bash
+   cp .env.example .env
+   ```
+   *(Ensure `POSTGRES_PASSWORD` and `JWT_KEY` are configured in `.env`)*
+
+3. Start all services:
+   ```bash
+   docker compose up --build -d
+   ```
+
+4. Access the applications:
+   - **Frontend UI**: [http://localhost:8080](http://localhost:8080)
+   - **API Backend**: [http://localhost:5000](http://localhost:5000)
+   - **Swagger Docs**: [http://localhost:5000/swagger](http://localhost:5000/swagger)
+
+---
+
+### Running Manually
+
+#### 1. Database Setup
+Ensure PostgreSQL is running, then create the database:
+```sql
+CREATE DATABASE cvsystem;
+```
+
+#### 2. Backend Setup
+```bash
+cd backend/backend
+dotnet restore
+dotnet run
+```
+The backend automatically executes EF Core database migrations and bootstraps the default administrator account on first boot.
+
+#### 3. Frontend Setup
+```bash
+cd frontend
+pnpm install
+pnpm dev
+```
+Navigate to `http://localhost:5173`.
+
+---
+
+## ⚙️ Environment Variables Reference
+
+| Variable | Description | Default / Example |
+| :--- | :--- | :--- |
+| `POSTGRES_PASSWORD` | PostgreSQL superuser password | `SuperSecretPassword!` |
+| `JWT_KEY` | Secret key for JWT token generation | *(At least 32 characters)* |
+| `FRONTEND_BASE_URL` | Allowed frontend origin for CORS | `http://localhost:8080` |
+| `BOOTSTRAP_ADMIN_EMAIL` | Initial admin account email | `makej1318@gmail.com` |
+| `BOOTSTRAP_ADMIN_PASSWORD` | Initial admin account password | `Password123!` |
+| `S3_ENDPOINT` | Cloudflare R2 / AWS S3 endpoint | `https://<account-id>.r2.cloudflarestorage.com` |
+| `S3_ACCESS_KEY` | S3 Access Key ID | `your-access-key-id` |
+| `S3_SECRET_KEY` | S3 Secret Access Key | `your-secret-access-key` |
+| `S3_BUCKET` | S3 bucket name | `cvsystem` |
+| `S3_PUBLIC_BASE_URL` | Public CDN URL for serving uploads | `https://pub-<id>.r2.dev` |
+
+---
+
+## 📋 Role & Permission Matrix
+
+| Feature / Action | Guest | Candidate | Recruiter | Administrator |
+| :--- | :---: | :---: | :---: | :---: |
+| Browse & Search Positions | ✅ | ✅ | ✅ | ✅ |
+| View Position Details | ✅ | ✅ | ✅ | ✅ |
+| Create / Edit Personal CV | ❌ | ✅ | ❌ | ✅ |
+| Like & Bookmark CVs | ❌ | ✅ | ✅ | ✅ |
+| Post to Discussion Board | ❌ | ✅ | ✅ | ✅ |
+| Create & Edit Positions | ❌ | ❌ | ✅ | ✅ |
+| Define Dynamic Attribute Schemas | ❌ | ❌ | ✅ | ✅ |
+| Access Candidate Matrix Table | ❌ | ❌ | ✅ | ✅ |
+| User Administration & Role Management | ❌ | ❌ | ❌ | ✅ |
+| System Health & Metrics | ❌ | ❌ | ❌ | ✅ |
+
+---
+
+## 📄 License
+This project is developed as part of advanced web engineering curriculum. All rights reserved.

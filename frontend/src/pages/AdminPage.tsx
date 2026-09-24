@@ -460,21 +460,34 @@ export default function AdminPage() {
 
                 {chosen.recruiterRequestStatus === 'Pending' && (
                   <div className="alert alert-warning py-2 px-3 mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
-                    <span className="small">⏳ <strong>{t('Recruiter request')}:</strong> {t('This candidate requested the Recruiter role.')}</span>
+                    <span className="small d-inline-flex align-items-center gap-1">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                      </svg>
+                      <strong>{t('Recruiter request')}:</strong> {t('This candidate requested the Recruiter role.')}
+                    </span>
                     <div className="d-flex gap-2">
                       <button
                         type="button"
-                        className="btn btn-success btn-sm py-1 px-3"
+                        className="btn btn-success btn-sm py-1 px-3 d-inline-flex align-items-center gap-1"
                         onClick={() => handleApproveRecruiter(chosen.id)}
                       >
-                        ✓ {t('Approve')}
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        {t('Approve')}
                       </button>
                       <button
                         type="button"
-                        className="btn btn-outline-danger btn-sm py-1 px-3"
+                        className="btn btn-outline-danger btn-sm py-1 px-3 d-inline-flex align-items-center gap-1"
                         onClick={() => handleRejectRecruiter(chosen.id)}
                       >
-                        ✕ {t('Reject')}
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <line x1="18" y1="6" x2="6" y2="18" />
+                          <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                        {t('Reject')}
                       </button>
                     </div>
                   </div>
@@ -504,10 +517,11 @@ export default function AdminPage() {
 
             <Status loading={users.loading} error={users.error} empty={users.data?.items.length === 0} />
 
-            {/* Users Table */}
+            {/* Users Table & Mobile Cards */}
             {users.data && users.data.items.length > 0 && (
               <div className="card border shadow-sm bg-card overflow-hidden">
-                <div className="table-responsive">
+                {/* Desktop View: Full Table */}
+                <div className="d-none d-lg-block table-responsive">
                   <table className="table table-hover align-middle mb-0">
                     <thead>
                       <tr>
@@ -572,13 +586,24 @@ export default function AdminPage() {
                           </td>
                           <td onClick={e => e.stopPropagation()}>
                             {user.roles.includes('Recruiter') ? (
-                              <span className="badge text-bg-success">✓ {t('Recruiter')}</span>
+                              <span className="badge text-bg-success d-inline-flex align-items-center gap-1">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                  <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                                {t('Recruiter')}
+                              </span>
                             ) : user.recruiterRequestStatus === 'Pending' ? (
                               <div className="d-flex align-items-center gap-1">
-                                <span className="badge bg-warning text-dark">⏳ {t('Pending')}</span>
+                                <span className="badge bg-warning text-dark d-inline-flex align-items-center gap-1">
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <polyline points="12 6 12 12 16 14" />
+                                  </svg>
+                                  {t('Pending')}
+                                </span>
                                 <button
                                   type="button"
-                                  className="btn btn-outline-success btn-sm py-0 px-2"
+                                  className="btn btn-outline-success btn-sm py-0 px-2 d-inline-flex align-items-center gap-1"
                                   style={{ fontSize: '0.75rem', lineHeight: '1.4' }}
                                   title={t('Approve')}
                                   onClick={() => handleApproveRecruiter(user.id)}
@@ -587,7 +612,7 @@ export default function AdminPage() {
                                 </button>
                                 <button
                                   type="button"
-                                  className="btn btn-outline-danger btn-sm py-0 px-2"
+                                  className="btn btn-outline-danger btn-sm py-0 px-2 d-inline-flex align-items-center gap-1"
                                   style={{ fontSize: '0.75rem', lineHeight: '1.4' }}
                                   title={t('Reject')}
                                   onClick={() => handleRejectRecruiter(user.id)}
@@ -596,7 +621,7 @@ export default function AdminPage() {
                                 </button>
                               </div>
                             ) : user.recruiterRequestStatus === 'Rejected' ? (
-                              <span className="badge text-bg-secondary">✕ {t('Rejected')}</span>
+                              <span className="badge text-bg-secondary">{t('Rejected')}</span>
                             ) : (
                               <span className="text-muted small">—</span>
                             )}
@@ -612,6 +637,118 @@ export default function AdminPage() {
                       ))}
                     </tbody>
                   </table>
+                </div>
+
+                {/* Mobile & Tablet View: Structured Card List (Листы) */}
+                <div className="d-lg-none admin-mobile-cards-list p-3">
+                  <div className="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                    <label className="form-check-label d-flex align-items-center gap-2 fw-semibold small">
+                      <input
+                        type="checkbox"
+                        className="form-check-input"
+                        checked={selected.length === users.data.items.length}
+                        onChange={e =>
+                          setSelected(e.target.checked ? users.data!.items.map(u => u.id) : [])
+                        }
+                      />
+                      <span>{t('Select all')} ({users.data.items.length})</span>
+                    </label>
+                    <span className="text-muted small">{selected.length} {t('selected')}</span>
+                  </div>
+
+                  {users.data.items.map(user => (
+                    <div
+                      key={user.id}
+                      className="admin-user-card p-3 mb-3 border rounded shadow-sm"
+                      style={{
+                        backgroundColor: selected.includes(user.id) ? 'var(--primary-light, rgba(37,99,235,0.06))' : 'var(--bg-card)',
+                        borderColor: selected.includes(user.id) ? 'var(--color-primary, #2563eb)' : 'var(--border-primary)',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() =>
+                        setSelected(
+                          selected.includes(user.id)
+                            ? selected.filter(id => id !== user.id)
+                            : [...selected, user.id]
+                        )
+                      }
+                    >
+                      <div className="d-flex align-items-start justify-content-between gap-2 mb-2">
+                        <div className="d-flex align-items-center gap-2">
+                          <div onClick={e => e.stopPropagation()}>
+                            <input
+                              type="checkbox"
+                              className="form-check-input"
+                              aria-label={`Select ${user.email}`}
+                              checked={selected.includes(user.id)}
+                              onChange={e =>
+                                setSelected(
+                                  e.target.checked
+                                    ? [...selected, user.id]
+                                    : selected.filter(id => id !== user.id)
+                                )
+                              }
+                            />
+                          </div>
+                          <a
+                            href={`/profile/${user.id}`}
+                            className="fw-bold text-decoration-none"
+                            style={{ color: 'var(--text-primary)', fontSize: '0.9375rem' }}
+                            onClick={e => e.stopPropagation()}
+                          >
+                            {user.firstName} {user.lastName}
+                          </a>
+                        </div>
+                        <span
+                          className={`badge ${user.isBlocked ? 'text-bg-danger' : 'text-bg-success'}`}
+                        >
+                          {user.isBlocked ? t('Blocked') : t('Active')}
+                        </span>
+                      </div>
+
+                      <div className="text-muted small mb-2" style={{ wordBreak: 'break-all' }}>
+                        {user.email}
+                      </div>
+
+                      <div className="d-flex flex-wrap gap-1 mb-2">
+                        {user.roles.map(r => (
+                          <span className="badge text-bg-light border" key={r}>
+                            {t(r)}
+                          </span>
+                        ))}
+                      </div>
+
+                      {user.recruiterRequestStatus === 'Pending' && (
+                        <div className="d-flex align-items-center justify-content-between gap-2 mt-2 pt-2 border-top" onClick={e => e.stopPropagation()}>
+                          <span className="badge bg-warning text-dark d-inline-flex align-items-center gap-1">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                              <circle cx="12" cy="12" r="10" />
+                              <polyline points="12 6 12 12 16 14" />
+                            </svg>
+                            {t('Pending')}
+                          </span>
+                          <div className="d-flex gap-1">
+                            <button
+                              type="button"
+                              className="btn btn-outline-success btn-sm py-1 px-2"
+                              style={{ fontSize: '0.75rem' }}
+                              onClick={() => handleApproveRecruiter(user.id)}
+                            >
+                              ✓ {t('Approve')}
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-outline-danger btn-sm py-1 px-2"
+                              style={{ fontSize: '0.75rem' }}
+                              onClick={() => handleRejectRecruiter(user.id)}
+                            >
+                              ✕ {t('Reject')}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

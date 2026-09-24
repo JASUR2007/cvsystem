@@ -34,7 +34,7 @@ export function Pager({ page, total, onPage }: { page: number; total: number; on
         >
           ← {t('Previous')}
         </button>
-        <span className="badge text-bg-light border px-3 py-2 font-monospace" style={{ fontSize: '0.875rem' }}>
+        <span className="pager-indicator px-3 py-2 font-monospace" style={{ fontSize: '0.875rem' }}>
           {page} / {safeTotal}
         </span>
         <button

@@ -196,7 +196,7 @@ export default function Header({
               </a>
               <button
                 type="button"
-                className="btn btn-outline-secondary btn-sm sign-out-btn d-inline-flex align-items-center gap-1"
+                className="btn btn-outline-danger btn-sm sign-out-btn d-inline-flex align-items-center gap-1"
                 onClick={onSignOut}
                 title={t('Sign out')}
                 aria-label={t('Sign out')}
@@ -343,6 +343,14 @@ export default function Header({
 
     {/* Mobile Bottom Navigation Bar */}
     <nav className="mobile-bottom-nav" aria-label="Mobile Navigation">
+      <a className={path === '/' ? 'bottom-nav-item active' : 'bottom-nav-item'} href="/">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9 22 9 12 15 12 15 22" />
+        </svg>
+        <span>{t('Overview')}</span>
+      </a>
+
       <a className={path.startsWith('/positions') ? 'bottom-nav-item active' : 'bottom-nav-item'} href="/positions">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
@@ -351,7 +359,7 @@ export default function Header({
         <span>{t('Positions')}</span>
       </a>
 
-      {canManage ? (
+      {canManage && (
         <a className={path.startsWith('/attributes') ? 'bottom-nav-item active' : 'bottom-nav-item'} href="/attributes">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polygon points="12 2 2 7 12 12 22 7 12 2" />
@@ -359,14 +367,6 @@ export default function Header({
             <polyline points="2 12 12 17 22 12" />
           </svg>
           <span>{t('Attributes')}</span>
-        </a>
-      ) : (
-        <a className={path.startsWith('/search') ? 'bottom-nav-item active' : 'bottom-nav-item'} href="/search">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="11" cy="11" r="7" />
-            <path d="m16 16 4 4" />
-          </svg>
-          <span>{t('Search')}</span>
         </a>
       )}
 
@@ -386,28 +386,12 @@ export default function Header({
         <span>{t('Profile')}</span>
       </a>
 
-      {isAdmin ? (
+      {isAdmin && (
         <a className={path.startsWith('/admin') ? 'bottom-nav-item active' : 'bottom-nav-item'} href="/admin">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
           </svg>
           <span>{t('Admin')}</span>
-        </a>
-      ) : canManage ? (
-        <a className={path.startsWith('/search') ? 'bottom-nav-item active' : 'bottom-nav-item'} href="/search">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="11" cy="11" r="7" />
-            <path d="m16 16 4 4" />
-          </svg>
-          <span>{t('Search')}</span>
-        </a>
-      ) : (
-        <a className={path === '/' ? 'bottom-nav-item active' : 'bottom-nav-item'} href="/">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-            <polyline points="9 22 9 12 15 12 15 22" />
-          </svg>
-          <span>{t('Overview')}</span>
         </a>
       )}
     </nav>

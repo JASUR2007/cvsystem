@@ -171,7 +171,7 @@ var s3Endpoint = builder.Configuration["S3:Endpoint"]?.Trim();
 var s3AccessKey = builder.Configuration["S3:AccessKey"]?.Trim();
 var s3SecretKey = builder.Configuration["S3:SecretKey"]?.Trim();
 var isR2 = s3Endpoint?.Contains("r2.cloudflarestorage.com", StringComparison.OrdinalIgnoreCase) == true;
-var s3Region = builder.Configuration["S3:Region"] ?? (isR2 ? "auto" : "uz");
+var s3Region = isR2 ? "auto" : (builder.Configuration["S3:Region"] ?? "uz");
 
 if (!string.IsNullOrWhiteSpace(s3Endpoint) && !string.IsNullOrWhiteSpace(s3AccessKey))
 {

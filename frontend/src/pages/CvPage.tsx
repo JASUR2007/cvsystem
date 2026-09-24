@@ -147,11 +147,13 @@ export default function CvPage({ id, user }: { id: string; user: CurrentUser | n
                     <img className="upload-preview" src={imageUrl(val.imageObjectKey)!} alt={val.name} style={{ maxWidth: 120, maxHeight: 120, borderRadius: '0.5rem' }} />
                   ) : val.type === 'Text' && val.textValue ? (
                     <Markdown>{val.textValue}</Markdown>
+                  ) : val.type === 'Boolean' && val.booleanValue !== null && val.booleanValue !== undefined ? (
+                    val.booleanValue ? t('Yes') : t('No')
                   ) : (
-                    val.textValue ??
+                    (val.booleanValue !== null && val.booleanValue !== undefined ? (val.booleanValue ? t('Yes') : t('No')) : null) ??
+                    (val.textValue === 'true' ? t('Yes') : val.textValue === 'false' ? t('No') : val.textValue) ??
                     val.numberValue ??
                     val.dateValue ??
-                    val.booleanValue?.toString() ??
                     (val.selectedOptionId ? attribute.options.find(o => o.id === val.selectedOptionId)?.value : null) ??
                     val.imageObjectKey ??
                     (val.periodStart ? `${val.periodStart} – ${val.periodEnd ?? ''}` : null)

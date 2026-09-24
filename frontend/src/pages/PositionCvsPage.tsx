@@ -160,7 +160,13 @@ export default function PositionCvsPage({ id }: { id: string }) {
                           {isMissing ? (
                             <span className="missing-badge">⚠ {t('Empty')}</span>
                           ) : (
-                            <span>{valItem.value}</span>
+                            <span>
+                              {col.type === 'Boolean' || valItem.value === 'true' || valItem.value === 'false'
+                                ? valItem.value === 'true'
+                                  ? t('Yes')
+                                  : t('No')
+                                : valItem.value}
+                            </span>
                           )}
                         </td>
                       )

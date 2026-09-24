@@ -169,11 +169,19 @@ export default function InfoTab({ userId }: { userId?: string }) {
               {result.data.map(value => {
                 const isBuiltIn = ['First Name', 'Last Name', 'Location', 'Personal Photo'].includes(value.name)
                 const valStr =
-                  value.textValue ??
-                  value.numberValue?.toString() ??
-                  value.dateValue ??
-                  value.booleanValue?.toString() ??
-                  (value.selectedOptionId ? t('Selected') : value.imageObjectKey ? t('Image') : null)
+                  value.type === 'Boolean' && value.booleanValue !== null && value.booleanValue !== undefined
+                    ? (value.booleanValue ? t('Yes') : t('No'))
+                    : (value.booleanValue !== null && value.booleanValue !== undefined
+                        ? (value.booleanValue ? t('Yes') : t('No'))
+                        : null) ??
+                      (value.textValue === 'true'
+                        ? t('Yes')
+                        : value.textValue === 'false'
+                        ? t('No')
+                        : value.textValue) ??
+                      value.numberValue?.toString() ??
+                      value.dateValue ??
+                      (value.selectedOptionId ? t('Selected') : value.imageObjectKey ? t('Image') : null)
 
                 return (
                   <tr

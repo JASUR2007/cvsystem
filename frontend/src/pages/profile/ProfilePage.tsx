@@ -327,6 +327,20 @@ export default function ProfilePage({ userId }: { userId?: string }) {
                   <span>{(form.firstName[0] || 'U').toUpperCase()}{(form.lastName[0] || '').toUpperCase()}</span>
                 )}
               </div>
+              {form.photoObjectKey && (
+                <button
+                  type="button"
+                  className="profile-avatar-remove-badge"
+                  title={t('Remove photo')}
+                  aria-label={t('Remove photo')}
+                  onClick={() => change('photoObjectKey', null)}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              )}
               <button
                 type="button"
                 className="profile-avatar-badge"
@@ -355,17 +369,6 @@ export default function ProfilePage({ userId }: { userId?: string }) {
                 }}
               />
             </div>
-
-            {form.photoObjectKey && (
-              <button
-                type="button"
-                className="btn btn-link btn-sm text-danger text-decoration-none mb-2"
-                onClick={() => change('photoObjectKey', null)}
-                style={{ fontSize: '0.8rem' }}
-              >
-                {t('Remove photo')}
-              </button>
-            )}
 
             {photoError && <small className="text-danger mb-2" role="alert">{photoError}</small>}
 

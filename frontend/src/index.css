@@ -592,6 +592,10 @@ input[type="checkbox"].form-check-input:focus {
 
 [data-bs-theme="dark"] .table td a,
 [data-bs-theme="dark"] .position-title-link,
+[data-bs-theme="dark"] .home-pos-title-link,
+[data-bs-theme="dark"] .home-pos-company,
+[data-bs-theme="dark"] .home-pos-updated,
+[data-bs-theme="dark"] .popular-title,
 [data-bs-theme="dark"] .attribute-category-text {
   color: #FFFFFF !important;
 }

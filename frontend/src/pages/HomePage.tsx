@@ -150,22 +150,22 @@ export default function HomePage() {
                     <td>
                       <a
                         href={`/positions/${position.id}`}
-                        style={{ fontWeight: 600, color: 'var(--color-primary)', textDecoration: 'none' }}
+                        className="home-pos-title-link"
                         onClick={e => e.stopPropagation()}
                       >
                         {position.title}
                       </a>
                     </td>
-                    <td>{position.company || '—'}</td>
+                    <td className="home-pos-company">{position.company || '—'}</td>
                     <td>
-                      <span className="badge text-bg-light border">{position.level || '—'}</span>
+                      <span className="badge home-level-badge">{position.level || '—'}</span>
                     </td>
                     <td>
-                      <span className="badge bg-primary-subtle text-primary border border-primary-subtle">
+                      <span className="badge home-cv-count-badge">
                         {position.cvCount}
                       </span>
                     </td>
-                    <td>{dateText(position.updatedAt)}</td>
+                    <td className="home-pos-updated">{dateText(position.updatedAt)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -193,34 +193,40 @@ export default function HomePage() {
         </section>
 
         {/* Platform Statistics */}
-        <section className="home-card">
+        <section className="home-card home-stats-card">
           <div className="section-head">
             <h2>{t('Platform statistics')}</h2>
           </div>
           <Status loading={stats.loading} error={stats.error} />
           {stats.data && (
-            <div className="stats-grid">
-              <div className="stat-item">
-                <span className="stat-number">{stats.data.users.toLocaleString()}</span>
-                <span className="stat-label">{t('Users')}</span>
+            <div className="home-stats-grid">
+              <div className="home-stat-item stat-users">
+                <div className="stat-item-header">
+                  <span className="stat-item-icon">👥</span>
+                  <span className="stat-item-number">{stats.data.users.toLocaleString()}</span>
+                </div>
+                <span className="stat-item-label">{t('Users')}</span>
               </div>
-              <div className="stat-item">
-                <span className="stat-number" style={{ color: '#2563EB' }}>
-                  {stats.data.candidates.toLocaleString()}
-                </span>
-                <span className="stat-label">{t('Candidates')}</span>
+              <div className="home-stat-item stat-candidates">
+                <div className="stat-item-header">
+                  <span className="stat-item-icon">🎓</span>
+                  <span className="stat-item-number">{stats.data.candidates.toLocaleString()}</span>
+                </div>
+                <span className="stat-item-label">{t('Candidates')}</span>
               </div>
-              <div className="stat-item">
-                <span className="stat-number" style={{ color: '#059669' }}>
-                  {stats.data.recruiters.toLocaleString()}
-                </span>
-                <span className="stat-label">{t('Recruiters')}</span>
+              <div className="home-stat-item stat-recruiters">
+                <div className="stat-item-header">
+                  <span className="stat-item-icon">💼</span>
+                  <span className="stat-item-number">{stats.data.recruiters.toLocaleString()}</span>
+                </div>
+                <span className="stat-item-label">{t('Recruiters')}</span>
               </div>
-              <div className="stat-item">
-                <span className="stat-number" style={{ color: '#7C3AED' }}>
-                  {stats.data.publishedCvs.toLocaleString()}
-                </span>
-                <span className="stat-label">{t('Published CVs')}</span>
+              <div className="home-stat-item stat-cvs">
+                <div className="stat-item-header">
+                  <span className="stat-item-icon">📄</span>
+                  <span className="stat-item-number">{stats.data.publishedCvs.toLocaleString()}</span>
+                </div>
+                <span className="stat-item-label">{t('Published CVs')}</span>
               </div>
             </div>
           )}

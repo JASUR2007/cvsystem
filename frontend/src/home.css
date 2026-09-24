@@ -257,6 +257,46 @@
   box-shadow: var(--shadow-sm);
 }
 
+.home-pos-title-link {
+  font-weight: 600;
+  color: #2563eb;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.home-pos-title-link:hover {
+  text-decoration: underline;
+  color: #1d4ed8;
+}
+
+.home-level-badge {
+  background-color: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  font-weight: 600;
+  font-size: 0.75rem;
+  padding: 0.35em 0.65em;
+  border-radius: 6px;
+}
+
+.home-cv-count-badge {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 0.35em 0.75em;
+  border-radius: 9999px;
+}
+
+.home-pos-company {
+  font-weight: 500;
+}
+
+.home-pos-updated {
+  font-size: 0.875rem;
+}
+
 /* Home 2-column Grid */
 .home-grid {
   display: grid;
@@ -279,34 +319,67 @@
   box-shadow: var(--shadow-sm);
 }
 
-/* Stats 2x2 Grid */
-.stats-grid {
+/* Large, Prominent Platform Statistics */
+.home-stats-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
 }
 
-.stat-item {
+.home-stat-item {
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-primary);
-  border-radius: 0.75rem;
-  padding: 1rem;
+  border-radius: 1rem;
+  padding: 1.5rem 1.25rem;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.stat-number {
-  font-size: 1.5rem;
+.home-stat-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+}
+
+.stat-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.stat-item-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.stat-item-number {
+  font-size: 2.75rem;
+  font-weight: 850;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.stat-item-label {
+  font-size: 1.05rem;
   font-weight: 700;
-  color: var(--text-primary);
-  line-height: 1.2;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
 }
 
-.stat-label {
-  font-size: 0.8125rem;
-  color: var(--text-muted);
-  font-weight: 500;
-  margin-top: 0.25rem;
+/* Light mode number accent colors */
+.stat-users .stat-item-number {
+  color: #0284c7;
+}
+.stat-candidates .stat-item-number {
+  color: #2563eb;
+}
+.stat-recruiters .stat-item-number {
+  color: #059669;
+}
+.stat-cvs .stat-item-number {
+  color: #7c3aed;
 }
 
 /* Popular Positions List */
@@ -320,27 +393,29 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
+  padding: 0.85rem 1.15rem;
+  border-radius: 0.75rem;
   background-color: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
   text-decoration: none;
   transition: all 0.15s ease;
 }
 
 .popular-item:hover {
   background-color: var(--primary-light);
+  transform: translateX(3px);
 }
 
 .popular-title {
   font-weight: 600;
   color: var(--text-primary);
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
 }
 
 .popular-cv-count {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   color: var(--color-primary);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 /* Popular Technologies Tag Cloud */
@@ -402,5 +477,168 @@
     width: 100%;
     height: 42px;
   }
+  .home-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  .stat-item-number {
+    font-size: 2.25rem;
+  }
+}
+
+/* ==========================================================================
+   HOME PAGE DARK THEME STYLES
+   ========================================================================== */
+[data-bs-theme="dark"] .home-latest {
+  background-color: var(--bg-card) !important;
+  border-color: #334155 !important;
+}
+
+[data-bs-theme="dark"] .home-latest .section-head h2 {
+  color: #FFFFFF !important;
+}
+
+[data-bs-theme="dark"] .home-latest .section-head a {
+  color: #60a5fa !important;
+}
+
+/* Home Latest Positions Table */
+[data-bs-theme="dark"] .home-latest .table-responsive {
+  border-color: #334155 !important;
+  background-color: var(--bg-card) !important;
+}
+
+[data-bs-theme="dark"] .home-latest .table {
+  background-color: var(--bg-card) !important;
+}
+
+[data-bs-theme="dark"] .home-latest .table th {
+  background-color: #1e293b !important;
+  color: #FFFFFF !important;
+  border-bottom: 2px solid #475569 !important;
+}
+
+[data-bs-theme="dark"] .home-latest .table td {
+  background-color: var(--bg-card) !important;
+  color: #FFFFFF !important;
+  border-bottom: 1px solid #334155 !important;
+}
+
+[data-bs-theme="dark"] .home-latest .table tbody tr:hover td {
+  background-color: #1e293b !important;
+}
+
+/* 1) Title (Название) */
+[data-bs-theme="dark"] .home-pos-title-link {
+  color: #FFFFFF !important;
+}
+[data-bs-theme="dark"] .home-pos-title-link:hover {
+  color: #93c5fd !important;
+}
+
+/* 2) Company (Компания) */
+[data-bs-theme="dark"] .home-pos-company {
+  color: #FFFFFF !important;
+}
+
+/* 3) Level (Уровень) */
+[data-bs-theme="dark"] .home-level-badge {
+  background-color: #334155 !important;
+  color: #FFFFFF !important;
+  border-color: #475569 !important;
+}
+
+/* 4) CV Count (Резюме) */
+[data-bs-theme="dark"] .home-cv-count-badge {
+  background-color: #2563eb !important;
+  color: #FFFFFF !important;
+  border-color: #3b82f6 !important;
+}
+
+/* 5) Updated (Обновлено) */
+[data-bs-theme="dark"] .home-pos-updated {
+  color: #FFFFFF !important;
+}
+
+/* Platform Statistics Dark Mode */
+[data-bs-theme="dark"] .home-stats-card {
+  background-color: var(--bg-card) !important;
+  border-color: #334155 !important;
+}
+
+[data-bs-theme="dark"] .home-stats-card .section-head h2 {
+  color: #FFFFFF !important;
+}
+
+[data-bs-theme="dark"] .home-stat-item {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+[data-bs-theme="dark"] .home-stat-item:hover {
+  border-color: #475569 !important;
+}
+
+[data-bs-theme="dark"] .stat-item-label {
+  color: #FFFFFF !important;
+}
+
+/* High-contrast, bright neon numbers in Dark Theme */
+[data-bs-theme="dark"] .stat-users .stat-item-number {
+  color: #38bdf8 !important; /* Electric cyan */
+}
+[data-bs-theme="dark"] .stat-candidates .stat-item-number {
+  color: #60a5fa !important; /* Bright sky blue */
+}
+[data-bs-theme="dark"] .stat-recruiters .stat-item-number {
+  color: #34d399 !important; /* Vivid emerald */
+}
+[data-bs-theme="dark"] .stat-cvs .stat-item-number {
+  color: #c084fc !important; /* Vivid violet */
+}
+
+/* Popular Positions Dark Mode */
+[data-bs-theme="dark"] .popular-item {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+[data-bs-theme="dark"] .popular-item:hover {
+  background-color: #24344d !important;
+  border-color: #3b82f6 !important;
+}
+
+[data-bs-theme="dark"] .popular-title {
+  color: #FFFFFF !important;
+}
+
+[data-bs-theme="dark"] .popular-cv-count {
+  color: #60a5fa !important;
+}
+
+/* Technologies Tag Cloud Dark Mode */
+[data-bs-theme="dark"] .home-technologies {
+  background-color: var(--bg-card) !important;
+  border-color: #334155 !important;
+}
+
+[data-bs-theme="dark"] .home-technologies .section-head h2 {
+  color: #FFFFFF !important;
+}
+
+[data-bs-theme="dark"] .tag-chip {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #FFFFFF !important;
+}
+
+[data-bs-theme="dark"] .tag-chip:hover {
+  background-color: #2563eb !important;
+  border-color: #3b82f6 !important;
+  color: #FFFFFF !important;
+}
+
+[data-bs-theme="dark"] .tag-chip .tag-count {
+  color: #94a3b8 !important;
 }
 

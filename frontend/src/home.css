@@ -161,6 +161,52 @@
   animation-delay: 3s;
 }
 
+.hero-pill-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.pill-icon-candidates {
+  color: #2563eb;
+  background-color: #eff6ff;
+}
+
+.pill-icon-recruiters {
+  color: #7c3aed;
+  background-color: #f5f3ff;
+}
+
+.pill-icon-opportunities {
+  color: #059669;
+  background-color: #ecfdf5;
+}
+
+[data-bs-theme="dark"] .floating-hero-pill {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #FFFFFF !important;
+}
+
+[data-bs-theme="dark"] .pill-icon-candidates {
+  color: #60a5fa !important;
+  background-color: rgba(96, 165, 250, 0.15) !important;
+}
+
+[data-bs-theme="dark"] .pill-icon-recruiters {
+  color: #c084fc !important;
+  background-color: rgba(192, 132, 252, 0.15) !important;
+}
+
+[data-bs-theme="dark"] .pill-icon-opportunities {
+  color: #34d399 !important;
+  background-color: rgba(52, 211, 153, 0.15) !important;
+}
+
 @keyframes floatSlow {
   0% { transform: translateY(0px); }
   100% { transform: translateY(-8px); }

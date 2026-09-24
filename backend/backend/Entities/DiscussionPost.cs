@@ -1,7 +1,6 @@
 namespace backend.Entities;
 
-public sealed class DiscussionPost
-{
+public sealed class DiscussionPost {
     public Guid Id { get; set; }
     public Guid PositionId { get; set; }
     public Position Position { get; set; } = null!;

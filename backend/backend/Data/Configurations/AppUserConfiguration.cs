@@ -4,10 +4,8 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace backend.Data.Configurations;
 
-public class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
-{
-    public void Configure(EntityTypeBuilder<AppUser> builder)
-    {
+public class AppUserConfiguration : IEntityTypeConfiguration<AppUser> {
+    public void Configure(EntityTypeBuilder<AppUser> builder) {
         builder.Property(x => x.FirstName).HasMaxLength(100);
         builder.Property(x => x.LastName).HasMaxLength(100);
         builder.Property(x => x.Location).HasMaxLength(200);

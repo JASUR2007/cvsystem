@@ -7,10 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services;
 
-public class HomeService(AppDbContext db) : IHomeService
-{
-    public async Task<HomeStatisticsResponse> GetStatisticsAsync(CancellationToken cancellationToken = default)
-    {
+public class HomeService(AppDbContext db) : IHomeService {
+    public async Task<HomeStatisticsResponse> GetStatisticsAsync(CancellationToken cancellationToken = default) {
         var users = await db.Users.CountAsync(cancellationToken);
         var candidates = await db.UserRoles.Join(db.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => r).CountAsync(r => r.Name == Roles.Candidate, cancellationToken);
         var recruiters = await db.UserRoles.Join(db.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => r).CountAsync(r => r.Name == Roles.Recruiter, cancellationToken);
@@ -21,8 +19,7 @@ public class HomeService(AppDbContext db) : IHomeService
         return new HomeStatisticsResponse(users, candidates, recruiters, positions, publishedCvs, cvsLast24Hours);
     }
 
-    public async Task<List<PositionListItem>> GetLatestPositionsAsync(CancellationToken cancellationToken = default)
-    {
+    public async Task<List<PositionListItem>> GetLatestPositionsAsync(CancellationToken cancellationToken = default) {
         var positions = await db.Positions.AsNoTracking()
             .OrderByDescending(p => p.UpdatedAt)
             .Take(10)
@@ -39,8 +36,7 @@ public class HomeService(AppDbContext db) : IHomeService
         return positions;
     }
 
-    public async Task<List<PopularPositionResponse>> GetPopularPositionsAsync(CancellationToken cancellationToken = default)
-    {
+    public async Task<List<PopularPositionResponse>> GetPopularPositionsAsync(CancellationToken cancellationToken = default) {
         var positions = await db.Positions.AsNoTracking()
             .OrderByDescending(p => p.Cvs.Count)
             .Take(5)
@@ -50,8 +46,7 @@ public class HomeService(AppDbContext db) : IHomeService
         return positions;
     }
 
-    public async Task<List<TagResponse>> GetPopularTagsAsync(CancellationToken cancellationToken = default)
-    {
+    public async Task<List<TagResponse>> GetPopularTagsAsync(CancellationToken cancellationToken = default) {
         var tags = await db.Tags.AsNoTracking()
             .OrderByDescending(t => t.Projects.Count)
             .Take(20)

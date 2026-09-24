@@ -5,10 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services;
 
-public static class PositionAccessHelper
-{
-    public static IQueryable<Cv> EligibleCvs(IQueryable<Cv> cvs, AppDbContext db)
-    {
+public static class PositionAccessHelper {
+    public static IQueryable<Cv> EligibleCvs(IQueryable<Cv> cvs, AppDbContext db) {
         return cvs.Where(cv => cv.Position.IsPublic || cv.Position.AccessRules.All(rule =>
             db.UserAttributeValues.Any(value => value.UserId == cv.CandidateId && value.AttributeId == rule.AttributeId &&
                 ((rule.Attribute.Type == AttributeType.Numeric &&
@@ -24,8 +22,7 @@ public static class PositionAccessHelper
                      (rule.Operator == AccessOperator.Contains && value.TextValue != null && EF.Functions.ILike(value.TextValue, "%" + rule.ComparisonValue + "%"))))))));
     }
 
-    public static IQueryable<Position> Eligible(IQueryable<Position> positions, AppDbContext db, Guid candidateId)
-    {
+    public static IQueryable<Position> Eligible(IQueryable<Position> positions, AppDbContext db, Guid candidateId) {
         return positions.Where(position => position.IsPublic || position.AccessRules.All(rule =>
             db.UserAttributeValues.Any(value => value.UserId == candidateId && value.AttributeId == rule.AttributeId &&
                 ((rule.Attribute.Type == AttributeType.Numeric &&
@@ -41,12 +38,10 @@ public static class PositionAccessHelper
                      (rule.Operator == AccessOperator.Contains && value.TextValue != null && EF.Functions.ILike(value.TextValue, "%" + rule.ComparisonValue + "%"))))))));
     }
 
-    public static string? ValidateRule(AttributeDefinition attribute, AccessOperator operation, string value)
-    {
+    public static string? ValidateRule(AttributeDefinition attribute, AccessOperator operation, string value) {
         if (attribute.IsBuiltIn) return "Built-in attributes cannot be used in access rules.";
         if (value.Length > 500) return "Comparison value is too long.";
-        return attribute.Type switch
-        {
+        return attribute.Type switch {
             AttributeType.Numeric when operation is AccessOperator.Equals or AccessOperator.GreaterThan or AccessOperator.GreaterThanOrEqual or AccessOperator.LessThan or AccessOperator.LessThanOrEqual
                 && decimal.TryParse(value, System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture, out _) => null,
             AttributeType.Boolean when operation == AccessOperator.Equals && bool.TryParse(value, out _) => null,

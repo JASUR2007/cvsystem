@@ -7,10 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Data.Seed;
 
-public static class DevelopmentDataSeeder
-{
-    public static async Task SeedAsync(IServiceProvider services)
-    {
+public static class DevelopmentDataSeeder {
+    public static async Task SeedAsync(IServiceProvider services) {
         using var scope = services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
@@ -25,14 +23,12 @@ public static class DevelopmentDataSeeder
         var tags = await SeedTagsAsync(db);
 
         // 4. Seed Positions, Projects, CVs, Likes, Discussions if positions are empty
-        if (!await db.Positions.AnyAsync())
-        {
+        if (!await db.Positions.AnyAsync()) {
             await SeedPositionsAndRelatedDataAsync(db, attributes, users, tags);
         }
     }
 
-    private static async Task<Dictionary<string, AttributeDefinition>> SeedAttributesAsync(AppDbContext db)
-    {
+    private static async Task<Dictionary<string, AttributeDefinition>> SeedAttributesAsync(AppDbContext db) {
         var existingAttributes = await db.Attributes.Include(a => a.Options).ToDictionaryAsync(a => a.Name);
 
         async Task<AttributeDefinition> EnsureAttrAsync(
@@ -40,16 +36,11 @@ public static class DevelopmentDataSeeder
             string category,
             AttributeType type,
             string description,
-            string[]? options = null)
-        {
-            if (existingAttributes.TryGetValue(name, out var existing))
-            {
-                if (options != null && options.Length > 0 && !existing.Options.Any())
-                {
-                    for (int i = 0; i < options.Length; i++)
-                    {
-                        existing.Options.Add(new AttributeOption
-                        {
+            string[]? options = null) {
+            if (existingAttributes.TryGetValue(name, out var existing)) {
+                if (options != null && options.Length > 0 && !existing.Options.Any()) {
+                    for (int i = 0; i < options.Length; i++) {
+                        existing.Options.Add(new AttributeOption {
                             Id = Guid.NewGuid(),
                             AttributeId = existing.Id,
                             Value = options[i],
@@ -61,8 +52,7 @@ public static class DevelopmentDataSeeder
                 return existing;
             }
 
-            var attr = new AttributeDefinition
-            {
+            var attr = new AttributeDefinition {
                 Id = Guid.NewGuid(),
                 Name = name,
                 Category = category,
@@ -71,12 +61,9 @@ public static class DevelopmentDataSeeder
                 IsBuiltIn = false
             };
 
-            if (options != null)
-            {
-                for (int i = 0; i < options.Length; i++)
-                {
-                    attr.Options.Add(new AttributeOption
-                    {
+            if (options != null) {
+                for (int i = 0; i < options.Length; i++) {
+                    attr.Options.Add(new AttributeOption {
                         Id = Guid.NewGuid(),
                         AttributeId = attr.Id,
                         Value = options[i],
@@ -113,17 +100,13 @@ public static class DevelopmentDataSeeder
         return existingAttributes;
     }
 
-    private static async Task<Dictionary<string, AppUser>> SeedUsersAsync(UserManager<AppUser> userManager)
-    {
+    private static async Task<Dictionary<string, AppUser>> SeedUsersAsync(UserManager<AppUser> userManager) {
         var users = new Dictionary<string, AppUser>(StringComparer.OrdinalIgnoreCase);
 
-        async Task<AppUser> EnsureUser(string email, string password, string first, string last, string[] roles, string? location = null)
-        {
+        async Task<AppUser> EnsureUser(string email, string password, string first, string last, string[] roles, string? location = null) {
             var user = await userManager.FindByEmailAsync(email);
-            if (user is null)
-            {
-                user = new AppUser
-                {
+            if (user is null) {
+                user = new AppUser {
                     Id = Guid.NewGuid(),
                     UserName = email,
                     Email = email,
@@ -134,25 +117,20 @@ public static class DevelopmentDataSeeder
                 };
 
                 var created = await userManager.CreateAsync(user, password);
-                if (!created.Succeeded)
-                {
+                if (!created.Succeeded) {
                     var errors = string.Join("; ", created.Errors.Select(e => e.Description));
                     throw new InvalidOperationException($"Could not seed user {email}: {errors}");
                 }
             }
-            else
-            {
-                if (!await userManager.CheckPasswordAsync(user, password))
-                {
+            else {
+                if (!await userManager.CheckPasswordAsync(user, password)) {
                     user.PasswordHash = userManager.PasswordHasher.HashPassword(user, password);
                     await userManager.UpdateAsync(user);
                 }
             }
 
-            foreach (var role in roles)
-            {
-                if (!await userManager.IsInRoleAsync(user, role))
-                {
+            foreach (var role in roles) {
+                if (!await userManager.IsInRoleAsync(user, role)) {
                     await userManager.AddToRoleAsync(user, role);
                 }
             }
@@ -172,20 +150,16 @@ public static class DevelopmentDataSeeder
         return users;
     }
 
-    private static async Task<Dictionary<string, Tag>> SeedTagsAsync(AppDbContext db)
-    {
-        var tagNames = new[]
-        {
+    private static async Task<Dictionary<string, Tag>> SeedTagsAsync(AppDbContext db) {
+        var tagNames = new[] {
             "SQL", "R", "Python", "Apache Hadoop", ".NET", "PostgreSQL",
             "Docker", "React", "TypeScript", "AWS", "Kubernetes", "Tailwind",
             "Pandas", "Spark", "CI/CD", "Redis", "Machine Learning", "Microservices"
         };
 
         var existingTags = await db.Tags.ToDictionaryAsync(t => t.Name, StringComparer.OrdinalIgnoreCase);
-        foreach (var name in tagNames)
-        {
-            if (!existingTags.ContainsKey(name))
-            {
+        foreach (var name in tagNames) {
+            if (!existingTags.ContainsKey(name)) {
                 var tag = new Tag { Id = Guid.NewGuid(), Name = name };
                 db.Tags.Add(tag);
                 existingTags[name] = tag;
@@ -199,8 +173,7 @@ public static class DevelopmentDataSeeder
         AppDbContext db,
         Dictionary<string, AttributeDefinition> attributes,
         Dictionary<string, AppUser> users,
-        Dictionary<string, Tag> tags)
-    {
+        Dictionary<string, Tag> tags) {
         var elena = users["elena.rostova@example.com"];
         var john = users["john.doe@example.com"];
         var anna = users["anna.smith@example.com"];
@@ -209,10 +182,8 @@ public static class DevelopmentDataSeeder
         var alex = users["alex.recruiter@talenthub.local"];
 
         // Helper to get option ID
-        Guid? GetOptionId(string attrName, string optValue)
-        {
-            if (attributes.TryGetValue(attrName, out var attr))
-            {
+        Guid? GetOptionId(string attrName, string optValue) {
+            if (attributes.TryGetValue(attrName, out var attr)) {
                 var opt = attr.Options.FirstOrDefault(o => string.Equals(o.Value, optValue, StringComparison.OrdinalIgnoreCase));
                 return opt?.Id;
             }
@@ -259,10 +230,8 @@ public static class DevelopmentDataSeeder
         await db.SaveChangesAsync();
 
         // 2. Candidate Projects
-        void AddProject(Guid userId, string name, DateOnly start, DateOnly? end, string desc, string[] projectTags)
-        {
-            var project = new Project
-            {
+        void AddProject(Guid userId, string name, DateOnly start, DateOnly? end, string desc, string[] projectTags) {
+            var project = new Project {
                 Id = Guid.NewGuid(),
                 UserId = userId,
                 Name = name,
@@ -271,10 +240,8 @@ public static class DevelopmentDataSeeder
                 Description = desc,
                 Version = 1
             };
-            foreach (var pt in projectTags)
-            {
-                if (tags.TryGetValue(pt, out var tagEntity))
-                {
+            foreach (var pt in projectTags) {
+                if (tags.TryGetValue(pt, out var tagEntity)) {
                     project.Tags.Add(new ProjectTag { ProjectId = project.Id, TagId = tagEntity.Id });
                 }
             }
@@ -317,8 +284,7 @@ public static class DevelopmentDataSeeder
 
         // 3. Positions from Course Requirements
         // Position 1: Junior Data Engineer @ Acme Corp. (Exact match to course spec)
-        var pos1 = new Position
-        {
+        var pos1 = new Position {
             Id = Guid.NewGuid(),
             Title = "Junior Data Engineer",
             Company = "Acme Corp.",
@@ -342,8 +308,7 @@ public static class DevelopmentDataSeeder
         db.Positions.Add(pos1);
 
         // Position 2: Senior Backend Developer @ TechCorp
-        var pos2 = new Position
-        {
+        var pos2 = new Position {
             Id = Guid.NewGuid(),
             Title = "Senior Backend Developer",
             Company = "TechCorp",
@@ -368,8 +333,7 @@ public static class DevelopmentDataSeeder
         db.Positions.Add(pos2);
 
         // Position 3: DevOps Engineer @ CloudSystems
-        var pos3 = new Position
-        {
+        var pos3 = new Position {
             Id = Guid.NewGuid(),
             Title = "DevOps Engineer",
             Company = "CloudSystems",
@@ -392,8 +356,7 @@ public static class DevelopmentDataSeeder
         db.Positions.Add(pos3);
 
         // Position 4: Frontend Developer @ WebLabs
-        var pos4 = new Position
-        {
+        var pos4 = new Position {
             Id = Guid.NewGuid(),
             Title = "Frontend Developer",
             Company = "WebLabs",
@@ -415,8 +378,7 @@ public static class DevelopmentDataSeeder
         db.Positions.Add(pos4);
 
         // Position 5: Business Analyst @ GlobalTech
-        var pos5 = new Position
-        {
+        var pos5 = new Position {
             Id = Guid.NewGuid(),
             Title = "Business Analyst",
             Company = "GlobalTech",
@@ -440,8 +402,7 @@ public static class DevelopmentDataSeeder
 
         // 4. Candidate CVs
         // Elena Rostova's CV for Junior Data Engineer @ Acme Corp.
-        var cvElena = new Cv
-        {
+        var cvElena = new Cv {
             Id = Guid.NewGuid(),
             CandidateId = elena.Id,
             PositionId = pos1.Id,
@@ -455,8 +416,7 @@ public static class DevelopmentDataSeeder
         db.Cvs.Add(cvElena);
 
         // John Doe's CV for Senior Backend Developer @ TechCorp
-        var cvJohn = new Cv
-        {
+        var cvJohn = new Cv {
             Id = Guid.NewGuid(),
             CandidateId = john.Id,
             PositionId = pos2.Id,
@@ -469,8 +429,7 @@ public static class DevelopmentDataSeeder
         db.Cvs.Add(cvJohn);
 
         // Anna Smith's CV for Frontend Developer @ WebLabs
-        var cvAnna = new Cv
-        {
+        var cvAnna = new Cv {
             Id = Guid.NewGuid(),
             CandidateId = anna.Id,
             PositionId = pos4.Id,
@@ -483,8 +442,7 @@ public static class DevelopmentDataSeeder
         db.Cvs.Add(cvAnna);
 
         // Michael Brown's CV for DevOps Engineer @ CloudSystems
-        var cvMichael = new Cv
-        {
+        var cvMichael = new Cv {
             Id = Guid.NewGuid(),
             CandidateId = michael.Id,
             PositionId = pos3.Id,
@@ -500,40 +458,35 @@ public static class DevelopmentDataSeeder
 
         // 5. Discussion Posts on Positions
         db.DiscussionPosts.AddRange(
-            new DiscussionPost
-            {
+            new DiscussionPost {
                 Id = Guid.NewGuid(),
                 PositionId = pos1.Id,
                 AuthorId = sarah.Id,
                 Content = "Welcome to Acme Corp! We are excited to find passionate data engineers with solid SQL and Python skills to join our team.",
                 CreatedAt = DateTime.UtcNow.AddHours(-20)
             },
-            new DiscussionPost
-            {
+            new DiscussionPost {
                 Id = Guid.NewGuid(),
                 PositionId = pos1.Id,
                 AuthorId = elena.Id,
                 Content = "Hello! Does the team support hybrid work, or is the position open for full-time remote candidates as well?",
                 CreatedAt = DateTime.UtcNow.AddHours(-19)
             },
-            new DiscussionPost
-            {
+            new DiscussionPost {
                 Id = Guid.NewGuid(),
                 PositionId = pos1.Id,
                 AuthorId = sarah.Id,
                 Content = "Hi Elena! Yes, we offer a flexible hybrid schedule with full remote options available for all data engineers.",
                 CreatedAt = DateTime.UtcNow.AddHours(-18)
             },
-            new DiscussionPost
-            {
+            new DiscussionPost {
                 Id = Guid.NewGuid(),
                 PositionId = pos2.Id,
                 AuthorId = alex.Id,
                 Content = "Looking for candidates with strong .NET Core and relational database modeling experience.",
                 CreatedAt = DateTime.UtcNow.AddHours(-15)
             },
-            new DiscussionPost
-            {
+            new DiscussionPost {
                 Id = Guid.NewGuid(),
                 PositionId = pos2.Id,
                 AuthorId = john.Id,

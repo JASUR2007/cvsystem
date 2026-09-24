@@ -16,16 +16,13 @@ public class AuthService(
     UserManager<AppUser> userManager,
     JwtTokenService tokenService,
     AppDbContext db,
-    IConfiguration configuration) : IAuthService
-{
-    public async Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
-    {
+    IConfiguration configuration) : IAuthService {
+    public async Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default) {
         var existing = await userManager.FindByEmailAsync(request.Email);
         if (existing is not null)
             throw new ConflictException("An account with this email already exists.");
 
-        var user = new AppUser
-        {
+        var user = new AppUser {
             Id = Guid.NewGuid(),
             UserName = request.Email,
             Email = request.Email,
@@ -42,8 +39,7 @@ public class AuthService(
         return await CreateAuthResponseAsync(user);
     }
 
-    public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
-    {
+    public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default) {
         var user = await userManager.FindByEmailAsync(request.Email);
         if (user is null || !await userManager.CheckPasswordAsync(user, request.Password))
             throw new ValidationException("Invalid email or password.");
@@ -54,8 +50,7 @@ public class AuthService(
         return await CreateAuthResponseAsync(user, request.RememberMe);
     }
 
-    public async Task<CurrentUserResponse> GetCurrentUserAsync(Guid userId, CancellationToken cancellationToken = default)
-    {
+    public async Task<CurrentUserResponse> GetCurrentUserAsync(Guid userId, CancellationToken cancellationToken = default) {
         var user = await userManager.FindByIdAsync(userId.ToString());
         if (user is null || user.IsBlocked)
             throw new NotFoundException("Account is unavailable.");
@@ -64,8 +59,7 @@ public class AuthService(
         return new CurrentUserResponse(user.Id, user.Email ?? string.Empty, user.FirstName, user.LastName, roles, user.PhotoObjectKey);
     }
 
-    public async Task<AuthResponse> ExchangeExternalCodeAsync(string code, CancellationToken cancellationToken = default)
-    {
+    public async Task<AuthResponse> ExchangeExternalCodeAsync(string code, CancellationToken cancellationToken = default) {
         var hash = Hash(code);
         await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
         var ticket = await db.ExternalAuthTickets.FirstOrDefaultAsync(item => item.CodeHash == hash, cancellationToken);
@@ -86,31 +80,27 @@ public class AuthService(
         return await CreateAuthResponseAsync(user, rememberMe: true);
     }
 
-    public object GetExternalProvidersStatus() => new
-    {
+    public object GetExternalProvidersStatus() => new {
         google = !string.IsNullOrWhiteSpace(configuration["Authentication:Google:ClientId"]) &&
                  !string.IsNullOrWhiteSpace(configuration["Authentication:Google:ClientSecret"]),
         github = !string.IsNullOrWhiteSpace(configuration["Authentication:GitHub:ClientId"]) &&
                  !string.IsNullOrWhiteSpace(configuration["Authentication:GitHub:ClientSecret"])
     };
 
-    public async Task<string> ProcessExternalLoginAsync(string scheme, ClaimsPrincipal principal, CancellationToken cancellationToken = default)
-    {
+    public async Task<string> ProcessExternalLoginAsync(string scheme, ClaimsPrincipal principal, CancellationToken cancellationToken = default) {
         var externalId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
         var email = principal.FindFirstValue(ClaimTypes.Email)?.Trim();
         if (string.IsNullOrWhiteSpace(externalId) || string.IsNullOrWhiteSpace(email))
             throw new ValidationException("email_required");
 
         var user = await userManager.FindByLoginAsync(scheme, externalId);
-        if (user is null)
-        {
+        if (user is null) {
             if (await userManager.FindByEmailAsync(email) is not null)
                 throw new ConflictException("account_exists");
 
             var fullName = principal.FindFirstValue(ClaimTypes.Name)?.Trim() ?? "";
             var parts = fullName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
-            user = new AppUser
-            {
+            user = new AppUser {
                 Id = Guid.NewGuid(),
                 UserName = email,
                 Email = email,
@@ -134,8 +124,7 @@ public class AuthService(
             throw new ForbiddenException("account_blocked");
 
         var code = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
-        db.ExternalAuthTickets.Add(new ExternalAuthTicket
-        {
+        db.ExternalAuthTickets.Add(new ExternalAuthTicket {
             Id = Guid.NewGuid(),
             CodeHash = Hash(code),
             UserId = user.Id,
@@ -146,8 +135,7 @@ public class AuthService(
         return code;
     }
 
-    private async Task<AuthResponse> CreateAuthResponseAsync(AppUser user, bool rememberMe = false)
-    {
+    private async Task<AuthResponse> CreateAuthResponseAsync(AppUser user, bool rememberMe = false) {
         var token = await tokenService.CreateAsync(user, rememberMe);
         var roles = await userManager.GetRolesAsync(user);
         var userResponse = new CurrentUserResponse(user.Id, user.Email ?? string.Empty, user.FirstName, user.LastName, roles, user.PhotoObjectKey);

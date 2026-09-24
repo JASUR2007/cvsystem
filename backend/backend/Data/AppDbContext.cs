@@ -6,8 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace backend.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options)
-    : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>(options)
-{
+    : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>(options) {
     public DbSet<AttributeDefinition> Attributes => Set<AttributeDefinition>();
     public DbSet<AttributeOption> AttributeOptions => Set<AttributeOption>();
     public DbSet<UserAttributeValue> UserAttributeValues => Set<UserAttributeValue>();
@@ -23,8 +22,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<DiscussionPost> DiscussionPosts => Set<DiscussionPost>();
     public DbSet<ExternalAuthTicket> ExternalAuthTickets => Set<ExternalAuthTicket>();
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
+    protected override void OnModelCreating(ModelBuilder modelBuilder) {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }

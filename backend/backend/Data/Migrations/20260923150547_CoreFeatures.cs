@@ -4,12 +4,9 @@ using NpgsqlTypes;
 
 #nullable disable
 
-namespace backend.Data.Migrations
-{
-    public partial class CoreFeatures : Migration
-    {
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
+namespace backend.Data.Migrations {
+    public partial class CoreFeatures : Migration {
+        protected override void Up(MigrationBuilder migrationBuilder) {
             migrationBuilder.AddColumn<int>(
                 name: "Version",
                 table: "Projects",
@@ -66,8 +63,7 @@ namespace backend.Data.Migrations
                 .Annotation("Npgsql:IndexMethod", "GIN");
         }
 
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
+        protected override void Down(MigrationBuilder migrationBuilder) {
             migrationBuilder.DropIndex(
                 name: "IX_Positions_SearchVector",
                 table: "Positions");

@@ -9,13 +9,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services;
 
-public class SearchService(AppDbContext db, ICurrentUserService currentUser) : ISearchService
-{
-    public async Task<object> SearchAllAsync(string q, CancellationToken cancellationToken = default)
-    {
+public class SearchService(AppDbContext db, ICurrentUserService currentUser) : ISearchService {
+    public async Task<object> SearchAllAsync(string q, CancellationToken cancellationToken = default) {
         var positions = await SearchPositionsAsync(q, 1, 10, cancellationToken);
-        if (!currentUser.IsRecruiter && !currentUser.IsAdmin)
-        {
+        if (!currentUser.IsRecruiter && !currentUser.IsAdmin) {
             return new { positions, cvs = new PagedResult<SearchCvItem>([], 1, 10, 0) };
         }
 
@@ -23,8 +20,7 @@ public class SearchService(AppDbContext db, ICurrentUserService currentUser) : I
         return new { positions, cvs };
     }
 
-    public async Task<PagedResult<PositionListItem>> SearchPositionsAsync(string q, int page, int pageSize, CancellationToken cancellationToken = default)
-    {
+    public async Task<PagedResult<PositionListItem>> SearchPositionsAsync(string q, int page, int pageSize, CancellationToken cancellationToken = default) {
         var query = db.Positions.AsNoTracking().AsQueryable();
 
         if (!currentUser.IsAuthenticated)
@@ -32,8 +28,7 @@ public class SearchService(AppDbContext db, ICurrentUserService currentUser) : I
         else if (currentUser.IsCandidate && !currentUser.IsAdmin)
             query = PositionAccessHelper.Eligible(query, db, currentUser.RequireUserId());
 
-        if (!string.IsNullOrWhiteSpace(q))
-        {
+        if (!string.IsNullOrWhiteSpace(q)) {
             var term = q.Trim();
             var pattern = $"%{term}%";
             query = query.Where(position =>
@@ -63,14 +58,12 @@ public class SearchService(AppDbContext db, ICurrentUserService currentUser) : I
         return new PagedResult<PositionListItem>(items, currentPage, size, total);
     }
 
-    public async Task<PagedResult<SearchCvItem>> SearchCvsAsync(string q, int page, int pageSize, CancellationToken cancellationToken = default)
-    {
+    public async Task<PagedResult<SearchCvItem>> SearchCvsAsync(string q, int page, int pageSize, CancellationToken cancellationToken = default) {
         var query = db.Cvs.AsNoTracking().Where(cv => cv.Status == CvStatus.Published);
         if (!currentUser.IsAdmin)
             query = PositionAccessHelper.EligibleCvs(query, db);
 
-        if (!string.IsNullOrWhiteSpace(q))
-        {
+        if (!string.IsNullOrWhiteSpace(q)) {
             var term = q.Trim();
             var pattern = $"%{term}%";
             query = query.Where(cv =>

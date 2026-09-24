@@ -12,10 +12,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services;
 
-public class CvService(AppDbContext db, ICurrentUserService currentUser) : ICvService
-{
-    public async Task<List<CvListItem>> ListCandidateCvsAsync(Guid candidateId, CancellationToken cancellationToken = default)
-    {
+public class CvService(AppDbContext db, ICurrentUserService currentUser) : ICvService {
+    public async Task<List<CvListItem>> ListCandidateCvsAsync(Guid candidateId, CancellationToken cancellationToken = default) {
         var items = await db.Cvs.AsNoTracking().Where(cv => cv.CandidateId == candidateId)
             .OrderByDescending(cv => cv.UpdatedAt)
             .Select(cv => new CvListItem(
@@ -30,8 +28,7 @@ public class CvService(AppDbContext db, ICurrentUserService currentUser) : ICvSe
         return items;
     }
 
-    public async Task<CvDetail> CreateCvAsync(Guid positionId, Guid candidateId, CancellationToken cancellationToken = default)
-    {
+    public async Task<CvDetail> CreateCvAsync(Guid positionId, Guid candidateId, CancellationToken cancellationToken = default) {
         var position = await db.Positions.Include(item => item.Attributes).FirstOrDefaultAsync(item => item.Id == positionId, cancellationToken);
         if (position is null)
             throw new NotFoundException("Position not found.");
@@ -50,13 +47,11 @@ public class CvService(AppDbContext db, ICurrentUserService currentUser) : ICvSe
             .Select(attributeId => new UserAttributeValue { UserId = candidateId, AttributeId = attributeId })
             .ToList();
 
-        if (missing.Count > 0)
-        {
+        if (missing.Count > 0) {
             db.UserAttributeValues.AddRange(missing);
         }
 
-        var cv = new Cv
-        {
+        var cv = new Cv {
             Id = Guid.NewGuid(),
             PositionId = positionId,
             CandidateId = candidateId,
@@ -69,8 +64,7 @@ public class CvService(AppDbContext db, ICurrentUserService currentUser) : ICvSe
         return await GetCvDetailAsync(cv.Id, cancellationToken);
     }
 
-    public async Task<CvDetail> GetCvDetailAsync(Guid id, CancellationToken cancellationToken = default)
-    {
+    public async Task<CvDetail> GetCvDetailAsync(Guid id, CancellationToken cancellationToken = default) {
         var cv = await db.Cvs.AsNoTracking()
             .Include(item => item.Candidate)
             .Include(item => item.Position).ThenInclude(position => position.ProjectTags).ThenInclude(link => link.Tag)
@@ -94,8 +88,7 @@ public class CvService(AppDbContext db, ICurrentUserService currentUser) : ICvSe
             .Where(value => value.UserId == cv.CandidateId && attributeIds.Contains(value.AttributeId))
             .ToDictionaryAsync(value => value.AttributeId, cancellationToken);
 
-        var attributes = cv.Position.Attributes.OrderBy(attribute => attribute.SortOrder).Select(attribute =>
-        {
+        var attributes = cv.Position.Attributes.OrderBy(attribute => attribute.SortOrder).Select(attribute => {
             var value = userValues.GetValueOrDefault(attribute.AttributeId);
             return new CvAttributeView(
                 AttributeValueHelper.View(attribute.Attribute, value, cv.Candidate),
@@ -142,8 +135,7 @@ public class CvService(AppDbContext db, ICurrentUserService currentUser) : ICvSe
             filteredProjects);
     }
 
-    public async Task<AttributeValueView> UpdateCvAttributeAsync(Guid id, Guid attributeId, AttributeValueUpdate request, CancellationToken cancellationToken = default)
-    {
+    public async Task<AttributeValueView> UpdateCvAttributeAsync(Guid id, Guid attributeId, AttributeValueUpdate request, CancellationToken cancellationToken = default) {
         var cv = await EditableCvAsync(id, cancellationToken);
         if (cv is null)
             throw new NotFoundException("CV not found.");
@@ -160,14 +152,12 @@ public class CvService(AppDbContext db, ICurrentUserService currentUser) : ICvSe
             throw new ValidationException("Image must belong to this profile.");
 
         UserAttributeValue? value = null;
-        if (attribute.IsBuiltIn)
-        {
+        if (attribute.IsBuiltIn) {
             var user = cv.Candidate;
             if (user.Version != request.Version)
                 throw new ConflictException("Profile was changed in another session.");
 
-            switch (attribute.Name)
-            {
+            switch (attribute.Name) {
                 case "First Name": user.FirstName = request.Value.TextValue?.Trim() ?? string.Empty; break;
                 case "Last Name": user.LastName = request.Value.TextValue?.Trim() ?? string.Empty; break;
                 case "Location": user.Location = request.Value.TextValue?.Trim(); break;
@@ -179,8 +169,7 @@ public class CvService(AppDbContext db, ICurrentUserService currentUser) : ICvSe
 
             user.Version++;
         }
-        else
-        {
+        else {
             value = await db.UserAttributeValues.FirstOrDefaultAsync(item => item.UserId == cv.CandidateId && item.AttributeId == attributeId, cancellationToken);
             if (value is null)
                 throw new NotFoundException("Attribute value not found.");
@@ -197,8 +186,7 @@ public class CvService(AppDbContext db, ICurrentUserService currentUser) : ICvSe
         return AttributeValueHelper.View(attribute, value, cv.Candidate);
     }
 
-    public async Task<object> PublishCvAsync(Guid id, CancellationToken cancellationToken = default)
-    {
+    public async Task<object> PublishCvAsync(Guid id, CancellationToken cancellationToken = default) {
         var cv = await EditableCvAsync(id, cancellationToken);
         if (cv is null)
             throw new NotFoundException("CV not found.");
@@ -227,8 +215,7 @@ public class CvService(AppDbContext db, ICurrentUserService currentUser) : ICvSe
         return new { cv.Id, cv.Status, cv.PublishedAt };
     }
 
-    public async Task DeleteCvAsync(Guid id, CancellationToken cancellationToken = default)
-    {
+    public async Task DeleteCvAsync(Guid id, CancellationToken cancellationToken = default) {
         var cv = await EditableCvAsync(id, cancellationToken);
         if (cv is null)
             throw new NotFoundException("CV not found.");
@@ -237,11 +224,9 @@ public class CvService(AppDbContext db, ICurrentUserService currentUser) : ICvSe
         await db.SaveChangesAsync(cancellationToken);
     }
 
-    private Task<Cv?> EditableCvAsync(Guid id, CancellationToken cancellationToken)
-    {
+    private Task<Cv?> EditableCvAsync(Guid id, CancellationToken cancellationToken) {
         var query = db.Cvs.Include(cv => cv.Candidate).Where(cv => cv.Id == id);
-        if (!currentUser.IsAdmin)
-        {
+        if (!currentUser.IsAdmin) {
             var currentId = currentUser.RequireUserId();
             query = query.Where(cv => cv.CandidateId == currentId && PositionAccessHelper.Eligible(db.Positions, db, currentId)
                 .Any(position => position.Id == cv.PositionId));

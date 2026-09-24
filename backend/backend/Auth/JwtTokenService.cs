@@ -7,13 +7,10 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace backend.Auth;
 
-public sealed class JwtTokenService(IConfiguration configuration, UserManager<AppUser> userManager)
-{
-    public async Task<string> CreateAsync(AppUser user, bool rememberMe = false)
-    {
+public sealed class JwtTokenService(IConfiguration configuration, UserManager<AppUser> userManager) {
+    public async Task<string> CreateAsync(AppUser user, bool rememberMe = false) {
         var roles = await userManager.GetRolesAsync(user);
-        var claims = new List<Claim>
-        {
+        var claims = new List<Claim> {
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),

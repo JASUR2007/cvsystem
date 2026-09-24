@@ -8,11 +8,9 @@ namespace backend.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/tags")]
-public sealed class TagsController(AppDbContext db) : ControllerBase
-{
+public sealed class TagsController(AppDbContext db) : ControllerBase {
     [HttpGet]
-    public async Task<ActionResult<List<string>>> Search(string? prefix, CancellationToken cancellationToken)
-    {
+    public async Task<ActionResult<List<string>>> Search(string? prefix, CancellationToken cancellationToken) {
         var query = db.Tags.AsNoTracking();
         if (!string.IsNullOrWhiteSpace(prefix))
             query = query.Where(tag => EF.Functions.ILike(tag.Name, prefix.Trim() + "%"));
@@ -23,8 +21,7 @@ public sealed class TagsController(AppDbContext db) : ControllerBase
 
     [HttpGet("popular")]
     [AllowAnonymous]
-    public async Task<IActionResult> Popular(CancellationToken cancellationToken)
-    {
+    public async Task<IActionResult> Popular(CancellationToken cancellationToken) {
         var tags = await db.Tags.AsNoTracking()
             .OrderByDescending(tag => tag.Projects.Count)
             .ThenBy(tag => tag.Name)

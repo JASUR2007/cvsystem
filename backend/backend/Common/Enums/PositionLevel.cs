@@ -1,7 +1,6 @@
 namespace backend.Common.Enums;
 
-public enum PositionLevel
-{
+public enum PositionLevel {
     Junior,
     Middle,
     Senior,

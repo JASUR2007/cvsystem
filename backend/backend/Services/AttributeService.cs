@@ -9,8 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services;
 
-public class AttributeService(AppDbContext db) : IAttributeService
-{
+public class AttributeService(AppDbContext db) : IAttributeService {
     private static readonly HashSet<string> Categories =
     [
         "Personal Information",
@@ -24,8 +23,7 @@ public class AttributeService(AppDbContext db) : IAttributeService
         "General"
     ];
 
-    public async Task<List<string>> GetCategoriesAsync(CancellationToken cancellationToken = default)
-    {
+    public async Task<List<string>> GetCategoriesAsync(CancellationToken cancellationToken = default) {
         var dbCategories = await db.Attributes.AsNoTracking()
             .Select(a => a.Category)
             .Distinct()
@@ -41,8 +39,7 @@ public class AttributeService(AppDbContext db) : IAttributeService
 
     public async Task<PagedResult<AttributeListItem>> ListAsync(
         string? prefix, string? category, AttributeType? type, bool? recent,
-        int page, int pageSize, CancellationToken cancellationToken = default)
-    {
+        int page, int pageSize, CancellationToken cancellationToken = default) {
         var query = db.Attributes.AsNoTracking().AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(prefix))
@@ -76,8 +73,7 @@ public class AttributeService(AppDbContext db) : IAttributeService
         return new PagedResult<AttributeListItem>(items, currentPage, size, total);
     }
 
-    public async Task<AttributeDetail> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
-    {
+    public async Task<AttributeDetail> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) {
         var item = await db.Attributes.AsNoTracking().Include(attribute => attribute.Options)
             .FirstOrDefaultAsync(attribute => attribute.Id == id, cancellationToken);
         if (item is null)
@@ -86,12 +82,10 @@ public class AttributeService(AppDbContext db) : IAttributeService
         return ToDetail(item);
     }
 
-    public async Task<AttributeDetail> CreateAsync(AttributeRequest request, CancellationToken cancellationToken = default)
-    {
+    public async Task<AttributeDetail> CreateAsync(AttributeRequest request, CancellationToken cancellationToken = default) {
         ValidateRequest(request);
 
-        var item = new AttributeDefinition
-        {
+        var item = new AttributeDefinition {
             Id = Guid.NewGuid(),
             Name = request.Name.Trim(),
             Description = request.Description?.Trim() ?? string.Empty,
@@ -108,8 +102,7 @@ public class AttributeService(AppDbContext db) : IAttributeService
         return ToDetail(item);
     }
 
-    public async Task<AttributeDetail> UpdateAsync(Guid id, AttributeRequest request, CancellationToken cancellationToken = default)
-    {
+    public async Task<AttributeDetail> UpdateAsync(Guid id, AttributeRequest request, CancellationToken cancellationToken = default) {
         ValidateRequest(request);
 
         var item = await db.Attributes.Include(attribute => attribute.Options)
@@ -145,8 +138,7 @@ public class AttributeService(AppDbContext db) : IAttributeService
         return ToDetail(item);
     }
 
-    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
-    {
+    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default) {
         var item = await db.Attributes.FindAsync([id], cancellationToken);
         if (item is null)
             throw new NotFoundException("Attribute not found.");
@@ -163,8 +155,7 @@ public class AttributeService(AppDbContext db) : IAttributeService
         await db.SaveChangesAsync(cancellationToken);
     }
 
-    private static void ValidateRequest(AttributeRequest request)
-    {
+    private static void ValidateRequest(AttributeRequest request) {
         if (string.IsNullOrWhiteSpace(request.Name) || request.Name.Trim().Length > 160)
             throw new ValidationException("Name is required and must be at most 160 characters.");
 

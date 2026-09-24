@@ -4,30 +4,24 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace backend.Data.Migrations
-{
-    public partial class InitialCreate : Migration
-    {
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
+namespace backend.Data.Migrations {
+    public partial class InitialCreate : Migration {
+        protected override void Up(MigrationBuilder migrationBuilder) {
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     ConcurrencyStamp = table.Column<string>(type: "text", nullable: true)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_AspNetRoles", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "AspNetUsers",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     FirstName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     LastName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
@@ -52,15 +46,13 @@ namespace backend.Data.Migrations
                     LockoutEnabled = table.Column<bool>(type: "boolean", nullable: false),
                     AccessFailedCount = table.Column<int>(type: "integer", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Attributes",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(160)", maxLength: 160, nullable: false),
                     Description = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: false),
@@ -70,15 +62,13 @@ namespace backend.Data.Migrations
                     Version = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_Attributes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Positions",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     ShortDescription = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: false),
@@ -90,35 +80,30 @@ namespace backend.Data.Migrations
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_Positions", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Tags",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_Tags", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     RoleId = table.Column<Guid>(type: "uuid", nullable: false),
                     ClaimType = table.Column<string>(type: "text", nullable: true),
                     ClaimValue = table.Column<string>(type: "text", nullable: true)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_AspNetRoleClaims", x => x.Id);
                     table.ForeignKey(
                         name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
@@ -130,16 +115,14 @@ namespace backend.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AspNetUserClaims",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     ClaimType = table.Column<string>(type: "text", nullable: true),
                     ClaimValue = table.Column<string>(type: "text", nullable: true)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_AspNetUserClaims", x => x.Id);
                     table.ForeignKey(
                         name: "FK_AspNetUserClaims_AspNetUsers_UserId",
@@ -151,15 +134,13 @@ namespace backend.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AspNetUserLogins",
-                columns: table => new
-                {
+                columns: table => new {
                     LoginProvider = table.Column<string>(type: "text", nullable: false),
                     ProviderKey = table.Column<string>(type: "text", nullable: false),
                     ProviderDisplayName = table.Column<string>(type: "text", nullable: true),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_AspNetUserLogins", x => new { x.LoginProvider, x.ProviderKey });
                     table.ForeignKey(
                         name: "FK_AspNetUserLogins_AspNetUsers_UserId",
@@ -171,13 +152,11 @@ namespace backend.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AspNetUserRoles",
-                columns: table => new
-                {
+                columns: table => new {
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     RoleId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_AspNetUserRoles", x => new { x.UserId, x.RoleId });
                     table.ForeignKey(
                         name: "FK_AspNetUserRoles_AspNetRoles_RoleId",
@@ -195,15 +174,13 @@ namespace backend.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AspNetUserTokens",
-                columns: table => new
-                {
+                columns: table => new {
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     LoginProvider = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Value = table.Column<string>(type: "text", nullable: true)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_AspNetUserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
                     table.ForeignKey(
                         name: "FK_AspNetUserTokens_AspNetUsers_UserId",
@@ -215,8 +192,7 @@ namespace backend.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Projects",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
@@ -224,8 +200,7 @@ namespace backend.Data.Migrations
                     EndedOn = table.Column<DateOnly>(type: "date", nullable: true),
                     Description = table.Column<string>(type: "text", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_Projects", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Projects_AspNetUsers_UserId",
@@ -237,15 +212,13 @@ namespace backend.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AttributeOptions",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     AttributeId = table.Column<Guid>(type: "uuid", nullable: false),
                     Value = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     SortOrder = table.Column<int>(type: "integer", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_AttributeOptions", x => x.Id);
                     table.ForeignKey(
                         name: "FK_AttributeOptions_Attributes_AttributeId",
@@ -257,8 +230,7 @@ namespace backend.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Cvs",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     CandidateId = table.Column<Guid>(type: "uuid", nullable: false),
                     PositionId = table.Column<Guid>(type: "uuid", nullable: false),
@@ -267,8 +239,7 @@ namespace backend.Data.Migrations
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     PublishedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_Cvs", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Cvs_AspNetUsers_CandidateId",
@@ -286,8 +257,7 @@ namespace backend.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "DiscussionPosts",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     PositionId = table.Column<Guid>(type: "uuid", nullable: false),
                     AuthorId = table.Column<Guid>(type: "uuid", nullable: false),
@@ -295,8 +265,7 @@ namespace backend.Data.Migrations
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_DiscussionPosts", x => x.Id);
                     table.ForeignKey(
                         name: "FK_DiscussionPosts_AspNetUsers_AuthorId",
@@ -314,16 +283,14 @@ namespace backend.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "PositionAccessRules",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     PositionId = table.Column<Guid>(type: "uuid", nullable: false),
                     AttributeId = table.Column<Guid>(type: "uuid", nullable: false),
                     Operator = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     ComparisonValue = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_PositionAccessRules", x => x.Id);
                     table.ForeignKey(
                         name: "FK_PositionAccessRules_Attributes_AttributeId",
@@ -341,15 +308,13 @@ namespace backend.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "PositionAttributes",
-                columns: table => new
-                {
+                columns: table => new {
                     PositionId = table.Column<Guid>(type: "uuid", nullable: false),
                     AttributeId = table.Column<Guid>(type: "uuid", nullable: false),
                     SortOrder = table.Column<int>(type: "integer", nullable: false),
                     IsRequired = table.Column<bool>(type: "boolean", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_PositionAttributes", x => new { x.PositionId, x.AttributeId });
                     table.ForeignKey(
                         name: "FK_PositionAttributes_Attributes_AttributeId",
@@ -367,13 +332,11 @@ namespace backend.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "PositionProjectTags",
-                columns: table => new
-                {
+                columns: table => new {
                     PositionId = table.Column<Guid>(type: "uuid", nullable: false),
                     TagId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_PositionProjectTags", x => new { x.PositionId, x.TagId });
                     table.ForeignKey(
                         name: "FK_PositionProjectTags_Positions_PositionId",
@@ -391,13 +354,11 @@ namespace backend.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "ProjectTags",
-                columns: table => new
-                {
+                columns: table => new {
                     ProjectId = table.Column<Guid>(type: "uuid", nullable: false),
                     TagId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_ProjectTags", x => new { x.ProjectId, x.TagId });
                     table.ForeignKey(
                         name: "FK_ProjectTags_Projects_ProjectId",
@@ -415,8 +376,7 @@ namespace backend.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "UserAttributeValues",
-                columns: table => new
-                {
+                columns: table => new {
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     AttributeId = table.Column<Guid>(type: "uuid", nullable: false),
                     TextValue = table.Column<string>(type: "text", nullable: true),
@@ -430,8 +390,7 @@ namespace backend.Data.Migrations
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Version = table.Column<int>(type: "integer", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_UserAttributeValues", x => new { x.UserId, x.AttributeId });
                     table.ForeignKey(
                         name: "FK_UserAttributeValues_AspNetUsers_UserId",
@@ -455,14 +414,12 @@ namespace backend.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "CvLikes",
-                columns: table => new
-                {
+                columns: table => new {
                     CvId = table.Column<Guid>(type: "uuid", nullable: false),
                     RecruiterId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_CvLikes", x => new { x.CvId, x.RecruiterId });
                     table.ForeignKey(
                         name: "FK_CvLikes_AspNetUsers_RecruiterId",
@@ -606,8 +563,7 @@ namespace backend.Data.Migrations
                 column: "SelectedOptionId");
         }
 
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
+        protected override void Down(MigrationBuilder migrationBuilder) {
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 

@@ -2,8 +2,7 @@ using System.Security.Claims;
 
 namespace backend.Auth;
 
-public interface ICurrentUserService
-{
+public interface ICurrentUserService {
     Guid? UserId { get; }
     Guid RequireUserId();
     bool IsAuthenticated { get; }

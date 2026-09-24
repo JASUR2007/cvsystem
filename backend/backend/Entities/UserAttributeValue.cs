@@ -1,7 +1,6 @@
 namespace backend.Entities;
 
-public sealed class UserAttributeValue
-{
+public sealed class UserAttributeValue {
     public Guid UserId { get; set; }
     public AppUser User { get; set; } = null!;
     public Guid AttributeId { get; set; }

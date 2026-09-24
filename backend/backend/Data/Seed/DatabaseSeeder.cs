@@ -7,64 +7,50 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Data.Seed;
 
-public static class DatabaseSeeder
-{
-    public static async Task InitializeAsync(IServiceProvider services)
-    {
+public static class DatabaseSeeder {
+    public static async Task InitializeAsync(IServiceProvider services) {
         using var scope = services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        try
-        {
+        try {
             await db.Database.MigrateAsync();
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             Console.Error.WriteLine($"Warning: db.Database.MigrateAsync encountered an issue: {ex.Message}");
         }
 
-        try
-        {
+        try {
             await db.Database.ExecuteSqlRawAsync(
                 "ALTER TABLE \"AspNetUsers\" ALTER COLUMN \"PhotoObjectKey\" TYPE text; " +
                 "ALTER TABLE \"UserAttributeValues\" ALTER COLUMN \"ImageObjectKey\" TYPE text;");
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             Console.Error.WriteLine($"Warning: Migration ALTER COLUMN failed: {ex.Message}");
         }
 
-        try
-        {
+        try {
             await db.Database.ExecuteSqlRawAsync(
                 "UPDATE \"AspNetUsers\" SET \"PhotoObjectKey\" = 'users/d7346498-df28-4b36-a269-e0cc1a0fae0c/168d73b32f084819875cd4de82a9585b.jpg' WHERE \"Id\" = 'd7346498-df28-4b36-a269-e0cc1a0fae0c' AND (\"PhotoObjectKey\" LIKE 'data:image%' OR \"PhotoObjectKey\" IS NULL); " +
                 "UPDATE \"UserAttributeValues\" SET \"ImageObjectKey\" = 'users/d7346498-df28-4b36-a269-e0cc1a0fae0c/168d73b32f084819875cd4de82a9585b.jpg' WHERE \"UserId\" = 'd7346498-df28-4b36-a269-e0cc1a0fae0c' AND \"ImageObjectKey\" LIKE 'data:image%'; " +
                 "UPDATE \"AspNetUsers\" SET \"PhotoObjectKey\" = NULL WHERE \"PhotoObjectKey\" LIKE 'data:image%'; " +
                 "UPDATE \"UserAttributeValues\" SET \"ImageObjectKey\" = NULL WHERE \"ImageObjectKey\" LIKE 'data:image%';");
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             Console.Error.WriteLine($"Warning: Database cleanup of base64 failed: {ex.Message}");
         }
 
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
-        foreach (var role in new[] { Roles.Candidate, Roles.Recruiter, Roles.Administrator })
-        {
-            if (!await roleManager.RoleExistsAsync(role))
-            {
+        foreach (var role in new[] { Roles.Candidate, Roles.Recruiter, Roles.Administrator }) {
+            if (!await roleManager.RoleExistsAsync(role)) {
                 var result = await roleManager.CreateAsync(new IdentityRole<Guid>(role));
-                if (!result.Succeeded)
-                {
+                if (!result.Succeeded) {
                     throw new InvalidOperationException($"Could not create role {role}.");
                 }
             }
         }
 
-        foreach (var name in new[] { "First Name", "Last Name", "Location", "Personal Photo" })
-        {
-            if (!await db.Attributes.AnyAsync(attribute => attribute.Name == name))
-            {
-                db.Attributes.Add(new AttributeDefinition
-                {
+        foreach (var name in new[] { "First Name", "Last Name", "Location", "Personal Photo" }) {
+            if (!await db.Attributes.AnyAsync(attribute => attribute.Name == name)) {
+                db.Attributes.Add(new AttributeDefinition {
                     Id = Guid.NewGuid(),
                     Name = name,
                     Category = "Personal Information",
@@ -93,29 +79,24 @@ public static class DatabaseSeeder
         var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
         var adminEmail = configuration["BootstrapAdmin:Email"];
         var adminPassword = configuration["BootstrapAdmin:Password"];
-        if (string.IsNullOrWhiteSpace(adminEmail) && string.IsNullOrWhiteSpace(adminPassword))
-        {
+        if (string.IsNullOrWhiteSpace(adminEmail) && string.IsNullOrWhiteSpace(adminPassword)) {
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(adminEmail) || string.IsNullOrWhiteSpace(adminPassword))
-        {
+        if (string.IsNullOrWhiteSpace(adminEmail) || string.IsNullOrWhiteSpace(adminPassword)) {
             throw new InvalidOperationException("Both BootstrapAdmin:Email and BootstrapAdmin:Password are required.");
         }
 
         var existing = await userManager.FindByEmailAsync(adminEmail);
-        if (existing is not null)
-        {
-            if (!await userManager.IsInRoleAsync(existing, Roles.Administrator))
-            {
+        if (existing is not null) {
+            if (!await userManager.IsInRoleAsync(existing, Roles.Administrator)) {
                 throw new InvalidOperationException("Bootstrap admin email belongs to a non-admin account.");
             }
 
             return;
         }
 
-        var admin = new AppUser
-        {
+        var admin = new AppUser {
             Id = Guid.NewGuid(),
             UserName = adminEmail,
             Email = adminEmail,
@@ -125,14 +106,12 @@ public static class DatabaseSeeder
 
         await using var transaction = await db.Database.BeginTransactionAsync();
         var created = await userManager.CreateAsync(admin, adminPassword);
-        if (!created.Succeeded)
-        {
+        if (!created.Succeeded) {
             throw new InvalidOperationException("Bootstrap administrator could not be created.");
         }
 
         var assigned = await userManager.AddToRoleAsync(admin, Roles.Administrator);
-        if (!assigned.Succeeded)
-        {
+        if (!assigned.Succeeded) {
             throw new InvalidOperationException("Bootstrap administrator role could not be assigned.");
         }
 
@@ -145,13 +124,10 @@ public static class DatabaseSeeder
         string password,
         string firstName,
         string lastName,
-        string[] roles)
-    {
+        string[] roles) {
         var user = await userManager.FindByEmailAsync(email);
-        if (user is null)
-        {
-            user = new AppUser
-            {
+        if (user is null) {
+            user = new AppUser {
                 Id = Guid.NewGuid(),
                 UserName = email,
                 Email = email,
@@ -161,25 +137,20 @@ public static class DatabaseSeeder
             };
 
             var created = await userManager.CreateAsync(user, password);
-            if (!created.Succeeded)
-            {
+            if (!created.Succeeded) {
                 var errors = string.Join("; ", created.Errors.Select(e => e.Description));
                 throw new InvalidOperationException($"Could not create user {email}: {errors}");
             }
         }
-        else
-        {
-            if (!await userManager.CheckPasswordAsync(user, password))
-            {
+        else {
+            if (!await userManager.CheckPasswordAsync(user, password)) {
                 user.PasswordHash = userManager.PasswordHasher.HashPassword(user, password);
                 await userManager.UpdateAsync(user);
             }
         }
 
-        foreach (var role in roles)
-        {
-            if (!await userManager.IsInRoleAsync(user, role))
-            {
+        foreach (var role in roles) {
+            if (!await userManager.IsInRoleAsync(user, role)) {
                 await userManager.AddToRoleAsync(user, role);
             }
         }

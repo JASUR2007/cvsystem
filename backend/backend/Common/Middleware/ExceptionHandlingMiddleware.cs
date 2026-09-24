@@ -6,27 +6,21 @@ using Npgsql;
 
 namespace backend.Common.Middleware;
 
-public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
-{
-    public async Task InvokeAsync(HttpContext context)
-    {
-        try
-        {
+public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger) {
+    public async Task InvokeAsync(HttpContext context) {
+        try {
             await next(context);
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             await HandleExceptionAsync(context, ex);
         }
     }
 
-    private async Task HandleExceptionAsync(HttpContext context, Exception exception)
-    {
+    private async Task HandleExceptionAsync(HttpContext context, Exception exception) {
         var statusCode = HttpStatusCode.InternalServerError;
         string message;
 
-        switch (exception)
-        {
+        switch (exception) {
             case NotFoundException notFound:
                 statusCode = HttpStatusCode.NotFound;
                 message = notFound.Message;

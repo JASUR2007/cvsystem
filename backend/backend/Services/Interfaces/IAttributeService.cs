@@ -4,8 +4,7 @@ using backend.DTOs.Attributes;
 
 namespace backend.Services.Interfaces;
 
-public interface IAttributeService
-{
+public interface IAttributeService {
     Task<PagedResult<AttributeListItem>> ListAsync(
         string? prefix, string? category, AttributeType? type, bool? recent,
         int page, int pageSize, CancellationToken cancellationToken = default);

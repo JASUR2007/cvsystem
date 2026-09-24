@@ -3,14 +3,11 @@ using backend.Common.Exceptions;
 
 namespace backend.Auth;
 
-public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICurrentUserService
-{
+public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICurrentUserService {
     public ClaimsPrincipal? Principal => httpContextAccessor.HttpContext?.User;
 
-    public Guid? UserId
-    {
-        get
-        {
+    public Guid? UserId {
+        get {
             var sub = Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value
                    ?? Principal?.FindFirst("sub")?.Value;
             return Guid.TryParse(sub, out var id) ? id : null;

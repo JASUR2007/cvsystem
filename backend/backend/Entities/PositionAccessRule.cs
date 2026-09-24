@@ -2,8 +2,7 @@ using backend.Common.Enums;
 
 namespace backend.Entities;
 
-public sealed class PositionAccessRule
-{
+public sealed class PositionAccessRule {
     public Guid Id { get; set; }
     public Guid PositionId { get; set; }
     public Position Position { get; set; } = null!;

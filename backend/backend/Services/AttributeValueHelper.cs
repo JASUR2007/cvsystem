@@ -4,17 +4,14 @@ using backend.Entities;
 
 namespace backend.Services;
 
-public static class AttributeValueHelper
-{
-    public static bool ValidImageKey(string? key, Guid userId)
-    {
+public static class AttributeValueHelper {
+    public static bool ValidImageKey(string? key, Guid userId) {
         if (string.IsNullOrWhiteSpace(key)) return true;
         var normalized = key.Trim();
         if (normalized.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase))
             return true;
 
-        if (Uri.TryCreate(normalized, UriKind.Absolute, out var uri))
-        {
+        if (Uri.TryCreate(normalized, UriKind.Absolute, out var uri)) {
             normalized = uri.AbsolutePath;
         }
 
@@ -22,16 +19,13 @@ public static class AttributeValueHelper
 
         var userPrefix = $"users/{userId}/";
         var userIdx = normalized.IndexOf(userPrefix, StringComparison.Ordinal);
-        if (userIdx >= 0)
-        {
+        if (userIdx >= 0) {
             normalized = normalized.Substring(userIdx);
         }
-        else
-        {
+        else {
             var uploadPrefix = $"uploads/users/{userId}/";
             var uploadIdx = normalized.IndexOf(uploadPrefix, StringComparison.Ordinal);
-            if (uploadIdx >= 0)
-            {
+            if (uploadIdx >= 0) {
                 normalized = normalized.Substring(uploadIdx);
             }
         }
@@ -40,30 +34,25 @@ public static class AttributeValueHelper
             || normalized.StartsWith($"uploads/users/{userId}/", StringComparison.Ordinal);
     }
 
-    public static string? CleanImageKey(string? key)
-    {
+    public static string? CleanImageKey(string? key) {
         if (string.IsNullOrWhiteSpace(key)) return null;
         var trimmed = key.Trim();
         if (trimmed.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase))
             return trimmed;
 
         var userIdx = trimmed.IndexOf("users/", StringComparison.Ordinal);
-        if (userIdx >= 0)
-        {
+        if (userIdx >= 0) {
             return trimmed.Substring(userIdx);
         }
         var uploadIdx = trimmed.IndexOf("uploads/users/", StringComparison.Ordinal);
-        if (uploadIdx >= 0)
-        {
+        if (uploadIdx >= 0) {
             return trimmed.Substring(uploadIdx);
         }
         return trimmed;
     }
 
-    public static string? Validate(AttributeDefinition attribute, AttributeValueInput input)
-    {
-        return attribute.Type switch
-        {
+    public static string? Validate(AttributeDefinition attribute, AttributeValueInput input) {
+        return attribute.Type switch {
             AttributeType.String when input.TextValue is not null && input.TextValue.Trim().Length > 200 => "Value must be at most 200 characters.",
             AttributeType.Text when input.TextValue is not null && input.TextValue.Trim().Length > 2000 => "Value must be at most 2000 characters.",
             AttributeType.Numeric when input.NumberValue is not null && (input.NumberValue < -1000000 || input.NumberValue > 1000000) => "Numeric value out of range.",
@@ -74,8 +63,7 @@ public static class AttributeValueHelper
         };
     }
 
-    public static void Apply(UserAttributeValue value, AttributeDefinition attribute, AttributeValueInput input)
-    {
+    public static void Apply(UserAttributeValue value, AttributeDefinition attribute, AttributeValueInput input) {
         value.TextValue = attribute.Type is AttributeType.String or AttributeType.Text ? input.TextValue?.Trim() : null;
         value.NumberValue = attribute.Type == AttributeType.Numeric ? input.NumberValue : null;
         value.DateValue = attribute.Type == AttributeType.Date ? input.DateValue : null;
@@ -88,12 +76,9 @@ public static class AttributeValueHelper
         value.Version++;
     }
 
-    public static bool IsFilled(UserAttributeValue? value, AttributeDefinition attribute, AppUser user)
-    {
-        if (attribute.IsBuiltIn)
-        {
-            return attribute.Name switch
-            {
+    public static bool IsFilled(UserAttributeValue? value, AttributeDefinition attribute, AppUser user) {
+        if (attribute.IsBuiltIn) {
+            return attribute.Name switch {
                 "First Name" => !string.IsNullOrWhiteSpace(user.FirstName),
                 "Last Name" => !string.IsNullOrWhiteSpace(user.LastName),
                 "Location" => !string.IsNullOrWhiteSpace(user.Location),
@@ -102,8 +87,7 @@ public static class AttributeValueHelper
             };
         }
 
-        return attribute.Type switch
-        {
+        return attribute.Type switch {
             AttributeType.String or AttributeType.Text => !string.IsNullOrWhiteSpace(value?.TextValue),
             AttributeType.Image => !string.IsNullOrWhiteSpace(value?.ImageObjectKey),
             AttributeType.Numeric => value?.NumberValue is not null,
@@ -115,10 +99,8 @@ public static class AttributeValueHelper
         };
     }
 
-    public static AttributeValueView View(AttributeDefinition attribute, UserAttributeValue? value, AppUser user)
-    {
-        var builtInText = attribute.Name switch
-        {
+    public static AttributeValueView View(AttributeDefinition attribute, UserAttributeValue? value, AppUser user) {
+        var builtInText = attribute.Name switch {
             "First Name" => user.FirstName,
             "Last Name" => user.LastName,
             "Location" => user.Location,

@@ -6,10 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services;
 
-public class SettingsService(AppDbContext db) : ISettingsService
-{
-    public async Task<SettingsView> GetSettingsAsync(Guid userId, CancellationToken cancellationToken = default)
-    {
+public class SettingsService(AppDbContext db) : ISettingsService {
+    public async Task<SettingsView> GetSettingsAsync(Guid userId, CancellationToken cancellationToken = default) {
         var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(item => item.Id == userId, cancellationToken);
         if (user is null)
             throw new NotFoundException("User not found.");
@@ -23,8 +21,7 @@ public class SettingsService(AppDbContext db) : ISettingsService
     public Task<SettingsView> UpdateThemeAsync(Guid userId, SettingsUpdate request, CancellationToken cancellationToken = default) =>
         UpdateAsync(userId, request, false, cancellationToken);
 
-    private async Task<SettingsView> UpdateAsync(Guid userId, SettingsUpdate request, bool isLanguage, CancellationToken cancellationToken)
-    {
+    private async Task<SettingsView> UpdateAsync(Guid userId, SettingsUpdate request, bool isLanguage, CancellationToken cancellationToken) {
         if (isLanguage && request.Value is not ("en" or "ru" or "uz"))
             throw new ValidationException("Unsupported language.");
 

@@ -2,14 +2,11 @@
 
 #nullable disable
 
-namespace backend.Data.Migrations
-{
+namespace backend.Data.Migrations {
     /// <inheritdoc />
-    public partial class UpdatePhotoColumnLength : Migration
-    {
+    public partial class UpdatePhotoColumnLength : Migration {
         /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
+        protected override void Up(MigrationBuilder migrationBuilder) {
             migrationBuilder.AlterColumn<string>(
                 name: "ImageObjectKey",
                 table: "UserAttributeValues",
@@ -32,8 +29,7 @@ namespace backend.Data.Migrations
         }
 
         /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
+        protected override void Down(MigrationBuilder migrationBuilder) {
             migrationBuilder.AlterColumn<string>(
                 name: "ImageObjectKey",
                 table: "UserAttributeValues",

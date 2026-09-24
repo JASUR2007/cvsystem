@@ -7,13 +7,11 @@ namespace backend.Controllers;
 
 [ApiController]
 [Authorize]
-public sealed class ProjectsController(IProjectService projectService) : ControllerBase
-{
+public sealed class ProjectsController(IProjectService projectService) : ControllerBase {
     [HttpGet("api/projects")]
     [HttpGet("api/profile/projects")]
     [HttpGet("api/users/{userId:guid}/projects")]
-    public async Task<ActionResult<List<ProjectView>>> List([FromQuery] Guid? userId, CancellationToken cancellationToken)
-    {
+    public async Task<ActionResult<List<ProjectView>>> List([FromQuery] Guid? userId, CancellationToken cancellationToken) {
         var result = await projectService.ListUserProjectsAsync(userId, cancellationToken);
         return Ok(result);
     }
@@ -21,22 +19,19 @@ public sealed class ProjectsController(IProjectService projectService) : Control
     [HttpPost("api/projects")]
     [HttpPost("api/profile/projects")]
     [HttpPost("api/users/{userId:guid}/projects")]
-    public async Task<ActionResult<ProjectView>> Create([FromQuery] Guid? userId, ProjectRequest request, CancellationToken cancellationToken)
-    {
+    public async Task<ActionResult<ProjectView>> Create([FromQuery] Guid? userId, ProjectRequest request, CancellationToken cancellationToken) {
         var result = await projectService.CreateProjectAsync(userId, request, cancellationToken);
         return CreatedAtAction(nameof(List), new { userId }, result);
     }
 
     [HttpPut("api/projects/{id:guid}")]
-    public async Task<ActionResult<ProjectView>> Update(Guid id, ProjectRequest request, CancellationToken cancellationToken)
-    {
+    public async Task<ActionResult<ProjectView>> Update(Guid id, ProjectRequest request, CancellationToken cancellationToken) {
         var result = await projectService.UpdateProjectAsync(id, request, cancellationToken);
         return Ok(result);
     }
 
     [HttpDelete("api/projects/{id:guid}")]
-    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
-    {
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken) {
         await projectService.DeleteProjectAsync(id, cancellationToken);
         return NoContent();
     }

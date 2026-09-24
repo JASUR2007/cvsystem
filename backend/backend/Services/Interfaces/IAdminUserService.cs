@@ -3,8 +3,7 @@ using backend.DTOs.Admin;
 
 namespace backend.Services.Interfaces;
 
-public interface IAdminUserService
-{
+public interface IAdminUserService {
     Task<AdminDashboardResponse> GetDashboardAsync(CancellationToken cancellationToken = default);
 
     Task<PagedResult<AdminUserView>> ListUsersAsync(

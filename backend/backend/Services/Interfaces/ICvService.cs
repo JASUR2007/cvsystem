@@ -4,8 +4,7 @@ using backend.DTOs.Profile;
 
 namespace backend.Services.Interfaces;
 
-public interface ICvService
-{
+public interface ICvService {
     Task<List<CvListItem>> ListCandidateCvsAsync(Guid candidateId, CancellationToken cancellationToken = default);
     Task<CvDetail> CreateCvAsync(Guid positionId, Guid candidateId, CancellationToken cancellationToken = default);
     Task<CvDetail> GetCvDetailAsync(Guid id, CancellationToken cancellationToken = default);

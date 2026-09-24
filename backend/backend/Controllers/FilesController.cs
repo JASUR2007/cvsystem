@@ -15,11 +15,9 @@ namespace backend.Controllers;
 public sealed class FilesController(
     IFileStorageService storageService,
     ICurrentUserService currentUser,
-    AppDbContext db) : ControllerBase
-{
+    AppDbContext db) : ControllerBase {
     [HttpPost("presign")]
-    public ActionResult<PresignResponse> Presign(PresignRequest request, Guid? userId)
-    {
+    public ActionResult<PresignResponse> Presign(PresignRequest request, Guid? userId) {
         var id = currentUser.RequireUserId();
         var targetId = currentUser.IsAdmin && userId is not null ? userId.Value : id;
 
@@ -29,8 +27,7 @@ public sealed class FilesController(
 
     [HttpPost("upload")]
     [Consumes("multipart/form-data")]
-    public async Task<ActionResult<PresignResponse>> Upload([FromForm] IFormFile? file, [FromQuery] Guid? userId, CancellationToken cancellationToken)
-    {
+    public async Task<ActionResult<PresignResponse>> Upload([FromForm] IFormFile? file, [FromQuery] Guid? userId, CancellationToken cancellationToken) {
         if (file is null || file.Length == 0)
             throw new ValidationException("No file provided.");
 
@@ -39,11 +36,9 @@ public sealed class FilesController(
 
         var contentType = file.ContentType?.ToLowerInvariant() ?? "application/octet-stream";
         var allowed = new[] { "image/jpeg", "image/png", "image/webp" };
-        if (!allowed.Contains(contentType))
-        {
+        if (!allowed.Contains(contentType)) {
             var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
-            contentType = ext switch
-            {
+            contentType = ext switch {
                 ".jpg" or ".jpeg" => "image/jpeg",
                 ".png" => "image/png",
                 ".webp" => "image/webp",
@@ -60,8 +55,7 @@ public sealed class FilesController(
     }
 
     [HttpDelete("{**objectKey}")]
-    public async Task<IActionResult> Delete(string objectKey, CancellationToken cancellationToken)
-    {
+    public async Task<IActionResult> Delete(string objectKey, CancellationToken cancellationToken) {
         var id = currentUser.RequireUserId();
         var normalizedKey = objectKey.TrimStart('/');
         if (!currentUser.IsAdmin && !normalizedKey.StartsWith($"users/{id}/", StringComparison.Ordinal) && !normalizedKey.StartsWith($"uploads/users/{id}/", StringComparison.Ordinal))

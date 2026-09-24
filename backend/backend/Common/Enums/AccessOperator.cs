@@ -1,7 +1,6 @@
 namespace backend.Common.Enums;
 
-public enum AccessOperator
-{
+public enum AccessOperator {
     Equals,
     NotEquals,
     GreaterThan,

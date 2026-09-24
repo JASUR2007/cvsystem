@@ -8,10 +8,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services;
 
-public class ProfileService(AppDbContext db) : IProfileService
-{
-    public async Task<ProfileView> GetProfileAsync(Guid userId, CancellationToken cancellationToken = default)
-    {
+public class ProfileService(AppDbContext db) : IProfileService {
+    public async Task<ProfileView> GetProfileAsync(Guid userId, CancellationToken cancellationToken = default) {
         var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(item => item.Id == userId, cancellationToken);
         if (user is null)
             throw new NotFoundException("User profile not found.");
@@ -19,8 +17,7 @@ public class ProfileService(AppDbContext db) : IProfileService
         return await ToViewAsync(user, cancellationToken);
     }
 
-    public async Task<ProfileView> UpdateProfileAsync(Guid userId, ProfileUpdate request, CancellationToken cancellationToken = default)
-    {
+    public async Task<ProfileView> UpdateProfileAsync(Guid userId, ProfileUpdate request, CancellationToken cancellationToken = default) {
         if (string.IsNullOrWhiteSpace(request.FirstName) || string.IsNullOrWhiteSpace(request.LastName))
             throw new ValidationException("First and last names are required.");
 
@@ -50,8 +47,7 @@ public class ProfileService(AppDbContext db) : IProfileService
         return await ToViewAsync(user, cancellationToken);
     }
 
-    public async Task<List<AttributeValueView>> GetProfileAttributesAsync(Guid userId, CancellationToken cancellationToken = default)
-    {
+    public async Task<List<AttributeValueView>> GetProfileAttributesAsync(Guid userId, CancellationToken cancellationToken = default) {
         var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(item => item.Id == userId, cancellationToken);
         if (user is null)
             throw new NotFoundException("User profile not found.");
@@ -68,8 +64,7 @@ public class ProfileService(AppDbContext db) : IProfileService
             .OrderBy(value => value.Category).ThenBy(value => value.Name).ToList();
     }
 
-    public async Task<AttributeValueView> AddProfileAttributeAsync(Guid userId, Guid attributeId, CancellationToken cancellationToken = default)
-    {
+    public async Task<AttributeValueView> AddProfileAttributeAsync(Guid userId, Guid attributeId, CancellationToken cancellationToken = default) {
         var attribute = await db.Attributes.FindAsync([attributeId], cancellationToken);
         if (attribute is null)
             throw new NotFoundException("Attribute not found.");
@@ -91,8 +86,7 @@ public class ProfileService(AppDbContext db) : IProfileService
         return AttributeValueHelper.View(attribute, value, user);
     }
 
-    public async Task<AttributeValueView> UpdateProfileAttributeAsync(Guid userId, Guid attributeId, AttributeValueUpdate request, CancellationToken cancellationToken = default)
-    {
+    public async Task<AttributeValueView> UpdateProfileAttributeAsync(Guid userId, Guid attributeId, AttributeValueUpdate request, CancellationToken cancellationToken = default) {
         var value = await db.UserAttributeValues.Include(item => item.Attribute).ThenInclude(attribute => attribute.Options)
             .FirstOrDefaultAsync(item => item.UserId == userId && item.AttributeId == attributeId, cancellationToken);
         if (value is null)
@@ -115,8 +109,7 @@ public class ProfileService(AppDbContext db) : IProfileService
         return AttributeValueHelper.View(value.Attribute, value, user);
     }
 
-    public async Task RemoveProfileAttributeAsync(Guid userId, Guid attributeId, CancellationToken cancellationToken = default)
-    {
+    public async Task RemoveProfileAttributeAsync(Guid userId, Guid attributeId, CancellationToken cancellationToken = default) {
         var value = await db.UserAttributeValues.FindAsync([userId, attributeId], cancellationToken);
         if (value is null)
             throw new NotFoundException("Attribute value not found.");
@@ -128,20 +121,17 @@ public class ProfileService(AppDbContext db) : IProfileService
         await db.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task<ProfileView> ToViewAsync(AppUser user, CancellationToken cancellationToken)
-    {
+    private async Task<ProfileView> ToViewAsync(AppUser user, CancellationToken cancellationToken) {
         var roles = await (from link in db.UserRoles
                            join r in db.Roles on link.RoleId equals r.Id
                            where link.UserId == user.Id
                            select r.Name).ToListAsync(cancellationToken);
 
         string? recruiterStatus = null;
-        if (roles.Contains(Roles.Recruiter))
-        {
+        if (roles.Contains(Roles.Recruiter)) {
             recruiterStatus = "Approved";
         }
-        else
-        {
+        else {
             recruiterStatus = await db.UserClaims
                 .Where(c => c.UserId == user.Id && c.ClaimType == "recruiter_request_status")
                 .Select(c => c.ClaimValue)

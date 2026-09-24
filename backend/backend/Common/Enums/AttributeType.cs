@@ -1,7 +1,6 @@
 namespace backend.Common.Enums;
 
-public enum AttributeType
-{
+public enum AttributeType {
     String,
     Text,
     Image,

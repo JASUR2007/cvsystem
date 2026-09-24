@@ -8,19 +8,16 @@ namespace backend.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public sealed class AuthController(IAuthService authService, ICurrentUserService currentUser) : ControllerBase
-{
+public sealed class AuthController(IAuthService authService, ICurrentUserService currentUser) : ControllerBase {
     [HttpPost("register")]
-    public async Task<ActionResult<AuthResponse>> Register(RegisterRequest request, CancellationToken cancellationToken)
-    {
+    public async Task<ActionResult<AuthResponse>> Register(RegisterRequest request, CancellationToken cancellationToken) {
         var response = await authService.RegisterAsync(request, cancellationToken);
         SetAuthCookie(response.Token);
         return Ok(response);
     }
 
     [HttpPost("login")]
-    public async Task<ActionResult<AuthResponse>> Login(LoginRequest request, CancellationToken cancellationToken)
-    {
+    public async Task<ActionResult<AuthResponse>> Login(LoginRequest request, CancellationToken cancellationToken) {
         var response = await authService.LoginAsync(request, cancellationToken);
         SetAuthCookie(response.Token, request.RememberMe);
         return Ok(response);
@@ -28,18 +25,15 @@ public sealed class AuthController(IAuthService authService, ICurrentUserService
 
     [Authorize]
     [HttpGet("me")]
-    public async Task<ActionResult<CurrentUserResponse>> Me(CancellationToken cancellationToken)
-    {
+    public async Task<ActionResult<CurrentUserResponse>> Me(CancellationToken cancellationToken) {
         var response = await authService.GetCurrentUserAsync(currentUser.RequireUserId(), cancellationToken);
         return Ok(response);
     }
 
     [Authorize]
     [HttpPost("logout")]
-    public IActionResult Logout()
-    {
-        Response.Cookies.Delete("talenthub_token", new CookieOptions
-        {
+    public IActionResult Logout() {
+        Response.Cookies.Delete("talenthub_token", new CookieOptions {
             HttpOnly = true,
             Secure = true,
             SameSite = SameSiteMode.None
@@ -47,10 +41,8 @@ public sealed class AuthController(IAuthService authService, ICurrentUserService
         return NoContent();
     }
 
-    private void SetAuthCookie(string token, bool rememberMe = false)
-    {
-        Response.Cookies.Append("talenthub_token", token, new CookieOptions
-        {
+    private void SetAuthCookie(string token, bool rememberMe = false) {
+        Response.Cookies.Append("talenthub_token", token, new CookieOptions {
             HttpOnly = true,
             Secure = true,
             SameSite = SameSiteMode.None,

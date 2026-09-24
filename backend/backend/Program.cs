@@ -23,8 +23,7 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.Configure<ForwardedHeadersOptions>(options =>
-{
+builder.Services.Configure<ForwardedHeadersOptions>(options => {
     options.ForwardedHeaders = ForwardedHeaders.All;
     options.KnownIPNetworks.Clear();
     options.KnownProxies.Clear();
@@ -40,22 +39,19 @@ var jwtIssuer = builder.Configuration["Jwt:Issuer"]
 var jwtAudience = builder.Configuration["Jwt:Audience"]
     ?? throw new InvalidOperationException("Jwt:Audience is required.");
 
-if (Encoding.UTF8.GetByteCount(jwtKey) < 32)
-{
+if (Encoding.UTF8.GetByteCount(jwtKey) < 32) {
     throw new InvalidOperationException("Jwt:Key must contain at least 32 bytes.");
 }
 
 // Database & Identity
-builder.Services.AddDbContext<AppDbContext>(options =>
-{
+builder.Services.AddDbContext<AppDbContext>(options => {
     options.UseNpgsql(connectionString);
     options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
 });
-builder.Services.AddIdentityCore<AppUser>(options =>
-    {
-        options.User.RequireUniqueEmail = true;
-        options.Password.RequiredLength = 8;
-    })
+builder.Services.AddIdentityCore<AppUser>(options => {
+    options.User.RequireUniqueEmail = true;
+    options.Password.RequiredLength = 8;
+})
     .AddRoles<IdentityRole<Guid>>()
     .AddEntityFrameworkStores<AppDbContext>();
 
@@ -83,19 +79,16 @@ builder.Services.AddScoped<ISettingsService, SettingsService>();
 
 // Authentication & Authorization
 var authentication = builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddCookie("External", options =>
-    {
+    .AddCookie("External", options => {
         options.Cookie.Name = "talenthub_external";
         options.Cookie.HttpOnly = true;
         options.Cookie.SameSite = SameSiteMode.Lax;
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
     })
-    .AddJwtBearer(options =>
-    {
+    .AddJwtBearer(options => {
         options.MapInboundClaims = false;
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
+        options.TokenValidationParameters = new TokenValidationParameters {
             ValidateIssuer = true,
             ValidIssuer = jwtIssuer,
             ValidateAudience = true,
@@ -107,22 +100,17 @@ var authentication = builder.Services.AddAuthentication(JwtBearerDefaults.Authen
             NameClaimType = JwtRegisteredClaimNames.Sub,
             RoleClaimType = ClaimTypes.Role
         };
-        options.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = context =>
-            {
-                if (string.IsNullOrEmpty(context.Token) && context.Request.Cookies.TryGetValue("talenthub_token", out var cookieToken))
-                {
+        options.Events = new JwtBearerEvents {
+            OnMessageReceived = context => {
+                if (string.IsNullOrEmpty(context.Token) && context.Request.Cookies.TryGetValue("talenthub_token", out var cookieToken)) {
                     context.Token = cookieToken;
                 }
                 return Task.CompletedTask;
             },
-            OnTokenValidated = async context =>
-            {
+            OnTokenValidated = async context => {
                 var idValue = context.Principal?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
                 var versionValue = context.Principal?.FindFirst("auth_version")?.Value;
-                if (!Guid.TryParse(idValue, out var id) || !int.TryParse(versionValue, out var version))
-                {
+                if (!Guid.TryParse(idValue, out var id) || !int.TryParse(versionValue, out var version)) {
                     context.Fail("Invalid token claims.");
                     return;
                 }
@@ -133,8 +121,7 @@ var authentication = builder.Services.AddAuthentication(JwtBearerDefaults.Authen
                     .Select(item => new { item.IsBlocked, item.AuthVersion })
                     .FirstOrDefaultAsync(context.HttpContext.RequestAborted);
 
-                if (user is null || user.IsBlocked || user.AuthVersion != version)
-                {
+                if (user is null || user.IsBlocked || user.AuthVersion != version) {
                     context.Fail("Token has been revoked.");
                 }
             }
@@ -142,10 +129,8 @@ var authentication = builder.Services.AddAuthentication(JwtBearerDefaults.Authen
     });
 
 if (!string.IsNullOrWhiteSpace(builder.Configuration["Authentication:Google:ClientId"])
-    && !string.IsNullOrWhiteSpace(builder.Configuration["Authentication:Google:ClientSecret"]))
-{
-    authentication.AddGoogle(options =>
-    {
+    && !string.IsNullOrWhiteSpace(builder.Configuration["Authentication:Google:ClientSecret"])) {
+    authentication.AddGoogle(options => {
         options.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
         options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
         options.SignInScheme = "External";
@@ -153,10 +138,8 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration["Authentication:Google:Clie
 }
 
 if (!string.IsNullOrWhiteSpace(builder.Configuration["Authentication:GitHub:ClientId"])
-    && !string.IsNullOrWhiteSpace(builder.Configuration["Authentication:GitHub:ClientSecret"]))
-{
-    authentication.AddGitHub(options =>
-    {
+    && !string.IsNullOrWhiteSpace(builder.Configuration["Authentication:GitHub:ClientSecret"])) {
+    authentication.AddGitHub(options => {
         options.ClientId = builder.Configuration["Authentication:GitHub:ClientId"]!;
         options.ClientSecret = builder.Configuration["Authentication:GitHub:ClientSecret"]!;
         options.SignInScheme = "External";
@@ -173,36 +156,28 @@ var s3SecretKey = builder.Configuration["S3:SecretKey"]?.Trim();
 var isR2 = s3Endpoint?.Contains("r2.cloudflarestorage.com", StringComparison.OrdinalIgnoreCase) == true;
 var s3Region = isR2 ? "auto" : (builder.Configuration["S3:Region"] ?? "uz");
 
-if (!string.IsNullOrWhiteSpace(s3Endpoint) && !string.IsNullOrWhiteSpace(s3AccessKey))
-{
+if (!string.IsNullOrWhiteSpace(s3Endpoint) && !string.IsNullOrWhiteSpace(s3AccessKey)) {
     if (!s3Endpoint.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
-        && !s3Endpoint.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-    {
+        && !s3Endpoint.StartsWith("https://", StringComparison.OrdinalIgnoreCase)) {
         if (s3AccessKey.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
-            || s3AccessKey.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-        {
+            || s3AccessKey.StartsWith("https://", StringComparison.OrdinalIgnoreCase)) {
             (s3Endpoint, s3AccessKey) = (s3AccessKey, s3Endpoint);
         }
-        else if (s3Endpoint.StartsWith("S3-", StringComparison.OrdinalIgnoreCase))
-        {
+        else if (s3Endpoint.StartsWith("S3-", StringComparison.OrdinalIgnoreCase)) {
             s3AccessKey = s3Endpoint;
             s3Endpoint = "https://storage.acdn.uz";
         }
-        else
-        {
+        else {
             s3Endpoint = "https://" + s3Endpoint;
         }
     }
 }
 
-if (!string.IsNullOrWhiteSpace(s3Endpoint) && !string.IsNullOrWhiteSpace(s3AccessKey) && !string.IsNullOrWhiteSpace(s3SecretKey))
-{
-    try
-    {
+if (!string.IsNullOrWhiteSpace(s3Endpoint) && !string.IsNullOrWhiteSpace(s3AccessKey) && !string.IsNullOrWhiteSpace(s3SecretKey)) {
+    try {
         builder.Services.AddSingleton<IAmazonS3>(new AmazonS3Client(
             new BasicAWSCredentials(s3AccessKey, s3SecretKey),
-            new AmazonS3Config
-            {
+            new AmazonS3Config {
                 ServiceURL = s3Endpoint,
                 ForcePathStyle = true,
                 AuthenticationRegion = s3Region,
@@ -210,8 +185,7 @@ if (!string.IsNullOrWhiteSpace(s3Endpoint) && !string.IsNullOrWhiteSpace(s3Acces
                 ResponseChecksumValidation = ResponseChecksumValidation.WHEN_REQUIRED
             }));
     }
-    catch (Exception ex)
-    {
+    catch (Exception ex) {
         Console.Error.WriteLine($"Warning: Failed to initialize AmazonS3Client: {ex.Message}");
     }
 }
@@ -219,31 +193,25 @@ if (!string.IsNullOrWhiteSpace(s3Endpoint) && !string.IsNullOrWhiteSpace(s3Acces
 // CORS
 var frontendOrigins = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 var frontendBaseUrl = builder.Configuration["Frontend:BaseUrl"];
-if (!string.IsNullOrWhiteSpace(frontendBaseUrl))
-{
+if (!string.IsNullOrWhiteSpace(frontendBaseUrl)) {
     frontendOrigins.Add(frontendBaseUrl.Trim().TrimEnd('/'));
 }
 
 var configOrigins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>();
-if (configOrigins != null)
-{
-    foreach (var o in configOrigins.Where(s => !string.IsNullOrWhiteSpace(s)))
-    {
+if (configOrigins != null) {
+    foreach (var o in configOrigins.Where(s => !string.IsNullOrWhiteSpace(s))) {
         frontendOrigins.Add(o.Trim().TrimEnd('/'));
     }
 }
 
-builder.Services.AddCors(options => options.AddPolicy("frontend", policy =>
-{
-    if (frontendOrigins.Count > 0)
-    {
+builder.Services.AddCors(options => options.AddPolicy("frontend", policy => {
+    if (frontendOrigins.Count > 0) {
         policy.WithOrigins(frontendOrigins.ToArray())
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
     }
-    else
-    {
+    else {
         policy.SetIsOriginAllowed(_ => true)
             .AllowAnyHeader()
             .AllowAnyMethod()
@@ -266,8 +234,7 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 // Database Seeding
 await DatabaseSeeder.InitializeAsync(app.Services);
 
-if (app.Environment.IsDevelopment())
-{
+if (app.Environment.IsDevelopment()) {
     app.MapOpenApi();
     await DevelopmentDataSeeder.SeedAsync(app.Services);
 }
@@ -281,13 +248,11 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapGet("/api/health", () => Results.Ok(new { status = "ok" }));
-app.MapGet("/uploads/{**path}", (string path) =>
-{
+app.MapGet("/uploads/{**path}", (string path) => {
     var localPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", path.Replace('/', Path.DirectorySeparatorChar));
     if (!File.Exists(localPath)) return Results.NotFound();
     var ext = Path.GetExtension(localPath).ToLowerInvariant();
-    var contentType = ext switch
-    {
+    var contentType = ext switch {
         ".jpg" or ".jpeg" => "image/jpeg",
         ".png" => "image/png",
         ".webp" => "image/webp",

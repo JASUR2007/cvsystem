@@ -5,8 +5,7 @@ using backend.DTOs.Positions;
 
 namespace backend.Services.Interfaces;
 
-public interface IPositionService
-{
+public interface IPositionService {
     Task<PagedResult<PositionListItem>> ListPositionsAsync(
         PositionLevel? level, string? q, bool? isPublic, int page, int pageSize,
         CancellationToken cancellationToken = default);

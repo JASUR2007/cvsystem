@@ -2,8 +2,7 @@ using backend.Common.Enums;
 
 namespace backend.Entities;
 
-public sealed class Position
-{
+public sealed class Position {
     public Guid Id { get; set; }
     public string Title { get; set; } = string.Empty;
     public string ShortDescription { get; set; } = string.Empty;

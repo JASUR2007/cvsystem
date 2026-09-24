@@ -4,10 +4,8 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace backend.Data.Configurations;
 
-public class AttributeDefinitionConfiguration : IEntityTypeConfiguration<AttributeDefinition>
-{
-    public void Configure(EntityTypeBuilder<AttributeDefinition> builder)
-    {
+public class AttributeDefinitionConfiguration : IEntityTypeConfiguration<AttributeDefinition> {
+    public void Configure(EntityTypeBuilder<AttributeDefinition> builder) {
         builder.Property(x => x.Name).HasMaxLength(160).IsRequired();
         builder.Property(x => x.Category).HasMaxLength(80).IsRequired();
         builder.Property(x => x.Description).HasMaxLength(2000);

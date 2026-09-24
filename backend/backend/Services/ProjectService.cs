@@ -8,10 +8,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services;
 
-public class ProjectService(AppDbContext db, ICurrentUserService currentUser) : IProjectService
-{
-    public async Task<List<ProjectView>> ListUserProjectsAsync(Guid? targetUserId, CancellationToken cancellationToken = default)
-    {
+public class ProjectService(AppDbContext db, ICurrentUserService currentUser) : IProjectService {
+    public async Task<List<ProjectView>> ListUserProjectsAsync(Guid? targetUserId, CancellationToken cancellationToken = default) {
         var id = ResolveUserId(targetUserId);
         var projects = await db.Projects.AsNoTracking().Where(project => project.UserId == id)
             .Include(project => project.Tags).ThenInclude(link => link.Tag)
@@ -21,13 +19,11 @@ public class ProjectService(AppDbContext db, ICurrentUserService currentUser) : 
         return projects.Select(View).ToList();
     }
 
-    public async Task<ProjectView> CreateProjectAsync(Guid? targetUserId, ProjectRequest request, CancellationToken cancellationToken = default)
-    {
+    public async Task<ProjectView> CreateProjectAsync(Guid? targetUserId, ProjectRequest request, CancellationToken cancellationToken = default) {
         Validate(request);
         var id = ResolveUserId(targetUserId);
 
-        var project = new Project
-        {
+        var project = new Project {
             Id = Guid.NewGuid(),
             UserId = id,
             Name = request.Name.Trim(),
@@ -43,8 +39,7 @@ public class ProjectService(AppDbContext db, ICurrentUserService currentUser) : 
         return View(project);
     }
 
-    public async Task<ProjectView> UpdateProjectAsync(Guid id, ProjectRequest request, CancellationToken cancellationToken = default)
-    {
+    public async Task<ProjectView> UpdateProjectAsync(Guid id, ProjectRequest request, CancellationToken cancellationToken = default) {
         var project = await OwnProjectAsync(id, cancellationToken);
         if (project is null)
             throw new NotFoundException("Project not found.");
@@ -66,8 +61,7 @@ public class ProjectService(AppDbContext db, ICurrentUserService currentUser) : 
         return View(project);
     }
 
-    public async Task DeleteProjectAsync(Guid id, CancellationToken cancellationToken = default)
-    {
+    public async Task DeleteProjectAsync(Guid id, CancellationToken cancellationToken = default) {
         var project = await OwnProjectAsync(id, cancellationToken);
         if (project is null)
             throw new NotFoundException("Project not found.");
@@ -76,23 +70,20 @@ public class ProjectService(AppDbContext db, ICurrentUserService currentUser) : 
         await db.SaveChangesAsync(cancellationToken);
     }
 
-    private Guid ResolveUserId(Guid? target)
-    {
+    private Guid ResolveUserId(Guid? target) {
         var current = currentUser.RequireUserId();
         if (target is null || target == current) return current;
         if (currentUser.IsAdmin) return target.Value;
         throw new ForbiddenException();
     }
 
-    private async Task<Project?> OwnProjectAsync(Guid id, CancellationToken cancellationToken)
-    {
+    private async Task<Project?> OwnProjectAsync(Guid id, CancellationToken cancellationToken) {
         var query = db.Projects.Include(project => project.Tags).ThenInclude(link => link.Tag).Where(project => project.Id == id);
         if (!currentUser.IsAdmin) query = query.Where(project => project.UserId == currentUser.RequireUserId());
         return await query.FirstOrDefaultAsync(cancellationToken);
     }
 
-    private async Task SetTagsAsync(Project project, List<string> names, CancellationToken cancellationToken)
-    {
+    private async Task SetTagsAsync(Project project, List<string> names, CancellationToken cancellationToken) {
         var distinct = names.Select(name => name.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         var removed = project.Tags.Where(link => !distinct.Contains(link.Tag.Name, StringComparer.OrdinalIgnoreCase)).ToList();
 
@@ -105,14 +96,12 @@ public class ProjectService(AppDbContext db, ICurrentUserService currentUser) : 
         var tags = existing.Concat(missing.Where(name => existing.All(tag => !string.Equals(tag.Name, name, StringComparison.OrdinalIgnoreCase)))
             .Select(name => new Tag { Id = Guid.NewGuid(), Name = name })).ToList();
 
-        foreach (var tag in tags)
-        {
+        foreach (var tag in tags) {
             project.Tags.Add(new ProjectTag { Project = project, Tag = tag, TagId = tag.Id });
         }
     }
 
-    private static void Validate(ProjectRequest request)
-    {
+    private static void Validate(ProjectRequest request) {
         if (string.IsNullOrWhiteSpace(request.Name) || request.Name.Length > 200)
             throw new ValidationException("Project name is required and must be at most 200 characters.");
 

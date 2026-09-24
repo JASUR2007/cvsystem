@@ -4,10 +4,8 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace backend.Data.Configurations;
 
-public class PositionConfiguration : IEntityTypeConfiguration<Position>
-{
-    public void Configure(EntityTypeBuilder<Position> builder)
-    {
+public class PositionConfiguration : IEntityTypeConfiguration<Position> {
+    public void Configure(EntityTypeBuilder<Position> builder) {
         builder.Property(x => x.Title).HasMaxLength(200).IsRequired();
         builder.Property(x => x.ShortDescription).HasMaxLength(2000).IsRequired();
         builder.Property(x => x.Company).HasMaxLength(160);

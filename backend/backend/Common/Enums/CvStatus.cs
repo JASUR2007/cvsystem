@@ -1,7 +1,6 @@
 namespace backend.Common.Enums;
 
-public enum CvStatus
-{
+public enum CvStatus {
     Draft,
     Published
 }

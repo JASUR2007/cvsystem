@@ -1,7 +1,6 @@
 namespace backend.Entities;
 
-public sealed class Project
-{
+public sealed class Project {
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
     public AppUser User { get; set; } = null!;

@@ -8,10 +8,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services;
 
-public class LikeService(AppDbContext db, ICurrentUserService currentUser) : ILikeService
-{
-    public async Task<object> GetLikesAsync(Guid cvId, CancellationToken cancellationToken = default)
-    {
+public class LikeService(AppDbContext db, ICurrentUserService currentUser) : ILikeService {
+    public async Task<object> GetLikesAsync(Guid cvId, CancellationToken cancellationToken = default) {
         var currentId = currentUser.UserId;
         var visible = currentUser.IsAdmin ? db.Cvs.AsQueryable() : PositionAccessHelper.EligibleCvs(db.Cvs, db);
 
@@ -24,8 +22,7 @@ public class LikeService(AppDbContext db, ICurrentUserService currentUser) : ILi
         return new { count, liked };
     }
 
-    public async Task<object> AddLikeAsync(Guid cvId, CancellationToken cancellationToken = default)
-    {
+    public async Task<object> AddLikeAsync(Guid cvId, CancellationToken cancellationToken = default) {
         var visible = currentUser.IsAdmin ? db.Cvs.AsQueryable() : PositionAccessHelper.EligibleCvs(db.Cvs, db);
         if (!await visible.AnyAsync(cv => cv.Id == cvId && cv.Status == CvStatus.Published, cancellationToken))
             throw new NotFoundException("CV not found.");
@@ -42,8 +39,7 @@ public class LikeService(AppDbContext db, ICurrentUserService currentUser) : ILi
         return new { count, liked = true };
     }
 
-    public async Task RemoveLikeAsync(Guid cvId, CancellationToken cancellationToken = default)
-    {
+    public async Task RemoveLikeAsync(Guid cvId, CancellationToken cancellationToken = default) {
         var currentId = currentUser.RequireUserId();
         var like = await db.CvLikes.FindAsync([cvId, currentId], cancellationToken);
         if (like is null)

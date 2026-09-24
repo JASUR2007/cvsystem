@@ -4,10 +4,8 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace backend.Data.Configurations;
 
-public class UserAttributeValueConfiguration : IEntityTypeConfiguration<UserAttributeValue>
-{
-    public void Configure(EntityTypeBuilder<UserAttributeValue> builder)
-    {
+public class UserAttributeValueConfiguration : IEntityTypeConfiguration<UserAttributeValue> {
+    public void Configure(EntityTypeBuilder<UserAttributeValue> builder) {
         builder.HasKey(x => new { x.UserId, x.AttributeId });
         builder.Property(x => x.NumberValue).HasPrecision(18, 4);
         builder.Property(x => x.ImageObjectKey);

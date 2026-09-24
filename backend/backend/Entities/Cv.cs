@@ -2,8 +2,7 @@ using backend.Common.Enums;
 
 namespace backend.Entities;
 
-public sealed class Cv
-{
+public sealed class Cv {
     public Guid Id { get; set; }
     public Guid CandidateId { get; set; }
     public AppUser Candidate { get; set; } = null!;

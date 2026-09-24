@@ -11,12 +11,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services;
 
-public class PositionService(AppDbContext db, ICurrentUserService currentUser) : IPositionService
-{
+public class PositionService(AppDbContext db, ICurrentUserService currentUser) : IPositionService {
     public async Task<PagedResult<PositionListItem>> ListPositionsAsync(
         PositionLevel? level, string? q, bool? isPublic, int page, int pageSize,
-        CancellationToken cancellationToken = default)
-    {
+        CancellationToken cancellationToken = default) {
         var query = db.Positions.AsNoTracking().AsQueryable();
 
         if (!currentUser.IsAuthenticated)
@@ -40,8 +38,7 @@ public class PositionService(AppDbContext db, ICurrentUserService currentUser) :
         return new PagedResult<PositionListItem>(items, currentPage, size, total);
     }
 
-    public async Task<PositionDetail> GetPositionByIdAsync(Guid id, CancellationToken cancellationToken = default)
-    {
+    public async Task<PositionDetail> GetPositionByIdAsync(Guid id, CancellationToken cancellationToken = default) {
         var query = db.Positions.AsNoTracking().Where(item => item.Id == id);
         if (!currentUser.IsAuthenticated)
             query = query.Where(position => position.IsPublic);
@@ -60,12 +57,10 @@ public class PositionService(AppDbContext db, ICurrentUserService currentUser) :
         return ToDetail(position);
     }
 
-    public async Task<PositionDetail> CreatePositionAsync(PositionRequest request, CancellationToken cancellationToken = default)
-    {
+    public async Task<PositionDetail> CreatePositionAsync(PositionRequest request, CancellationToken cancellationToken = default) {
         ValidateRequest(request);
 
-        var position = new Position
-        {
+        var position = new Position {
             Id = Guid.NewGuid(),
             Title = request.Title.Trim(),
             ShortDescription = request.ShortDescription.Trim(),
@@ -82,8 +77,7 @@ public class PositionService(AppDbContext db, ICurrentUserService currentUser) :
         return await GetPositionByIdAsync(position.Id, cancellationToken);
     }
 
-    public async Task<PositionDetail> UpdatePositionAsync(Guid id, PositionRequest request, CancellationToken cancellationToken = default)
-    {
+    public async Task<PositionDetail> UpdatePositionAsync(Guid id, PositionRequest request, CancellationToken cancellationToken = default) {
         ValidateRequest(request);
 
         var position = await db.Positions
@@ -117,8 +111,7 @@ public class PositionService(AppDbContext db, ICurrentUserService currentUser) :
         return await GetPositionByIdAsync(position.Id, cancellationToken);
     }
 
-    public async Task DeletePositionAsync(Guid id, CancellationToken cancellationToken = default)
-    {
+    public async Task DeletePositionAsync(Guid id, CancellationToken cancellationToken = default) {
         var position = await db.Positions.FindAsync([id], cancellationToken);
         if (position is null)
             throw new NotFoundException("Position not found.");
@@ -130,8 +123,7 @@ public class PositionService(AppDbContext db, ICurrentUserService currentUser) :
         await db.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<PositionDetail> DuplicatePositionAsync(Guid id, CancellationToken cancellationToken = default)
-    {
+    public async Task<PositionDetail> DuplicatePositionAsync(Guid id, CancellationToken cancellationToken = default) {
         var source = await db.Positions.AsNoTracking()
             .Include(item => item.Attributes)
             .Include(item => item.AccessRules)
@@ -141,8 +133,7 @@ public class PositionService(AppDbContext db, ICurrentUserService currentUser) :
         if (source is null)
             throw new NotFoundException("Position not found.");
 
-        var duplicate = new Position
-        {
+        var duplicate = new Position {
             Id = Guid.NewGuid(),
             Title = $"{source.Title} (Copy)",
             ShortDescription = source.ShortDescription,
@@ -150,14 +141,12 @@ public class PositionService(AppDbContext db, ICurrentUserService currentUser) :
             Level = source.Level,
             IsPublic = source.IsPublic,
             MaxProjects = source.MaxProjects,
-            Attributes = source.Attributes.Select(attribute => new PositionAttribute
-            {
+            Attributes = source.Attributes.Select(attribute => new PositionAttribute {
                 AttributeId = attribute.AttributeId,
                 SortOrder = attribute.SortOrder,
                 IsRequired = attribute.IsRequired
             }).ToList(),
-            AccessRules = source.AccessRules.Select(rule => new PositionAccessRule
-            {
+            AccessRules = source.AccessRules.Select(rule => new PositionAccessRule {
                 Id = Guid.NewGuid(),
                 AttributeId = rule.AttributeId,
                 Operator = rule.Operator,
@@ -177,8 +166,7 @@ public class PositionService(AppDbContext db, ICurrentUserService currentUser) :
 
     public async Task<PositionCvPage> ListPositionCvsAsync(
         Guid positionId, string? q, Guid? attributeId, AccessOperator? operation, string? value,
-        string? sort, int page, int pageSize, CancellationToken cancellationToken = default)
-    {
+        string? sort, int page, int pageSize, CancellationToken cancellationToken = default) {
         var position = await db.Positions.AsNoTracking().Include(item => item.Attributes).ThenInclude(link => link.Attribute)
             .FirstOrDefaultAsync(item => item.Id == positionId, cancellationToken);
         if (position is null)
@@ -190,8 +178,7 @@ public class PositionService(AppDbContext db, ICurrentUserService currentUser) :
         if (!string.IsNullOrWhiteSpace(q))
             query = query.Where(cv => EF.Functions.ILike(cv.Candidate.FirstName + " " + cv.Candidate.LastName, "%" + q.Trim() + "%"));
 
-        if (attributeId is not null && operation is not null && value is not null)
-        {
+        if (attributeId is not null && operation is not null && value is not null) {
             var attribute = position.Attributes.FirstOrDefault(link => link.AttributeId == attributeId)?.Attribute;
             if (attribute is null)
                 throw new ValidationException("Attribute is not part of this position.");
@@ -218,8 +205,7 @@ public class PositionService(AppDbContext db, ICurrentUserService currentUser) :
                      (operation == AccessOperator.Contains && item.TextValue != null && EF.Functions.ILike(item.TextValue, "%" + value + "%")))))));
         }
 
-        query = sort switch
-        {
+        query = sort switch {
             "likes" => query.OrderByDescending(cv => cv.Likes.Count).ThenByDescending(cv => cv.UpdatedAt),
             "candidate" => query.OrderBy(cv => cv.Candidate.LastName).ThenBy(cv => cv.Candidate.FirstName),
             _ => query.OrderByDescending(cv => cv.UpdatedAt)
@@ -261,8 +247,7 @@ public class PositionService(AppDbContext db, ICurrentUserService currentUser) :
         return new PositionCvPage(columns, items, currentPage, size, total);
     }
 
-    private static void ValidateRequest(PositionRequest request)
-    {
+    private static void ValidateRequest(PositionRequest request) {
         if (string.IsNullOrWhiteSpace(request.Title) || request.Title.Length > 200)
             throw new ValidationException("Title is required and must be at most 200 characters.");
 
@@ -282,8 +267,7 @@ public class PositionService(AppDbContext db, ICurrentUserService currentUser) :
             throw new ValidationException("Invalid project tags.");
     }
 
-    private async Task ApplyAttributesAndRulesAsync(Position position, PositionRequest request, CancellationToken cancellationToken)
-    {
+    private async Task ApplyAttributesAndRulesAsync(Position position, PositionRequest request, CancellationToken cancellationToken) {
         var attributeIds = request.Attributes.Select(attribute => attribute.AttributeId)
             .Concat(request.AccessRules.Select(rule => rule.AttributeId)).Distinct().ToList();
         var attributes = await db.Attributes.Include(attribute => attribute.Options)
@@ -295,8 +279,7 @@ public class PositionService(AppDbContext db, ICurrentUserService currentUser) :
         if (request.Attributes.Select(attribute => attribute.AttributeId).Distinct().Count() != request.Attributes.Count)
             throw new ValidationException("Attributes must be unique.");
 
-        position.Attributes = request.Attributes.Select(attribute => new PositionAttribute
-        {
+        position.Attributes = request.Attributes.Select(attribute => new PositionAttribute {
             Position = position,
             AttributeId = attribute.AttributeId,
             SortOrder = attribute.SortOrder,
@@ -304,16 +287,14 @@ public class PositionService(AppDbContext db, ICurrentUserService currentUser) :
         }).ToList();
 
         position.AccessRules = [];
-        foreach (var rule in request.AccessRules)
-        {
+        foreach (var rule in request.AccessRules) {
             if (!attributes.TryGetValue(rule.AttributeId, out var attribute))
                 throw new ValidationException("Access rule attribute was not found.");
 
             var error = PositionAccessHelper.ValidateRule(attribute, rule.Operator, rule.ComparisonValue);
             if (error is not null) throw new ValidationException(error);
 
-            position.AccessRules.Add(new PositionAccessRule
-            {
+            position.AccessRules.Add(new PositionAccessRule {
                 Position = position,
                 AttributeId = rule.AttributeId,
                 Operator = rule.Operator,
@@ -341,14 +322,12 @@ public class PositionService(AppDbContext db, ICurrentUserService currentUser) :
             rule.Id, rule.AttributeId, rule.Attribute.Name, rule.Operator, rule.ComparisonValue)).ToList(),
         position.ProjectTags.Select(link => link.Tag.Name).Order().ToList());
 
-    private static string? DisplayValue(PositionAttributeView column, UserAttributeValue? value, Dictionary<Guid, string> optionMap, string firstName, string lastName, string? location, string? photoKey)
-    {
+    private static string? DisplayValue(PositionAttributeView column, UserAttributeValue? value, Dictionary<Guid, string> optionMap, string firstName, string lastName, string? location, string? photoKey) {
         if (column.Name == "First Name") return firstName;
         if (column.Name == "Last Name") return lastName;
         if (column.Name == "Location") return location;
         if (column.Name == "Personal Photo") return photoKey;
-        return column.Type switch
-        {
+        return column.Type switch {
             AttributeType.String or AttributeType.Text => value?.TextValue,
             AttributeType.Numeric => value?.NumberValue?.ToString(System.Globalization.CultureInfo.InvariantCulture),
             AttributeType.Date => value?.DateValue?.ToString(),

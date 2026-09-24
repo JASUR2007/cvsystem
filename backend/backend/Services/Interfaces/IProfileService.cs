@@ -2,8 +2,7 @@ using backend.DTOs.Profile;
 
 namespace backend.Services.Interfaces;
 
-public interface IProfileService
-{
+public interface IProfileService {
     Task<ProfileView> GetProfileAsync(Guid userId, CancellationToken cancellationToken = default);
     Task<ProfileView> UpdateProfileAsync(Guid userId, ProfileUpdate request, CancellationToken cancellationToken = default);
     Task<List<AttributeValueView>> GetProfileAttributesAsync(Guid userId, CancellationToken cancellationToken = default);

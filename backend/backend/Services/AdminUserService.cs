@@ -14,8 +14,7 @@ namespace backend.Services;
 public class AdminUserService(
     AppDbContext db,
     UserManager<AppUser> userManager,
-    ICurrentUserService currentUser) : IAdminUserService
-{
+    ICurrentUserService currentUser) : IAdminUserService {
     private static readonly HashSet<string> AllowedRoles =
     [
         Roles.Candidate,
@@ -23,8 +22,7 @@ public class AdminUserService(
         Roles.Administrator
     ];
 
-    public async Task<AdminDashboardResponse> GetDashboardAsync(CancellationToken cancellationToken = default)
-    {
+    public async Task<AdminDashboardResponse> GetDashboardAsync(CancellationToken cancellationToken = default) {
         var totalUsers = await db.Users.CountAsync(cancellationToken);
         var candidates = await (from link in db.UserRoles
                                 join r in db.Roles on link.RoleId equals r.Id
@@ -80,8 +78,7 @@ public class AdminUserService(
 
     public async Task<PagedResult<AdminUserView>> ListUsersAsync(
         string? q, string? role, bool? isBlocked, int page, int pageSize,
-        CancellationToken cancellationToken = default)
-    {
+        CancellationToken cancellationToken = default) {
         var query = db.Users.AsNoTracking().AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(q))
@@ -90,8 +87,7 @@ public class AdminUserService(
         if (isBlocked is not null)
             query = query.Where(user => user.IsBlocked == isBlocked.Value);
 
-        if (!string.IsNullOrWhiteSpace(role))
-        {
+        if (!string.IsNullOrWhiteSpace(role)) {
             var roleId = await db.Roles.Where(r => r.Name == role).Select(r => r.Id).FirstOrDefaultAsync(cancellationToken);
             if (roleId != Guid.Empty)
                 query = query.Where(user => db.UserRoles.Any(link => link.UserId == user.Id && link.RoleId == roleId));
@@ -133,8 +129,7 @@ public class AdminUserService(
         return new PagedResult<AdminUserView>(items, currentPage, size, total);
     }
 
-    public async Task<AdminUserView> GetUserAsync(Guid id, CancellationToken cancellationToken = default)
-    {
+    public async Task<AdminUserView> GetUserAsync(Guid id, CancellationToken cancellationToken = default) {
         var user = await userManager.FindByIdAsync(id.ToString());
         if (user is null)
             throw new NotFoundException("User not found.");
@@ -147,8 +142,7 @@ public class AdminUserService(
         return new AdminUserView(user.Id, user.Email ?? string.Empty, user.FirstName, user.LastName, user.IsBlocked, roles, status);
     }
 
-    public async Task SetBlockedAsync(Guid id, bool blocked, CancellationToken cancellationToken = default)
-    {
+    public async Task SetBlockedAsync(Guid id, bool blocked, CancellationToken cancellationToken = default) {
         if (id == currentUser.UserId)
             throw new ValidationException("You cannot block your own account.");
 
@@ -163,8 +157,7 @@ public class AdminUserService(
             throw new ConflictException("User state changed in another session.");
     }
 
-    public async Task<AdminUserView> UpdateRolesAsync(Guid id, List<string> roles, CancellationToken cancellationToken = default)
-    {
+    public async Task<AdminUserView> UpdateRolesAsync(Guid id, List<string> roles, CancellationToken cancellationToken = default) {
         if (id == currentUser.UserId && !roles.Contains(Roles.Administrator))
             throw new ValidationException("You cannot remove Administrator from your own account.");
 
@@ -200,14 +193,12 @@ public class AdminUserService(
         return await GetUserAsync(id, cancellationToken);
     }
 
-    public async Task<AdminUserView> ApproveRecruiterAsync(Guid id, CancellationToken cancellationToken = default)
-    {
+    public async Task<AdminUserView> ApproveRecruiterAsync(Guid id, CancellationToken cancellationToken = default) {
         var user = await userManager.FindByIdAsync(id.ToString());
         if (user is null)
             throw new NotFoundException("User not found.");
 
-        if (!await userManager.IsInRoleAsync(user, Roles.Recruiter))
-        {
+        if (!await userManager.IsInRoleAsync(user, Roles.Recruiter)) {
             var add = await userManager.AddToRoleAsync(user, Roles.Recruiter);
             if (!add.Succeeded)
                 throw new ConflictException("Failed to assign Recruiter role.");
@@ -215,12 +206,10 @@ public class AdminUserService(
 
         var existingClaim = (await userManager.GetClaimsAsync(user))
             .FirstOrDefault(c => c.Type == "recruiter_request_status");
-        if (existingClaim is not null)
-        {
+        if (existingClaim is not null) {
             await userManager.ReplaceClaimAsync(user, existingClaim, new System.Security.Claims.Claim("recruiter_request_status", "Approved"));
         }
-        else
-        {
+        else {
             await userManager.AddClaimAsync(user, new System.Security.Claims.Claim("recruiter_request_status", "Approved"));
         }
 
@@ -231,25 +220,21 @@ public class AdminUserService(
         return await GetUserAsync(id, cancellationToken);
     }
 
-    public async Task<AdminUserView> RejectRecruiterAsync(Guid id, CancellationToken cancellationToken = default)
-    {
+    public async Task<AdminUserView> RejectRecruiterAsync(Guid id, CancellationToken cancellationToken = default) {
         var user = await userManager.FindByIdAsync(id.ToString());
         if (user is null)
             throw new NotFoundException("User not found.");
 
-        if (await userManager.IsInRoleAsync(user, Roles.Recruiter))
-        {
+        if (await userManager.IsInRoleAsync(user, Roles.Recruiter)) {
             await userManager.RemoveFromRoleAsync(user, Roles.Recruiter);
         }
 
         var existingClaim = (await userManager.GetClaimsAsync(user))
             .FirstOrDefault(c => c.Type == "recruiter_request_status");
-        if (existingClaim is not null)
-        {
+        if (existingClaim is not null) {
             await userManager.ReplaceClaimAsync(user, existingClaim, new System.Security.Claims.Claim("recruiter_request_status", "Rejected"));
         }
-        else
-        {
+        else {
             await userManager.AddClaimAsync(user, new System.Security.Claims.Claim("recruiter_request_status", "Rejected"));
         }
 
@@ -260,8 +245,7 @@ public class AdminUserService(
         return await GetUserAsync(id, cancellationToken);
     }
 
-    public async Task DeleteUserAsync(Guid id, CancellationToken cancellationToken = default)
-    {
+    public async Task DeleteUserAsync(Guid id, CancellationToken cancellationToken = default) {
         if (id == currentUser.UserId)
             throw new ValidationException("You cannot delete your own account.");
 

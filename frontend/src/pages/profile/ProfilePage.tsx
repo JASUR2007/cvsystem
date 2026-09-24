@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { api, dateText, json, type CvListItem, type Profile } from '../../shared/api'
-import { getCachedUser, saveAuth, clearAuth } from '../../auth/api'
+import { getCachedUser, clearAuth } from '../../auth/api'
 import { Status } from '../../shared/ui'
 import { useApi } from '../../shared/useApi'
 import InfoTab from './InfoTab'
@@ -93,8 +93,11 @@ export default function ProfilePage({ userId }: { userId?: string }) {
   }
 
   const cachedUser = getCachedUser()
-  const isCandidateOnly =
-    !userId && cachedUser && cachedUser.roles.includes('Candidate') && !cachedUser.roles.includes('Recruiter')
+  const userRoles = result.data?.roles || cachedUser?.roles || []
+  const isRecruiter = userRoles.includes('Recruiter')
+  const isAdministrator = userRoles.includes('Administrator')
+  const isCandidateOnly = !userId && !isRecruiter && !isAdministrator
+  const recruiterStatus = isRecruiter ? 'Approved' : (result.data?.recruiterRequestStatus || 'None')
 
   useEffect(() => {
     const errorStatus = (result.error as any)?.status || (cvs.error as any)?.status
@@ -269,10 +272,9 @@ export default function ProfilePage({ userId }: { userId?: string }) {
     setRequestingRecruiter(true)
     setRecruiterMessage('')
     try {
-      const res = await api<{ token: string; user: any }>('/profile/request-recruiter', { method: 'POST' })
-      saveAuth(res.token, res.user)
-      setRecruiterMessage(t('Recruiter role granted! You can now post positions and review CVs.'))
-      window.location.reload()
+      const res = await api<{ message?: string; recruiterRequestStatus?: string }>('/profile/request-recruiter', { method: 'POST' })
+      setRecruiterMessage(res.message || t('Request submitted. Pending administrator review.'))
+      result.reload()
     } catch (cause) {
       setRecruiterMessage(cause instanceof Error ? cause.message : 'Could not request recruiter role.')
     } finally {
@@ -385,27 +387,66 @@ export default function ProfilePage({ userId }: { userId?: string }) {
             </p>
 
             <div className="d-flex flex-wrap gap-1 justify-content-center mt-2">
-              {cachedUser?.roles.map(r => (
+              {userRoles.map(r => (
                 <span className="badge text-bg-light border" key={r}>
                   {t(r)}
                 </span>
               ))}
             </div>
 
-            {isCandidateOnly && (
-              <div className="mt-3 p-2 rounded border bg-light text-start" style={{ fontSize: '0.8125rem' }}>
-                <div className="fw-semibold text-primary mb-1">{t('Looking to hire?')}</div>
-                <p className="text-muted small mb-2">{t('Get recruiter access to publish positions and search candidates.')}</p>
-                <button
-                  type="button"
-                  className="btn btn-outline-primary btn-sm w-100"
-                  onClick={handleRequestRecruiter}
-                  disabled={requestingRecruiter}
-                >
-                  {requestingRecruiter ? t('Requesting...') : t('Request Recruiter role')}
-                </button>
-                {recruiterMessage && <div className="text-success small mt-1">{recruiterMessage}</div>}
+            {isRecruiter && (
+              <div className="mt-3 p-2 rounded border border-success-subtle bg-success-subtle text-start" style={{ fontSize: '0.8125rem' }}>
+                <div className="d-flex align-items-center gap-1 fw-semibold text-success">
+                  <span>✓</span>
+                  <span>{t('Recruiter')} ({t('Approved')})</span>
+                </div>
               </div>
+            )}
+
+            {isCandidateOnly && (
+              <>
+                {recruiterStatus === 'Pending' ? (
+                  <div className="mt-3 p-2 rounded border border-warning-subtle bg-warning-subtle text-start" style={{ fontSize: '0.8125rem' }}>
+                    <div className="d-flex align-items-center justify-content-between mb-1">
+                      <span className="fw-semibold text-warning-emphasis">{t('Recruiter role')}</span>
+                      <span className="badge bg-warning text-dark">⏳ {t('Pending')}</span>
+                    </div>
+                    <p className="text-muted small mb-0">{t('Your request for the recruiter role is currently pending administrator review.')}</p>
+                    {recruiterMessage && <div className="text-success small mt-1">{recruiterMessage}</div>}
+                  </div>
+                ) : recruiterStatus === 'Rejected' ? (
+                  <div className="mt-3 p-2 rounded border border-danger-subtle bg-danger-subtle text-start" style={{ fontSize: '0.8125rem' }}>
+                    <div className="d-flex align-items-center justify-content-between mb-1">
+                      <span className="fw-semibold text-danger-emphasis">{t('Recruiter role')}</span>
+                      <span className="badge bg-danger">✕ {t('Rejected')}</span>
+                    </div>
+                    <p className="text-muted small mb-2">{t('Your previous request was rejected by an administrator.')}</p>
+                    <button
+                      type="button"
+                      className="btn btn-outline-danger btn-sm w-100"
+                      onClick={handleRequestRecruiter}
+                      disabled={requestingRecruiter}
+                    >
+                      {requestingRecruiter ? t('Requesting...') : t('Request again')}
+                    </button>
+                    {recruiterMessage && <div className="text-secondary small mt-1">{recruiterMessage}</div>}
+                  </div>
+                ) : (
+                  <div className="mt-3 p-2 rounded border bg-light text-start" style={{ fontSize: '0.8125rem' }}>
+                    <div className="fw-semibold text-primary mb-1">{t('Looking to hire?')}</div>
+                    <p className="text-muted small mb-2">{t('Get recruiter access to publish positions and search candidates.')}</p>
+                    <button
+                      type="button"
+                      className="btn btn-outline-primary btn-sm w-100"
+                      onClick={handleRequestRecruiter}
+                      disabled={requestingRecruiter}
+                    >
+                      {requestingRecruiter ? t('Requesting...') : t('Request Recruiter role')}
+                    </button>
+                    {recruiterMessage && <div className="text-success small mt-1">{recruiterMessage}</div>}
+                  </div>
+                )}
+              </>
             )}
           </div>
 

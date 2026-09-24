@@ -111,14 +111,24 @@ public class AdminUserService(
                            where ids.Contains(link.UserId)
                            select new { link.UserId, r.Name }).ToListAsync(cancellationToken);
 
-        var items = users.Select(user => new AdminUserView(
-            user.Id,
-            user.Email ?? string.Empty,
-            user.FirstName,
-            user.LastName,
-            user.IsBlocked,
-            roles.Where(r => r.UserId == user.Id).Select(r => r.Name).ToList()))
-            .ToList();
+        var statuses = await db.UserClaims
+            .Where(c => c.ClaimType == "recruiter_request_status" && ids.Contains(c.UserId))
+            .ToDictionaryAsync(c => c.UserId, c => c.ClaimValue, cancellationToken);
+
+        var items = users.Select(user => {
+            var userRoles = roles.Where(r => r.UserId == user.Id).Select(r => r.Name).ToList();
+            var status = userRoles.Contains(Roles.Recruiter)
+                ? "Approved"
+                : (statuses.TryGetValue(user.Id, out var s) ? s : "None");
+            return new AdminUserView(
+                user.Id,
+                user.Email ?? string.Empty,
+                user.FirstName,
+                user.LastName,
+                user.IsBlocked,
+                userRoles,
+                status);
+        }).ToList();
 
         return new PagedResult<AdminUserView>(items, currentPage, size, total);
     }
@@ -130,7 +140,11 @@ public class AdminUserService(
             throw new NotFoundException("User not found.");
 
         var roles = (await userManager.GetRolesAsync(user)).ToList();
-        return new AdminUserView(user.Id, user.Email ?? string.Empty, user.FirstName, user.LastName, user.IsBlocked, roles);
+        var status = roles.Contains(Roles.Recruiter)
+            ? "Approved"
+            : (await db.UserClaims.Where(c => c.UserId == id && c.ClaimType == "recruiter_request_status").Select(c => c.ClaimValue).FirstOrDefaultAsync(cancellationToken) ?? "None");
+
+        return new AdminUserView(user.Id, user.Email ?? string.Empty, user.FirstName, user.LastName, user.IsBlocked, roles, status);
     }
 
     public async Task SetBlockedAsync(Guid id, bool blocked, CancellationToken cancellationToken = default)
@@ -183,7 +197,67 @@ public class AdminUserService(
 
         await transaction.CommitAsync(cancellationToken);
 
-        return new AdminUserView(user.Id, user.Email ?? string.Empty, user.FirstName, user.LastName, user.IsBlocked, roles);
+        return await GetUserAsync(id, cancellationToken);
+    }
+
+    public async Task<AdminUserView> ApproveRecruiterAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var user = await userManager.FindByIdAsync(id.ToString());
+        if (user is null)
+            throw new NotFoundException("User not found.");
+
+        if (!await userManager.IsInRoleAsync(user, Roles.Recruiter))
+        {
+            var add = await userManager.AddToRoleAsync(user, Roles.Recruiter);
+            if (!add.Succeeded)
+                throw new ConflictException("Failed to assign Recruiter role.");
+        }
+
+        var existingClaim = (await userManager.GetClaimsAsync(user))
+            .FirstOrDefault(c => c.Type == "recruiter_request_status");
+        if (existingClaim is not null)
+        {
+            await userManager.ReplaceClaimAsync(user, existingClaim, new System.Security.Claims.Claim("recruiter_request_status", "Approved"));
+        }
+        else
+        {
+            await userManager.AddClaimAsync(user, new System.Security.Claims.Claim("recruiter_request_status", "Approved"));
+        }
+
+        user.SecurityStamp = Guid.NewGuid().ToString("N");
+        user.AuthVersion++;
+        await userManager.UpdateAsync(user);
+
+        return await GetUserAsync(id, cancellationToken);
+    }
+
+    public async Task<AdminUserView> RejectRecruiterAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var user = await userManager.FindByIdAsync(id.ToString());
+        if (user is null)
+            throw new NotFoundException("User not found.");
+
+        if (await userManager.IsInRoleAsync(user, Roles.Recruiter))
+        {
+            await userManager.RemoveFromRoleAsync(user, Roles.Recruiter);
+        }
+
+        var existingClaim = (await userManager.GetClaimsAsync(user))
+            .FirstOrDefault(c => c.Type == "recruiter_request_status");
+        if (existingClaim is not null)
+        {
+            await userManager.ReplaceClaimAsync(user, existingClaim, new System.Security.Claims.Claim("recruiter_request_status", "Rejected"));
+        }
+        else
+        {
+            await userManager.AddClaimAsync(user, new System.Security.Claims.Claim("recruiter_request_status", "Rejected"));
+        }
+
+        user.SecurityStamp = Guid.NewGuid().ToString("N");
+        user.AuthVersion++;
+        await userManager.UpdateAsync(user);
+
+        return await GetUserAsync(id, cancellationToken);
     }
 
     public async Task DeleteUserAsync(Guid id, CancellationToken cancellationToken = default)

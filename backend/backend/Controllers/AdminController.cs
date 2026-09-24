@@ -56,6 +56,20 @@ public sealed class AdminController(IAdminUserService adminUserService) : Contro
         return Ok(result);
     }
 
+    [HttpPost("users/{id:guid}/approve-recruiter")]
+    public async Task<ActionResult<AdminUserView>> ApproveRecruiter(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await adminUserService.ApproveRecruiterAsync(id, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("users/{id:guid}/reject-recruiter")]
+    public async Task<ActionResult<AdminUserView>> RejectRecruiter(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await adminUserService.RejectRecruiterAsync(id, cancellationToken);
+        return Ok(result);
+    }
+
     [HttpDelete("users/{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {

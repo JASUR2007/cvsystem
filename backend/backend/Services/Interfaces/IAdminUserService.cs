@@ -14,5 +14,7 @@ public interface IAdminUserService
     Task<AdminUserView> GetUserAsync(Guid id, CancellationToken cancellationToken = default);
     Task SetBlockedAsync(Guid id, bool blocked, CancellationToken cancellationToken = default);
     Task<AdminUserView> UpdateRolesAsync(Guid id, List<string> roles, CancellationToken cancellationToken = default);
+    Task<AdminUserView> ApproveRecruiterAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<AdminUserView> RejectRecruiterAsync(Guid id, CancellationToken cancellationToken = default);
     Task DeleteUserAsync(Guid id, CancellationToken cancellationToken = default);
 }

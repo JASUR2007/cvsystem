@@ -18,7 +18,9 @@ public sealed record ProfileView(
     string? PhotoObjectKey,
     string Language,
     string Theme,
-    int Version);
+    int Version,
+    string? RecruiterRequestStatus = "None",
+    IList<string>? Roles = null);
 
 public sealed record AttributeValueInput(
     string? TextValue,

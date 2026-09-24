@@ -13,6 +13,7 @@ type User = {
   lastName: string
   isBlocked: boolean
   roles: string[]
+  recruiterRequestStatus?: string
 }
 
 type RecentUser = {
@@ -133,6 +134,28 @@ export default function AdminPage() {
     } catch (cause) {
       setMessage(cause instanceof Error ? cause.message : t('Could not update roles.'))
       users.reload()
+    }
+  }
+
+  async function handleApproveRecruiter(userId: string) {
+    try {
+      await api(`/admin/users/${userId}/approve-recruiter`, { method: 'POST' })
+      users.reload()
+      stats.reload()
+      setMessage(t('Recruiter role approved.'))
+    } catch (cause) {
+      setMessage(cause instanceof Error ? cause.message : t('Could not perform operation.'))
+    }
+  }
+
+  async function handleRejectRecruiter(userId: string) {
+    try {
+      await api(`/admin/users/${userId}/reject-recruiter`, { method: 'POST' })
+      users.reload()
+      stats.reload()
+      setMessage(t('Recruiter role rejected.'))
+    } catch (cause) {
+      setMessage(cause instanceof Error ? cause.message : t('Could not perform operation.'))
     }
   }
 
@@ -435,6 +458,28 @@ export default function AdminPage() {
                   ></button>
                 </div>
 
+                {chosen.recruiterRequestStatus === 'Pending' && (
+                  <div className="alert alert-warning py-2 px-3 mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <span className="small">⏳ <strong>{t('Recruiter request')}:</strong> {t('This candidate requested the Recruiter role.')}</span>
+                    <div className="d-flex gap-2">
+                      <button
+                        type="button"
+                        className="btn btn-success btn-sm py-1 px-3"
+                        onClick={() => handleApproveRecruiter(chosen.id)}
+                      >
+                        ✓ {t('Approve')}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-outline-danger btn-sm py-1 px-3"
+                        onClick={() => handleRejectRecruiter(chosen.id)}
+                      >
+                        ✕ {t('Reject')}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 <div className="d-flex flex-wrap gap-4">
                   {['Candidate', 'Recruiter', 'Administrator'].map(role => (
                     <label className="form-check-label d-flex align-items-center gap-2" key={role}>
@@ -480,6 +525,7 @@ export default function AdminPage() {
                         <th>{t('User')}</th>
                         <th>{t('Email')}</th>
                         <th>{t('Roles')}</th>
+                        <th>{t('Recruiter request')}</th>
                         <th>{t('Status')}</th>
                       </tr>
                     </thead>
@@ -523,6 +569,37 @@ export default function AdminPage() {
                                 </span>
                               ))}
                             </div>
+                          </td>
+                          <td onClick={e => e.stopPropagation()}>
+                            {user.roles.includes('Recruiter') ? (
+                              <span className="badge text-bg-success">✓ {t('Recruiter')}</span>
+                            ) : user.recruiterRequestStatus === 'Pending' ? (
+                              <div className="d-flex align-items-center gap-1">
+                                <span className="badge bg-warning text-dark">⏳ {t('Pending')}</span>
+                                <button
+                                  type="button"
+                                  className="btn btn-outline-success btn-sm py-0 px-2"
+                                  style={{ fontSize: '0.75rem', lineHeight: '1.4' }}
+                                  title={t('Approve')}
+                                  onClick={() => handleApproveRecruiter(user.id)}
+                                >
+                                  ✓ {t('Approve')}
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn btn-outline-danger btn-sm py-0 px-2"
+                                  style={{ fontSize: '0.75rem', lineHeight: '1.4' }}
+                                  title={t('Reject')}
+                                  onClick={() => handleRejectRecruiter(user.id)}
+                                >
+                                  ✕ {t('Reject')}
+                                </button>
+                              </div>
+                            ) : user.recruiterRequestStatus === 'Rejected' ? (
+                              <span className="badge text-bg-secondary">✕ {t('Rejected')}</span>
+                            ) : (
+                              <span className="text-muted small">—</span>
+                            )}
                           </td>
                           <td>
                             <span

@@ -25,44 +25,32 @@ public sealed class ProfileController(IProfileService profileService, ICurrentUs
     [HttpPost("request-recruiter")]
     public async Task<ActionResult<object>> RequestRecruiter(
         [FromServices] UserManager<AppUser> userManager,
-        [FromServices] JwtTokenService jwtTokenService,
         CancellationToken cancellationToken)
     {
         var id = currentUser.RequireUserId();
         var user = await userManager.FindByIdAsync(id.ToString());
         if (user is null) throw new NotFoundException("User not found.");
 
-        if (!await userManager.IsInRoleAsync(user, Roles.Recruiter))
+        if (await userManager.IsInRoleAsync(user, Roles.Recruiter))
         {
-            var addResult = await userManager.AddToRoleAsync(user, Roles.Recruiter);
-            if (!addResult.Succeeded)
-            {
-                throw new ValidationException(string.Join(" ", addResult.Errors.Select(e => e.Description)));
-            }
+            return Ok(new { status = "Approved", message = "Вы уже являетесь рекрутером." });
         }
 
-        var roles = await userManager.GetRolesAsync(user);
-        var newToken = await jwtTokenService.CreateAsync(user);
-
-        Response.Cookies.Append("talenthub_token", newToken, new CookieOptions
+        var existingClaim = (await userManager.GetClaimsAsync(user))
+            .FirstOrDefault(c => c.Type == "recruiter_request_status");
+        if (existingClaim is not null)
         {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.None,
-            Expires = DateTimeOffset.UtcNow.AddHours(1)
-        });
+            await userManager.ReplaceClaimAsync(user, existingClaim, new System.Security.Claims.Claim("recruiter_request_status", "Pending"));
+        }
+        else
+        {
+            await userManager.AddClaimAsync(user, new System.Security.Claims.Claim("recruiter_request_status", "Pending"));
+        }
 
         return Ok(new
         {
-            token = newToken,
-            user = new
-            {
-                id = user.Id,
-                email = user.Email,
-                firstName = user.FirstName,
-                lastName = user.LastName,
-                roles = roles.ToList()
-            }
+            status = "Pending",
+            message = "Запрос отправлен. Ожидание рассмотрения администратором."
         });
     }
 

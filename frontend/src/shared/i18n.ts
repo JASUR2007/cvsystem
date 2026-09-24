@@ -176,6 +176,21 @@ const uz: Record<string, string> = {
   Language: 'Tillar',
   Education: 'Ta’lim',
   'Domain Knowledge': 'Soha bilimlari',
+  Pending: 'Kutilmoqda',
+  Rejected: 'Rad etilgan',
+  Approved: 'Tasdiqlangan',
+  'Not requested': 'So‘ralmagan',
+  'Recruiter role': 'Rekruter roli',
+  'Request again': 'Qayta so‘rash',
+  Approve: 'Tasdiqlash',
+  Reject: 'Rad etish',
+  'Your request for the recruiter role is currently pending administrator review.': 'Rekruter roli bo‘yicha so‘rovingiz administrator ko‘rib chiqishida.',
+  'Your previous request was rejected by an administrator.': 'Oldingi so‘rovingiz administrator tomonidan rad etilgan.',
+  'Request submitted. Pending administrator review.': 'So‘rov yuborildi. Administrator ko‘rib chiqishini kuting.',
+  'Recruiter request': 'Rekruterlik so‘rovi',
+  'This candidate requested the Recruiter role.': 'Ushbu nomzod rekruter rolini so‘radi.',
+  'Recruiter role approved.': 'Rekruter roli tasdiqlandi.',
+  'Recruiter role rejected.': 'Rekruter roli rad etildi.',
 }
 
 const ru: Record<string, string> = {
@@ -357,6 +372,21 @@ const ru: Record<string, string> = {
   Certification: 'Сертификаты',
   Education: 'Образование',
   'Domain Knowledge': 'Предметная область',
+  Pending: 'Ожидание',
+  Rejected: 'Отказ',
+  Approved: 'Одобрено',
+  'Not requested': 'Не запрошено',
+  'Recruiter role': 'Роль рекрутера',
+  'Request again': 'Запросить снова',
+  Approve: 'Одобрить',
+  Reject: 'Отклонить',
+  'Your request for the recruiter role is currently pending administrator review.': 'Ваш запрос на роль рекрутера находится на рассмотрении администратором.',
+  'Your previous request was rejected by an administrator.': 'Ваш предыдущий запрос был отклонён администратором.',
+  'Request submitted. Pending administrator review.': 'Запрос отправлен. Ожидание рассмотрения администратором.',
+  'Recruiter request': 'Запрос рекрутера',
+  'This candidate requested the Recruiter role.': 'Этот кандидат запросил роль рекрутера.',
+  'Recruiter role approved.': 'Роль рекрутера одобрена.',
+  'Recruiter role rejected.': 'Запрос роли рекрутера отклонён.',
 }
 
 export function t(value: string) {

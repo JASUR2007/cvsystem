@@ -6,7 +6,8 @@ public sealed record AdminUserView(
     string FirstName,
     string LastName,
     bool IsBlocked,
-    List<string> Roles);
+    List<string> Roles,
+    string? RecruiterRequestStatus = "None");
 
 public sealed record RoleUpdate(List<string> Roles);
 

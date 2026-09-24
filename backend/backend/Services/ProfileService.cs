@@ -1,3 +1,4 @@
+using backend.Auth;
 using backend.Common.Exceptions;
 using backend.Data;
 using backend.DTOs.Profile;
@@ -15,7 +16,7 @@ public class ProfileService(AppDbContext db) : IProfileService
         if (user is null)
             throw new NotFoundException("User profile not found.");
 
-        return ToView(user);
+        return await ToViewAsync(user, cancellationToken);
     }
 
     public async Task<ProfileView> UpdateProfileAsync(Guid userId, ProfileUpdate request, CancellationToken cancellationToken = default)
@@ -46,7 +47,7 @@ public class ProfileService(AppDbContext db) : IProfileService
         user.Version++;
 
         await db.SaveChangesAsync(cancellationToken);
-        return ToView(user);
+        return await ToViewAsync(user, cancellationToken);
     }
 
     public async Task<List<AttributeValueView>> GetProfileAttributesAsync(Guid userId, CancellationToken cancellationToken = default)
@@ -127,7 +128,29 @@ public class ProfileService(AppDbContext db) : IProfileService
         await db.SaveChangesAsync(cancellationToken);
     }
 
-    private static ProfileView ToView(AppUser user) => new(
-        user.Id, user.FirstName, user.LastName, user.Email ?? string.Empty,
-        user.Location, user.PhotoObjectKey, user.Language, user.Theme, user.Version);
+    private async Task<ProfileView> ToViewAsync(AppUser user, CancellationToken cancellationToken)
+    {
+        var roles = await (from link in db.UserRoles
+                           join r in db.Roles on link.RoleId equals r.Id
+                           where link.UserId == user.Id
+                           select r.Name).ToListAsync(cancellationToken);
+
+        string? recruiterStatus = null;
+        if (roles.Contains(Roles.Recruiter))
+        {
+            recruiterStatus = "Approved";
+        }
+        else
+        {
+            recruiterStatus = await db.UserClaims
+                .Where(c => c.UserId == user.Id && c.ClaimType == "recruiter_request_status")
+                .Select(c => c.ClaimValue)
+                .FirstOrDefaultAsync(cancellationToken) ?? "None";
+        }
+
+        return new ProfileView(
+            user.Id, user.FirstName, user.LastName, user.Email ?? string.Empty,
+            user.Location, user.PhotoObjectKey, user.Language, user.Theme, user.Version,
+            recruiterStatus, roles);
+    }
 }

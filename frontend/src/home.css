@@ -350,8 +350,37 @@
 }
 
 .stat-item-icon {
-  font-size: 1.75rem;
-  line-height: 1;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.home-stat-icon-svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Light mode monochrome icon container & SVG colors */
+.stat-users .stat-item-icon {
+  background-color: #f0f9ff;
+  color: #0284c7;
+}
+.stat-candidates .stat-item-icon {
+  background-color: #eff6ff;
+  color: #2563eb;
+}
+.stat-recruiters .stat-item-icon {
+  background-color: #ecfdf5;
+  color: #059669;
+}
+.stat-cvs .stat-item-icon {
+  background-color: #f5f3ff;
+  color: #7c3aed;
 }
 
 .stat-item-number {
@@ -595,6 +624,24 @@
 }
 [data-bs-theme="dark"] .stat-cvs .stat-item-number {
   color: #c084fc !important; /* Vivid violet */
+}
+
+/* Dark mode monochrome icon containers */
+[data-bs-theme="dark"] .stat-users .stat-item-icon {
+  background-color: rgba(56, 189, 248, 0.15) !important;
+  color: #38bdf8 !important;
+}
+[data-bs-theme="dark"] .stat-candidates .stat-item-icon {
+  background-color: rgba(96, 165, 250, 0.15) !important;
+  color: #60a5fa !important;
+}
+[data-bs-theme="dark"] .stat-recruiters .stat-item-icon {
+  background-color: rgba(52, 211, 153, 0.15) !important;
+  color: #34d399 !important;
+}
+[data-bs-theme="dark"] .stat-cvs .stat-item-icon {
+  background-color: rgba(192, 132, 252, 0.15) !important;
+  color: #c084fc !important;
 }
 
 /* Popular Positions Dark Mode */

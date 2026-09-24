@@ -202,28 +202,53 @@ export default function HomePage() {
             <div className="home-stats-grid">
               <div className="home-stat-item stat-users">
                 <div className="stat-item-header">
-                  <span className="stat-item-icon">👥</span>
+                  <span className="stat-item-icon">
+                    <svg className="home-stat-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                  </span>
                   <span className="stat-item-number">{stats.data.users.toLocaleString()}</span>
                 </div>
                 <span className="stat-item-label">{t('Users')}</span>
               </div>
               <div className="home-stat-item stat-candidates">
                 <div className="stat-item-header">
-                  <span className="stat-item-icon">🎓</span>
+                  <span className="stat-item-icon">
+                    <svg className="home-stat-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                      <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                    </svg>
+                  </span>
                   <span className="stat-item-number">{stats.data.candidates.toLocaleString()}</span>
                 </div>
                 <span className="stat-item-label">{t('Candidates')}</span>
               </div>
               <div className="home-stat-item stat-recruiters">
                 <div className="stat-item-header">
-                  <span className="stat-item-icon">💼</span>
+                  <span className="stat-item-icon">
+                    <svg className="home-stat-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                    </svg>
+                  </span>
                   <span className="stat-item-number">{stats.data.recruiters.toLocaleString()}</span>
                 </div>
                 <span className="stat-item-label">{t('Recruiters')}</span>
               </div>
               <div className="home-stat-item stat-cvs">
                 <div className="stat-item-header">
-                  <span className="stat-item-icon">📄</span>
+                  <span className="stat-item-icon">
+                    <svg className="home-stat-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <polyline points="14 2 14 8 20 8" />
+                      <line x1="16" y1="13" x2="8" y2="13" />
+                      <line x1="16" y1="17" x2="8" y2="17" />
+                      <line x1="10" y1="9" x2="8" y2="9" />
+                    </svg>
+                  </span>
                   <span className="stat-item-number">{stats.data.publishedCvs.toLocaleString()}</span>
                 </div>
                 <span className="stat-item-label">{t('Published CVs')}</span>

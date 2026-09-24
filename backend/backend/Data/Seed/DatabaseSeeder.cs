@@ -33,6 +33,19 @@ public static class DatabaseSeeder
             Console.Error.WriteLine($"Warning: Migration ALTER COLUMN failed: {ex.Message}");
         }
 
+        try
+        {
+            await db.Database.ExecuteSqlRawAsync(
+                "UPDATE \"AspNetUsers\" SET \"PhotoObjectKey\" = 'users/d7346498-df28-4b36-a269-e0cc1a0fae0c/168d73b32f084819875cd4de82a9585b.jpg' WHERE \"Id\" = 'd7346498-df28-4b36-a269-e0cc1a0fae0c' AND (\"PhotoObjectKey\" LIKE 'data:image%' OR \"PhotoObjectKey\" IS NULL); " +
+                "UPDATE \"UserAttributeValues\" SET \"ImageObjectKey\" = 'users/d7346498-df28-4b36-a269-e0cc1a0fae0c/168d73b32f084819875cd4de82a9585b.jpg' WHERE \"UserId\" = 'd7346498-df28-4b36-a269-e0cc1a0fae0c' AND \"ImageObjectKey\" LIKE 'data:image%'; " +
+                "UPDATE \"AspNetUsers\" SET \"PhotoObjectKey\" = NULL WHERE \"PhotoObjectKey\" LIKE 'data:image%'; " +
+                "UPDATE \"UserAttributeValues\" SET \"ImageObjectKey\" = NULL WHERE \"ImageObjectKey\" LIKE 'data:image%';");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Warning: Database cleanup of base64 failed: {ex.Message}");
+        }
+
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
         foreach (var role in new[] { Roles.Candidate, Roles.Recruiter, Roles.Administrator })
         {

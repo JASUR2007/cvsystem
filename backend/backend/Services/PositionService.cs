@@ -346,7 +346,7 @@ public class PositionService(AppDbContext db, ICurrentUserService currentUser) :
         if (column.Name == "First Name") return firstName;
         if (column.Name == "Last Name") return lastName;
         if (column.Name == "Location") return location;
-        if (column.Name == "Personal Photo") return photoKey is null ? null : "Photo";
+        if (column.Name == "Personal Photo") return photoKey;
         return column.Type switch
         {
             AttributeType.String or AttributeType.Text => value?.TextValue,
@@ -355,7 +355,7 @@ public class PositionService(AppDbContext db, ICurrentUserService currentUser) :
             AttributeType.Period => value?.PeriodStart is null ? null : value.PeriodStart + " – " + value.PeriodEnd,
             AttributeType.Boolean => value?.BooleanValue is null ? null : value.BooleanValue.Value ? "Yes" : "No",
             AttributeType.Dropdown => value?.SelectedOptionId is Guid optionId ? optionMap.GetValueOrDefault(optionId) : null,
-            AttributeType.Image => value?.ImageObjectKey is null ? null : "Image",
+            AttributeType.Image => value?.ImageObjectKey,
             _ => null
         };
     }

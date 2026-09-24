@@ -6,6 +6,7 @@ import { Status } from '../shared/ui'
 import { useApi } from '../shared/useApi'
 import type { CurrentUser } from '../auth/api'
 import { imageUrl } from '../shared/imageUrl'
+import ImageViewerModal from '../shared/ImageViewerModal'
 import { t } from '../shared/i18n'
 import '../cv-pages.css'
 
@@ -13,6 +14,7 @@ export default function CvPage({ id, user }: { id: string; user: CurrentUser | n
   const result = useApi<CvDetail>(`/cvs/${id}`)
   const likes = useApi<{ count: number; liked: boolean }>(`/cvs/${id}/likes`)
   const [editing, setEditing] = useState<AttributeValue | null>(null)
+  const [fullscreenImage, setFullscreenImage] = useState<{ url: string; title?: string } | null>(null)
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -144,7 +146,24 @@ export default function CvPage({ id, user }: { id: string; user: CurrentUser | n
                 const isFilled = attribute.isFilled
                 const displayVal =
                   val.type === 'Image' && imageUrl(val.imageObjectKey) ? (
-                    <img className="upload-preview" src={imageUrl(val.imageObjectKey)!} alt={val.name} style={{ maxWidth: 120, maxHeight: 120, borderRadius: '0.5rem' }} />
+                    <img
+                      className="upload-preview"
+                      src={imageUrl(val.imageObjectKey)!}
+                      alt={val.name}
+                      style={{
+                        maxWidth: 140,
+                        maxHeight: 140,
+                        borderRadius: '0.5rem',
+                        cursor: 'zoom-in',
+                        objectFit: 'contain',
+                        backgroundColor: 'var(--bs-tertiary-bg)',
+                        border: '1px solid var(--border-primary)',
+                        padding: '2px',
+                        transition: 'transform 0.15s ease',
+                      }}
+                      title={t('Click to enlarge')}
+                      onClick={() => setFullscreenImage({ url: imageUrl(val.imageObjectKey)!, title: `${cv.firstName} ${cv.lastName} — ${val.name}` })}
+                    />
                   ) : val.type === 'Text' && val.textValue ? (
                     <Markdown>{val.textValue}</Markdown>
                   ) : val.type === 'Boolean' && val.booleanValue !== null && val.booleanValue !== undefined ? (
@@ -170,8 +189,9 @@ export default function CvPage({ id, user }: { id: string; user: CurrentUser | n
                           {isFilled ? (
                             displayVal
                           ) : (
-                            <span className="missing-badge">
-                              ⚠ {t('Empty')}
+                            <span className="missing-badge text-muted" style={{ fontSize: '0.85rem' }}>
+                              <span style={{ opacity: 0.6, marginRight: '4px' }}>—</span>
+                              {t('Empty')}
                             </span>
                           )}
                         </div>
@@ -273,6 +293,13 @@ export default function CvPage({ id, user }: { id: string; user: CurrentUser | n
             </div>
           </div>
         )}
+
+        {/* Fullscreen Image Lightbox Modal */}
+        <ImageViewerModal
+          url={fullscreenImage?.url ?? null}
+          title={fullscreenImage?.title}
+          onClose={() => setFullscreenImage(null)}
+        />
       </div>
     </div>
   )

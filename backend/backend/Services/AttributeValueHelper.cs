@@ -19,8 +19,45 @@ public static class AttributeValueHelper
         }
 
         normalized = normalized.TrimStart('/');
+
+        var userPrefix = $"users/{userId}/";
+        var userIdx = normalized.IndexOf(userPrefix, StringComparison.Ordinal);
+        if (userIdx >= 0)
+        {
+            normalized = normalized.Substring(userIdx);
+        }
+        else
+        {
+            var uploadPrefix = $"uploads/users/{userId}/";
+            var uploadIdx = normalized.IndexOf(uploadPrefix, StringComparison.Ordinal);
+            if (uploadIdx >= 0)
+            {
+                normalized = normalized.Substring(uploadIdx);
+            }
+        }
+
         return normalized.StartsWith($"users/{userId}/", StringComparison.Ordinal)
             || normalized.StartsWith($"uploads/users/{userId}/", StringComparison.Ordinal);
+    }
+
+    public static string? CleanImageKey(string? key)
+    {
+        if (string.IsNullOrWhiteSpace(key)) return null;
+        var trimmed = key.Trim();
+        if (trimmed.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase))
+            return trimmed;
+
+        var userIdx = trimmed.IndexOf("users/", StringComparison.Ordinal);
+        if (userIdx >= 0)
+        {
+            return trimmed.Substring(userIdx);
+        }
+        var uploadIdx = trimmed.IndexOf("uploads/users/", StringComparison.Ordinal);
+        if (uploadIdx >= 0)
+        {
+            return trimmed.Substring(uploadIdx);
+        }
+        return trimmed;
     }
 
     public static string? Validate(AttributeDefinition attribute, AttributeValueInput input)
@@ -46,7 +83,7 @@ public static class AttributeValueHelper
         value.PeriodEnd = attribute.Type == AttributeType.Period ? input.PeriodEnd : null;
         value.BooleanValue = attribute.Type == AttributeType.Boolean ? input.BooleanValue : null;
         value.SelectedOptionId = attribute.Type == AttributeType.Dropdown ? input.SelectedOptionId : null;
-        value.ImageObjectKey = attribute.Type == AttributeType.Image ? input.ImageObjectKey?.Trim() : null;
+        value.ImageObjectKey = attribute.Type == AttributeType.Image ? CleanImageKey(input.ImageObjectKey) : null;
         value.UpdatedAt = DateTime.UtcNow;
         value.Version++;
     }

@@ -171,7 +171,7 @@ public class CvService(AppDbContext db, ICurrentUserService currentUser) : ICvSe
                 case "First Name": user.FirstName = request.Value.TextValue?.Trim() ?? string.Empty; break;
                 case "Last Name": user.LastName = request.Value.TextValue?.Trim() ?? string.Empty; break;
                 case "Location": user.Location = request.Value.TextValue?.Trim(); break;
-                case "Personal Photo": user.PhotoObjectKey = request.Value.ImageObjectKey?.Trim(); break;
+                case "Personal Photo": user.PhotoObjectKey = AttributeValueHelper.CleanImageKey(request.Value.ImageObjectKey); break;
             }
 
             if (string.IsNullOrWhiteSpace(user.FirstName) || string.IsNullOrWhiteSpace(user.LastName))

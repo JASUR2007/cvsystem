@@ -2,6 +2,8 @@ import { useState } from 'react'
 import type { PositionCvPage } from '../shared/api'
 import { Pager, Status } from '../shared/ui'
 import { useApi } from '../shared/useApi'
+import { imageUrl } from '../shared/imageUrl'
+import ImageViewerModal from '../shared/ImageViewerModal'
 import { t } from '../shared/i18n'
 import '../cv-pages.css'
 
@@ -12,6 +14,7 @@ export default function PositionCvsPage({ id, embedded = false }: { id: string; 
   const [value, setValue] = useState('')
   const [sort, setSort] = useState('newest')
   const [page, setPage] = useState(1)
+  const [fullscreenImage, setFullscreenImage] = useState<{ url: string; title?: string } | null>(null)
 
   const filter = attributeId && value ? `&attributeId=${attributeId}&operation=${operation}&value=${encodeURIComponent(value)}` : ''
   const result = useApi<PositionCvPage>(
@@ -156,6 +159,7 @@ export default function PositionCvsPage({ id, embedded = false }: { id: string; 
                     {result.data!.columns.map(col => {
                       const valItem = cv.values.find(v => v.attributeId === col.attributeId)
                       const isMissing = !valItem?.value
+                      const isImageCol = col.type === 'Image' || col.name === 'Personal Photo'
 
                       return (
                         <td key={col.attributeId}>
@@ -164,6 +168,32 @@ export default function PositionCvsPage({ id, embedded = false }: { id: string; 
                               <span style={{ opacity: 0.6, marginRight: '4px' }}>—</span>
                               {t('Empty')}
                             </span>
+                          ) : isImageCol && valItem.value ? (
+                            <div className="d-flex align-items-center">
+                              <img
+                                src={imageUrl(valItem.value)!}
+                                alt={col.name}
+                                style={{
+                                  width: '42px',
+                                  height: '42px',
+                                  objectFit: 'cover',
+                                  borderRadius: '7px',
+                                  cursor: 'zoom-in',
+                                  border: '1px solid var(--bs-border-color)',
+                                  backgroundColor: 'var(--bs-tertiary-bg)',
+                                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                                  transition: 'transform 0.15s ease',
+                                }}
+                                title={t('Click to enlarge')}
+                                onClick={e => {
+                                  e.stopPropagation()
+                                  setFullscreenImage({
+                                    url: imageUrl(valItem.value)!,
+                                    title: `${cv.candidate} — ${col.name}`,
+                                  })
+                                }}
+                              />
+                            </div>
                           ) : (
                             <span>
                               {col.type === 'Boolean' || valItem.value === 'true' || valItem.value === 'false'
@@ -200,6 +230,13 @@ export default function PositionCvsPage({ id, embedded = false }: { id: string; 
           onPage={setPage}
         />
       </div>
+
+      {/* Fullscreen Lightbox Modal */}
+      <ImageViewerModal
+        url={fullscreenImage?.url ?? null}
+        title={fullscreenImage?.title}
+        onClose={() => setFullscreenImage(null)}
+      />
     </div>
   )
 }

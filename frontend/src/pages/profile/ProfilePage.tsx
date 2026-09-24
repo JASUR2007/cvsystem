@@ -8,6 +8,7 @@ import ProjectsTab from './ProjectsTab'
 import { imageUrl } from '../../shared/imageUrl'
 import { t } from '../../shared/i18n'
 import ConfirmModal from '../../shared/ConfirmModal'
+import ImageViewerModal from '../../shared/ImageViewerModal'
 import '../../profile.css'
 
 const LOCATION_SUGGESTIONS = [
@@ -73,6 +74,7 @@ export default function ProfilePage({ userId }: { userId?: string }) {
   const [savingManual, setSavingManual] = useState(false)
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const [photoError, setPhotoError] = useState('')
+  const [fullscreenImage, setFullscreenImage] = useState<{ url: string; title?: string } | null>(null)
   const [detectingLocation, setDetectingLocation] = useState(false)
   const [requestingRecruiter, setRequestingRecruiter] = useState(false)
   const [recruiterMessage, setRecruiterMessage] = useState('')
@@ -144,9 +146,32 @@ export default function ProfilePage({ userId }: { userId?: string }) {
       } catch (cause) {
         setSaveState(cause instanceof Error ? cause.message : 'Save failed.')
       }
-    }, 7000)
+    }, 800)
     return () => window.clearTimeout(timer)
   }, [form, dirty, setData, target])
+
+  async function persistProfile(updatedForm: Profile) {
+    revision.current++
+    setForm(updatedForm)
+    setSaveState(t('Saving...'))
+    try {
+      const saved = await api<Profile>(`/profile${target}`, json('PUT', updatedForm))
+      setData(saved)
+      setForm(saved)
+      setDirty(false)
+      setSaveState(t('Saved'))
+      if (!userId && cachedUser) {
+        const updated = { ...cachedUser, photoObjectKey: saved.photoObjectKey, firstName: saved.firstName, lastName: saved.lastName }
+        localStorage.setItem('talenthub_user', JSON.stringify(updated))
+        sessionStorage.setItem('talenthub_user', JSON.stringify(updated))
+        window.dispatchEvent(new Event('talenthub_user_updated'))
+      }
+      return saved
+    } catch (cause) {
+      setSaveState(cause instanceof Error ? cause.message : 'Save failed.')
+      throw cause
+    }
+  }
 
   function change(field: keyof Profile, value: string | null) {
     if (!form) return
@@ -179,7 +204,7 @@ export default function ProfilePage({ userId }: { userId?: string }) {
           `/files/upload${userId ? `?userId=${userId}` : ''}`,
           { method: 'POST', body: formData }
         )
-        objectKey = uploaded.publicUrl || uploaded.objectKey
+        objectKey = uploaded.objectKey || uploaded.publicUrl || ''
       } catch {
         // Client-side fallback: Data URL
         objectKey = await new Promise<string>((resolve, reject) => {
@@ -189,7 +214,11 @@ export default function ProfilePage({ userId }: { userId?: string }) {
           reader.readAsDataURL(file)
         })
       }
-      change('photoObjectKey', objectKey)
+      if (form) {
+        await persistProfile({ ...form, photoObjectKey: objectKey })
+      } else {
+        change('photoObjectKey', objectKey)
+      }
     } catch (cause) {
       setPhotoError(cause instanceof Error ? cause.message : 'Image upload failed.')
     } finally {
@@ -324,7 +353,13 @@ export default function ProfilePage({ userId }: { userId?: string }) {
             <div className="profile-avatar-wrapper">
               <div className="profile-large-avatar">
                 {imageUrl(form.photoObjectKey) ? (
-                  <img src={imageUrl(form.photoObjectKey)!} alt="Profile photo" />
+                  <img
+                    src={imageUrl(form.photoObjectKey)!}
+                    alt="Profile photo"
+                    style={{ cursor: 'zoom-in' }}
+                    title={t('Click to enlarge')}
+                    onClick={() => setFullscreenImage({ url: imageUrl(form.photoObjectKey)!, title: `${form.firstName} ${form.lastName}` })}
+                  />
                 ) : (
                   <span>{(form.firstName[0] || 'U').toUpperCase()}{(form.lastName[0] || '').toUpperCase()}</span>
                 )}
@@ -335,7 +370,7 @@ export default function ProfilePage({ userId }: { userId?: string }) {
                   className="profile-avatar-remove-badge"
                   title={t('Remove photo')}
                   aria-label={t('Remove photo')}
-                  onClick={() => change('photoObjectKey', null)}
+                  onClick={() => form && void persistProfile({ ...form, photoObjectKey: null })}
                 >
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18" />
@@ -704,6 +739,13 @@ export default function ProfilePage({ userId }: { userId?: string }) {
         confirmVariant="danger"
         onConfirm={handleDeleteCvsConfirm}
         onCancel={() => setIsDeleteCvModalOpen(false)}
+      />
+
+      {/* Fullscreen Avatar Viewer Modal */}
+      <ImageViewerModal
+        url={fullscreenImage?.url ?? null}
+        title={fullscreenImage?.title}
+        onClose={() => setFullscreenImage(null)}
       />
     </div>
   )

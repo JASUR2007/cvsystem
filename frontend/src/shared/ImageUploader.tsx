@@ -36,7 +36,7 @@ export default function ImageUploader({
             body: formData,
           }
         )
-        objectKey = uploaded.publicUrl || uploaded.objectKey
+        objectKey = uploaded.objectKey || uploaded.publicUrl || ''
       } catch {
         // Client-side fallback: Data URL
         objectKey = await new Promise<string>((resolve, reject) => {
@@ -83,23 +83,63 @@ export default function ImageUploader({
       </div>
 
       {source && (
-        <div className="mb-2 d-flex align-items-center gap-2">
-          <img
-            src={source}
-            alt="Uploaded preview"
-            className="upload-preview border rounded"
-            style={{ maxWidth: 140, maxHeight: 140, objectFit: 'cover' }}
-          />
+        <div className="my-3 d-flex flex-column align-items-center justify-content-center text-center">
+          <div className="position-relative d-inline-block">
+            <img
+              src={source}
+              alt="Uploaded preview"
+              className="upload-preview border rounded shadow-sm"
+              style={{
+                maxWidth: 180,
+                maxHeight: 180,
+                objectFit: 'contain',
+                backgroundColor: 'var(--bs-tertiary-bg)',
+                padding: '4px',
+              }}
+            />
+            {value && (
+              <button
+                className="btn btn-danger btn-sm rounded-circle position-absolute"
+                type="button"
+                style={{
+                  top: -10,
+                  right: -10,
+                  width: 26,
+                  height: 26,
+                  padding: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+                }}
+                title={t('Remove image')}
+                aria-label={t('Remove image')}
+                onClick={() => {
+                  setPreview(null)
+                  onChange(null)
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            )}
+          </div>
           {value && (
             <button
-              className="btn btn-sm btn-outline-danger"
+              className="btn btn-sm btn-outline-danger mt-2 d-inline-flex align-items-center gap-1"
               type="button"
               onClick={() => {
                 setPreview(null)
                 onChange(null)
               }}
             >
-              {t('Remove image')}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+              <span>{t('Remove image')}</span>
             </button>
           )}
         </div>

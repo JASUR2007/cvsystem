@@ -43,7 +43,7 @@ public class ProfileService(AppDbContext db) : IProfileService
         user.FirstName = request.FirstName.Trim();
         user.LastName = request.LastName.Trim();
         user.Location = request.Location?.Trim();
-        user.PhotoObjectKey = request.PhotoObjectKey?.Trim();
+        user.PhotoObjectKey = AttributeValueHelper.CleanImageKey(request.PhotoObjectKey);
         user.Version++;
 
         await db.SaveChangesAsync(cancellationToken);

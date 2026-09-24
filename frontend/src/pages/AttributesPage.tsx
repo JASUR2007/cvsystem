@@ -294,12 +294,15 @@ export default function AttributesPage() {
                       <span className="badge text-bg-secondary ms-2">{t('Built-in')}</span>
                     )}
                   </td>
-                  <td>{t(item.category)}</td>
+                  <td className="attribute-category-text">{t(item.category)}</td>
                   <td>
                     <span className="badge text-bg-light border font-monospace">{t(item.type)}</span>
                   </td>
                   <td>
-                    <span className={`badge ${item.usageCount > 0 ? 'text-bg-info' : 'text-bg-light border'}`}>
+                    <span
+                      className={`badge ${item.usageCount > 0 ? 'bg-primary text-white' : 'text-bg-light border'}`}
+                      style={item.usageCount > 0 ? { color: '#ffffff', backgroundColor: '#2563eb' } : undefined}
+                    >
                       {item.usageCount}
                     </span>
                   </td>

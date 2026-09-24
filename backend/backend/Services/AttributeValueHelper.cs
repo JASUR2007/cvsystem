@@ -9,10 +9,18 @@ public static class AttributeValueHelper
     public static bool ValidImageKey(string? key, Guid userId)
     {
         if (string.IsNullOrWhiteSpace(key)) return true;
-        var normalized = key.TrimStart('/');
+        var normalized = key.Trim();
+        if (normalized.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (Uri.TryCreate(normalized, UriKind.Absolute, out var uri))
+        {
+            normalized = uri.AbsolutePath;
+        }
+
+        normalized = normalized.TrimStart('/');
         return normalized.StartsWith($"users/{userId}/", StringComparison.Ordinal)
-            || normalized.StartsWith($"uploads/users/{userId}/", StringComparison.Ordinal)
-            || key.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase);
+            || normalized.StartsWith($"uploads/users/{userId}/", StringComparison.Ordinal);
     }
 
     public static string? Validate(AttributeDefinition attribute, AttributeValueInput input)

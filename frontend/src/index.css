@@ -570,19 +570,55 @@ input[type="checkbox"].form-check-input:focus {
 [data-bs-theme="dark"] .table > :not(caption) > * > *,
 [data-bs-theme="dark"] .table-responsive table,
 [data-bs-theme="dark"] .cv-kv-table,
-[data-bs-theme="dark"] .pos-selected-attrs-table {
+[data-bs-theme="dark"] .pos-selected-attrs-table,
+[data-bs-theme="dark"] .matrix-table {
   background-color: var(--bg-card) !important;
-  color: var(--text-primary);
+  color: #FFFFFF !important;
 }
 
-[data-bs-theme="dark"] .table td {
+[data-bs-theme="dark"] .table td,
+[data-bs-theme="dark"] .matrix-table td {
   border-bottom: 1px solid #334155 !important;
+  background-color: var(--bg-card) !important;
+  color: #FFFFFF !important;
 }
 
-[data-bs-theme="dark"] .table th {
+[data-bs-theme="dark"] .table th,
+[data-bs-theme="dark"] .matrix-table th {
   border-bottom: 2px solid #475569 !important;
   background-color: #1e293b !important;
-  color: #cbd5e1 !important;
+  color: #FFFFFF !important;
+}
+
+[data-bs-theme="dark"] .table td a,
+[data-bs-theme="dark"] .position-title-link,
+[data-bs-theme="dark"] .attribute-category-text {
+  color: #FFFFFF !important;
+}
+
+[data-bs-theme="dark"] .table tbody tr:hover td {
+  background-color: #1e293b !important;
+  color: #FFFFFF !important;
+}
+
+[data-bs-theme="dark"] .level-pill,
+[data-bs-theme="dark"] .cv-count-badge {
+  background-color: rgba(59, 130, 246, 0.25) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+[data-bs-theme="dark"] .form-label,
+[data-bs-theme="dark"] .profile-card-title,
+[data-bs-theme="dark"] .profile-display-name,
+[data-bs-theme="dark"] .pos-main-title,
+[data-bs-theme="dark"] .page-main-title {
+  color: #FFFFFF !important;
+}
+
+.badge.bg-primary,
+.badge.text-bg-info {
+  color: #FFFFFF !important;
 }
 
 /* Responsive labels for screens smaller than laptop (< 1200px) */

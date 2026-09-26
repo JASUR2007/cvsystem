@@ -599,8 +599,13 @@
   border-bottom: 1px solid #334155 !important;
 }
 
-[data-bs-theme="dark"] .home-latest .table tbody tr:hover td {
-  background-color: #1e293b !important;
+[data-bs-theme="dark"] .home-latest .table tbody tr:hover td,
+[data-bs-theme="dark"] .home-latest .table-hover tbody tr:hover > * {
+  background-color: #24354f !important;
+  --bs-table-bg-state: #24354f !important;
+  --bs-table-hover-bg: #24354f !important;
+  box-shadow: inset 0 0 0 9999px #24354f !important;
+  color: #FFFFFF !important;
 }
 
 /* 1) Title (Название) */

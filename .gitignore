@@ -19,3 +19,4 @@ obj/
 .env
 frontend/dist/
 frontend/node_modules/
+DEFENSE_PREPARATION.md

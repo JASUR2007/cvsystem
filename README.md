@@ -10,7 +10,7 @@
 
 ---
 
-## 🌐 Live Deployment
+##  Live Deployment
 
 - **Frontend Application**: [https://cvsystem-frontend.onrender.com](https://cvsystem-frontend.onrender.com)
 - **Default Administrator Account**:
@@ -19,7 +19,7 @@
 
 ---
 
-## ✨ Key Features
+##  Key Features
 
 ### 1. Multi-Role Authorization & Security (RBAC)
 - **Administrator**: Full system management, user role assignments, moderation, audit logging.
@@ -41,7 +41,7 @@
 
 ---
 
-## 🏗️ Architecture & Tech Stack
+##  Architecture & Tech Stack
 
 ```text
 ┌────────────────────────────────────────────────────────┐
@@ -76,7 +76,7 @@
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 - [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/)
@@ -139,7 +139,7 @@ Navigate to `http://localhost:5173`.
 
 ---
 
-## ⚙️ Environment Variables Reference
+## ⚙️Environment Variables Reference
 
 | Variable | Description | Default / Example |
 | :--- | :--- | :--- |
@@ -156,22 +156,5 @@ Navigate to `http://localhost:5173`.
 
 ---
 
-## 📋 Role & Permission Matrix
-
-| Feature / Action | Guest | Candidate | Recruiter | Administrator |
-| :--- | :---: | :---: | :---: | :---: |
-| Browse & Search Positions | ✅ | ✅ | ✅ | ✅ |
-| View Position Details | ✅ | ✅ | ✅ | ✅ |
-| Create / Edit Personal CV | ❌ | ✅ | ❌ | ✅ |
-| Like & Bookmark CVs | ❌ | ✅ | ✅ | ✅ |
-| Post to Discussion Board | ❌ | ✅ | ✅ | ✅ |
-| Create & Edit Positions | ❌ | ❌ | ✅ | ✅ |
-| Define Dynamic Attribute Schemas | ❌ | ❌ | ✅ | ✅ |
-| Access Candidate Matrix Table | ❌ | ❌ | ✅ | ✅ |
-| User Administration & Role Management | ❌ | ❌ | ❌ | ✅ |
-| System Health & Metrics | ❌ | ❌ | ❌ | ✅ |
-
----
-
-## 📄 License
+##  License
 This project is developed as part of advanced web engineering curriculum. All rights reserved.

@@ -6,16 +6,13 @@ using backend.Services.Interfaces;
 
 namespace backend.Storage;
 
-public class AcdnS3Service(IServiceProvider services, IConfiguration configuration) : IFileStorageService {
+public class CloudflareR2StorageService(IServiceProvider services, IConfiguration configuration) : IFileStorageService {
     private IAmazonS3? S3Client => services.GetService<IAmazonS3>();
     private string? Bucket {
         get {
             var b = configuration["S3:Bucket"];
-            var ep = configuration["S3:Endpoint"];
-            if (ep?.Contains("r2.cloudflarestorage.com", StringComparison.OrdinalIgnoreCase) == true) {
-                if (string.IsNullOrWhiteSpace(b) || b.Equals("cvmanagement", StringComparison.OrdinalIgnoreCase)) {
-                    return "cvsystem";
-                }
+            if (string.IsNullOrWhiteSpace(b) || b.Equals("cvmanagement", StringComparison.OrdinalIgnoreCase)) {
+                return "cvsystem";
             }
             return b;
         }
@@ -23,8 +20,7 @@ public class AcdnS3Service(IServiceProvider services, IConfiguration configurati
     private string? PublicBaseUrl {
         get {
             var url = configuration["S3:PublicBaseUrl"]?.TrimEnd('/');
-            var ep = configuration["S3:Endpoint"];
-            if (ep?.Contains("r2.cloudflarestorage.com", StringComparison.OrdinalIgnoreCase) == true && string.IsNullOrWhiteSpace(url)) {
+            if (string.IsNullOrWhiteSpace(url) || url.Contains("storage.acdn.uz", StringComparison.OrdinalIgnoreCase)) {
                 return "https://pub-1834497bb7c24e8cb36a4a06dd7e7ffd.r2.dev";
             }
             return url;

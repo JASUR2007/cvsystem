@@ -197,7 +197,7 @@ export default function ProfilePage({ userId }: { userId?: string }) {
     try {
       let objectKey = ''
       try {
-        // Direct upload to backend API (handles ACDN S3 via server-side AWS SDK and robust fallback)
+        // Direct upload to backend API (handles Cloudflare R2 S3 via server-side AWS SDK and robust fallback)
         const formData = new FormData()
         formData.append('file', file)
         const uploaded = await api<{ objectKey: string; publicUrl: string | null }>(

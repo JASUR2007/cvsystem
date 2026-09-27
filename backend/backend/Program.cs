@@ -61,7 +61,7 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 // Token & Storage Services
 builder.Services.AddScoped<JwtTokenService>();
-builder.Services.AddScoped<IFileStorageService, AcdnS3Service>();
+builder.Services.AddScoped<IFileStorageService, CloudflareR2StorageService>();
 
 // Domain Business Services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -149,12 +149,17 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration["Authentication:GitHub:Clie
 
 builder.Services.AddAuthorization();
 
-// S3 Client (supports Cloudflare R2, ACDN, AWS S3)
+// S3 Client (supports Cloudflare R2, AWS S3)
 var s3Endpoint = builder.Configuration["S3:Endpoint"]?.Trim();
 var s3AccessKey = builder.Configuration["S3:AccessKey"]?.Trim();
 var s3SecretKey = builder.Configuration["S3:SecretKey"]?.Trim();
+
+if (string.IsNullOrWhiteSpace(s3Endpoint) || s3Endpoint.Contains("storage.acdn.uz", StringComparison.OrdinalIgnoreCase)) {
+    s3Endpoint = "https://774b85c7e1e973d0f0e723dcc5640d31.r2.cloudflarestorage.com";
+}
+
 var isR2 = s3Endpoint?.Contains("r2.cloudflarestorage.com", StringComparison.OrdinalIgnoreCase) == true;
-var s3Region = isR2 ? "auto" : (builder.Configuration["S3:Region"] ?? "uz");
+var s3Region = isR2 ? "auto" : (builder.Configuration["S3:Region"] ?? "auto");
 
 if (!string.IsNullOrWhiteSpace(s3Endpoint) && !string.IsNullOrWhiteSpace(s3AccessKey)) {
     if (!s3Endpoint.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
@@ -162,10 +167,6 @@ if (!string.IsNullOrWhiteSpace(s3Endpoint) && !string.IsNullOrWhiteSpace(s3Acces
         if (s3AccessKey.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
             || s3AccessKey.StartsWith("https://", StringComparison.OrdinalIgnoreCase)) {
             (s3Endpoint, s3AccessKey) = (s3AccessKey, s3Endpoint);
-        }
-        else if (s3Endpoint.StartsWith("S3-", StringComparison.OrdinalIgnoreCase)) {
-            s3AccessKey = s3Endpoint;
-            s3Endpoint = "https://storage.acdn.uz";
         }
         else {
             s3Endpoint = "https://" + s3Endpoint;

@@ -32,10 +32,12 @@ public static class DatabaseSeeder {
                 "UPDATE \"AspNetUsers\" SET \"PhotoObjectKey\" = 'users/d7346498-df28-4b36-a269-e0cc1a0fae0c/168d73b32f084819875cd4de82a9585b.jpg' WHERE \"Id\" = 'd7346498-df28-4b36-a269-e0cc1a0fae0c' AND (\"PhotoObjectKey\" LIKE 'data:image%' OR \"PhotoObjectKey\" IS NULL); " +
                 "UPDATE \"UserAttributeValues\" SET \"ImageObjectKey\" = 'users/d7346498-df28-4b36-a269-e0cc1a0fae0c/168d73b32f084819875cd4de82a9585b.jpg' WHERE \"UserId\" = 'd7346498-df28-4b36-a269-e0cc1a0fae0c' AND \"ImageObjectKey\" LIKE 'data:image%'; " +
                 "UPDATE \"AspNetUsers\" SET \"PhotoObjectKey\" = NULL WHERE \"PhotoObjectKey\" LIKE 'data:image%'; " +
-                "UPDATE \"UserAttributeValues\" SET \"ImageObjectKey\" = NULL WHERE \"ImageObjectKey\" LIKE 'data:image%';");
+                "UPDATE \"UserAttributeValues\" SET \"ImageObjectKey\" = NULL WHERE \"ImageObjectKey\" LIKE 'data:image%'; " +
+                "UPDATE \"AspNetUsers\" SET \"PhotoObjectKey\" = REPLACE(REPLACE(\"PhotoObjectKey\", 'https://storage.acdn.uz/cvmanagement/', ''), 'https://storage.acdn.uz/', '') WHERE \"PhotoObjectKey\" LIKE '%storage.acdn.uz%'; " +
+                "UPDATE \"UserAttributeValues\" SET \"ImageObjectKey\" = REPLACE(REPLACE(\"ImageObjectKey\", 'https://storage.acdn.uz/cvmanagement/', ''), 'https://storage.acdn.uz/', '') WHERE \"ImageObjectKey\" LIKE '%storage.acdn.uz%';");
         }
         catch (Exception ex) {
-            Console.Error.WriteLine($"Warning: Database cleanup of base64 failed: {ex.Message}");
+            Console.Error.WriteLine($"Warning: Database cleanup of legacy image keys failed: {ex.Message}");
         }
 
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();

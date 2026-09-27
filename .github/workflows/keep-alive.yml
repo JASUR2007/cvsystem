@@ -1,0 +1,15 @@
+﻿name: Keep Backend Alive
+
+on:
+  schedule:
+    # Ping every 10 minutes to prevent Render free-tier cold sleep
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render Backend Health Endpoint
+        run: |
+          curl -s -f https://cvsystem-jtnh.onrender.com/api/health || true

@@ -29,7 +29,6 @@ builder.Services.Configure<ForwardedHeadersOptions>(options => {
     options.KnownProxies.Clear();
 });
 
-// Configuration validation
 var connectionString = builder.Configuration.GetConnectionString("Default")
     ?? throw new InvalidOperationException("ConnectionStrings:Default is required.");
 var jwtKey = builder.Configuration["Jwt:Key"]
@@ -43,7 +42,6 @@ if (Encoding.UTF8.GetByteCount(jwtKey) < 32) {
     throw new InvalidOperationException("Jwt:Key must contain at least 32 bytes.");
 }
 
-// Database & Identity
 builder.Services.AddDbContext<AppDbContext>(options => {
     options.UseNpgsql(connectionString);
     options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
@@ -77,7 +75,6 @@ builder.Services.AddScoped<IHomeService, HomeService>();
 builder.Services.AddScoped<IAdminUserService, AdminUserService>();
 builder.Services.AddScoped<ISettingsService, SettingsService>();
 
-// Authentication & Authorization
 var authentication = builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddCookie("External", options => {
         options.Cookie.Name = "talenthub_external";

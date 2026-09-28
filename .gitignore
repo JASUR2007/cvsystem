@@ -13,10 +13,9 @@ obj/
 *.suo
 *.userosscache
 *.sln.docstates
-
+DEFENSE_PREPARATION.md
 # Logs
 *.log
 .env
 frontend/dist/
 frontend/node_modules/
-DEFENSE_PREPARATION.md

@@ -245,7 +245,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapGet("/api/health", () => Results.Ok(new { status = "ok" }));
+app.MapMethods("/api/health", ["GET", "HEAD"], () => Results.Ok(new { status = "ok" }));
+app.MapMethods("/health", ["GET", "HEAD"], () => Results.Ok(new { status = "ok" }));
+app.MapMethods("/", ["GET", "HEAD"], () => Results.Ok(new { service = "TalentHub API", status = "healthy" }));
 app.MapGet("/uploads/{**path}", (string path) => {
     var localPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", path.Replace('/', Path.DirectorySeparatorChar));
     if (!File.Exists(localPath)) return Results.NotFound();

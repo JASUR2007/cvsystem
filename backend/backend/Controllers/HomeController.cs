@@ -9,6 +9,7 @@ namespace backend.Controllers;
 [Route("api/[controller]")]
 public sealed class HomeController(IHomeService homeService) : ControllerBase {
     [HttpGet("statistics")]
+    [HttpHead("statistics")]
     public async Task<ActionResult<HomeStatisticsResponse>> GetStatistics(CancellationToken cancellationToken) {
         var result = await homeService.GetStatisticsAsync(cancellationToken);
         return Ok(result);

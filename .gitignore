@@ -18,4 +18,5 @@ obj/
 *.log
 .env
 frontend/dist/
-frontend/node_modules/
+frontend/node_modules/
+DEFENSE_PREPARATION.md

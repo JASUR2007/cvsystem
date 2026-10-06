@@ -26,6 +26,9 @@ public static class DevelopmentDataSeeder {
         if (!await db.Positions.AnyAsync()) {
             await SeedPositionsAndRelatedDataAsync(db, attributes, users, tags);
         }
+
+        // 5. Ensure Numeric aggregation demo data ("Years of Experience" with 2, 4, 6 => Avg 4, Min 2, Max 6)
+        await EnsureYearsOfExperienceDemoDataAsync(db, attributes, users);
     }
 
     private static async Task<Dictionary<string, AttributeDefinition>> SeedAttributesAsync(AppDbContext db) {
@@ -198,6 +201,10 @@ public static class DevelopmentDataSeeder {
             new UserAttributeValue { UserId = elena.Id, AttributeId = attributes["Python"].Id, BooleanValue = true, Version = 1 },
             new UserAttributeValue { UserId = elena.Id, AttributeId = attributes["Apache Hadoop"].Id, BooleanValue = true, Version = 1 },
             new UserAttributeValue { UserId = elena.Id, AttributeId = attributes["CAP"].Id, SelectedOptionId = GetOptionId("CAP", "Pro"), Version = 1 },
+            new UserAttributeValue { UserId = elena.Id, AttributeId = attributes["Years of Experience"].Id, NumberValue = 2.0m, Version = 1 },
+            new UserAttributeValue { UserId = elena.Id, AttributeId = attributes["C# / .NET Core"].Id, BooleanValue = true, Version = 1 },
+            new UserAttributeValue { UserId = elena.Id, AttributeId = attributes["PostgreSQL"].Id, BooleanValue = true, Version = 1 },
+            new UserAttributeValue { UserId = elena.Id, AttributeId = attributes["Docker"].Id, BooleanValue = true, Version = 1 },
             new UserAttributeValue { UserId = elena.Id, AttributeId = attributes["Remote Work"].Id, BooleanValue = true, Version = 1 }
         );
 
@@ -207,7 +214,7 @@ public static class DevelopmentDataSeeder {
             new UserAttributeValue { UserId = john.Id, AttributeId = attributes["C# / .NET Core"].Id, BooleanValue = true, Version = 1 },
             new UserAttributeValue { UserId = john.Id, AttributeId = attributes["PostgreSQL"].Id, BooleanValue = true, Version = 1 },
             new UserAttributeValue { UserId = john.Id, AttributeId = attributes["Docker"].Id, BooleanValue = true, Version = 1 },
-            new UserAttributeValue { UserId = john.Id, AttributeId = attributes["Years of Experience"].Id, NumberValue = 5.0m, Version = 1 },
+            new UserAttributeValue { UserId = john.Id, AttributeId = attributes["Years of Experience"].Id, NumberValue = 4.0m, Version = 1 },
             new UserAttributeValue { UserId = john.Id, AttributeId = attributes["Remote Work"].Id, BooleanValue = true, Version = 1 }
         );
 
@@ -219,12 +226,14 @@ public static class DevelopmentDataSeeder {
             new UserAttributeValue { UserId = anna.Id, AttributeId = attributes["Presentation Skills"].Id, SelectedOptionId = GetOptionId("Presentation Skills", "Advanced"), Version = 1 }
         );
 
-        // Michael Brown (DevOps candidate)
+        // Michael Brown (DevOps / Backend candidate)
         db.UserAttributeValues.AddRange(
             new UserAttributeValue { UserId = michael.Id, AttributeId = attributes["English Level"].Id, SelectedOptionId = GetOptionId("English Level", "B2"), Version = 1 },
+            new UserAttributeValue { UserId = michael.Id, AttributeId = attributes["C# / .NET Core"].Id, BooleanValue = true, Version = 1 },
+            new UserAttributeValue { UserId = michael.Id, AttributeId = attributes["PostgreSQL"].Id, BooleanValue = true, Version = 1 },
             new UserAttributeValue { UserId = michael.Id, AttributeId = attributes["Docker"].Id, BooleanValue = true, Version = 1 },
             new UserAttributeValue { UserId = michael.Id, AttributeId = attributes["Remote Work"].Id, BooleanValue = true, Version = 1 },
-            new UserAttributeValue { UserId = michael.Id, AttributeId = attributes["Years of Experience"].Id, NumberValue = 4.0m, Version = 1 }
+            new UserAttributeValue { UserId = michael.Id, AttributeId = attributes["Years of Experience"].Id, NumberValue = 6.0m, Version = 1 }
         );
 
         await db.SaveChangesAsync();
@@ -324,7 +333,8 @@ public static class DevelopmentDataSeeder {
         pos2.Attributes.Add(new PositionAttribute { PositionId = pos2.Id, AttributeId = attributes["C# / .NET Core"].Id, SortOrder = 2, IsRequired = true });
         pos2.Attributes.Add(new PositionAttribute { PositionId = pos2.Id, AttributeId = attributes["PostgreSQL"].Id, SortOrder = 3, IsRequired = true });
         pos2.Attributes.Add(new PositionAttribute { PositionId = pos2.Id, AttributeId = attributes["Docker"].Id, SortOrder = 4, IsRequired = true });
-        pos2.Attributes.Add(new PositionAttribute { PositionId = pos2.Id, AttributeId = attributes["Remote Work"].Id, SortOrder = 5, IsRequired = false });
+        pos2.Attributes.Add(new PositionAttribute { PositionId = pos2.Id, AttributeId = attributes["Years of Experience"].Id, SortOrder = 5, IsRequired = true });
+        pos2.Attributes.Add(new PositionAttribute { PositionId = pos2.Id, AttributeId = attributes["Remote Work"].Id, SortOrder = 6, IsRequired = false });
 
         pos2.ProjectTags.Add(new PositionProjectTag { PositionId = pos2.Id, TagId = tags[".NET"].Id });
         pos2.ProjectTags.Add(new PositionProjectTag { PositionId = pos2.Id, TagId = tags["PostgreSQL"].Id });
@@ -428,6 +438,30 @@ public static class DevelopmentDataSeeder {
         cvJohn.Likes.Add(new CvLike { CvId = cvJohn.Id, RecruiterId = alex.Id, CreatedAt = DateTime.UtcNow.AddHours(-12) });
         db.Cvs.Add(cvJohn);
 
+        // Elena Rostova's CV for Senior Backend Developer @ TechCorp
+        var cvElenaBackend = new Cv {
+            Id = Guid.NewGuid(),
+            CandidateId = elena.Id,
+            PositionId = pos2.Id,
+            Status = CvStatus.Published,
+            CreatedAt = DateTime.UtcNow.AddHours(-12),
+            UpdatedAt = DateTime.UtcNow.AddHours(-11),
+            PublishedAt = DateTime.UtcNow.AddHours(-11)
+        };
+        db.Cvs.Add(cvElenaBackend);
+
+        // Michael Brown's CV for Senior Backend Developer @ TechCorp
+        var cvMichaelBackend = new Cv {
+            Id = Guid.NewGuid(),
+            CandidateId = michael.Id,
+            PositionId = pos2.Id,
+            Status = CvStatus.Published,
+            CreatedAt = DateTime.UtcNow.AddHours(-10),
+            UpdatedAt = DateTime.UtcNow.AddHours(-9),
+            PublishedAt = DateTime.UtcNow.AddHours(-9)
+        };
+        db.Cvs.Add(cvMichaelBackend);
+
         // Anna Smith's CV for Frontend Developer @ WebLabs
         var cvAnna = new Cv {
             Id = Guid.NewGuid(),
@@ -494,6 +528,135 @@ public static class DevelopmentDataSeeder {
                 CreatedAt = DateTime.UtcNow.AddHours(-14)
             }
         );
+
+        await db.SaveChangesAsync();
+    }
+
+    private static async Task EnsureYearsOfExperienceDemoDataAsync(
+        AppDbContext db,
+        Dictionary<string, AttributeDefinition> attributes,
+        Dictionary<string, AppUser> users) {
+        if (!attributes.TryGetValue("Years of Experience", out var expAttr)) {
+            expAttr = await db.Attributes.FirstOrDefaultAsync(a => a.Name == "Years of Experience");
+            if (expAttr == null) {
+                expAttr = new AttributeDefinition {
+                    Id = Guid.NewGuid(),
+                    Name = "Years of Experience",
+                    Category = "Experience",
+                    Type = AttributeType.Numeric,
+                    Description = "Total commercial software development experience in years",
+                    IsBuiltIn = false
+                };
+                db.Attributes.Add(expAttr);
+                await db.SaveChangesAsync();
+            }
+            attributes["Years of Experience"] = expAttr;
+        }
+
+        // Find Backend positions (including target Senior Backend Developer)
+        var backendPositions = await db.Positions
+            .Include(p => p.Attributes)
+            .Where(p => p.Title == "Senior Backend Developer" || p.Title.Contains("Backend"))
+            .ToListAsync();
+
+        if (backendPositions.Count == 0) {
+            var anyPos = await db.Positions.Include(p => p.Attributes).FirstOrDefaultAsync();
+            if (anyPos != null) {
+                backendPositions.Add(anyPos);
+            }
+        }
+
+        foreach (var pos in backendPositions) {
+            // 1. Ensure position has "Years of Experience" attribute
+            if (pos.Attributes.All(pa => pa.AttributeId != expAttr.Id)) {
+                var maxSort = pos.Attributes.Count > 0 ? pos.Attributes.Max(a => a.SortOrder) + 1 : 1;
+                pos.Attributes.Add(new PositionAttribute {
+                    PositionId = pos.Id,
+                    AttributeId = expAttr.Id,
+                    SortOrder = maxSort,
+                    IsRequired = true
+                });
+            }
+
+            // 2. Fetch existing published CVs for this position
+            var publishedCvs = await db.Cvs
+                .Where(c => c.PositionId == pos.Id && c.Status == CvStatus.Published)
+                .OrderBy(c => c.CreatedAt)
+                .ToListAsync();
+
+            var candidateIds = publishedCvs.Select(c => c.CandidateId).Distinct().ToList();
+
+            // If fewer than 3 candidates, find other candidate users to add published CVs
+            if (candidateIds.Count < 3) {
+                var candidatePool = new List<Guid>();
+                foreach (var email in new[] { "john.doe@example.com", "elena.rostova@example.com", "michael.brown@example.com", "anna.smith@example.com" }) {
+                    if (users.TryGetValue(email, out var u)) {
+                        candidatePool.Add(u.Id);
+                    }
+                    else {
+                        var found = await db.Users.FirstOrDefaultAsync(x => x.Email == email);
+                        if (found != null) candidatePool.Add(found.Id);
+                    }
+                }
+                var allUsers = await db.Users.Take(10).Select(u => u.Id).ToListAsync();
+                foreach (var uid in allUsers) {
+                    if (!candidatePool.Contains(uid)) candidatePool.Add(uid);
+                }
+
+                foreach (var cid in candidatePool) {
+                    if (candidateIds.Count >= 3) break;
+                    if (!candidateIds.Contains(cid)) {
+                        var newCv = new Cv {
+                            Id = Guid.NewGuid(),
+                            CandidateId = cid,
+                            PositionId = pos.Id,
+                            Status = CvStatus.Published,
+                            CreatedAt = DateTime.UtcNow.AddHours(-12),
+                            UpdatedAt = DateTime.UtcNow.AddHours(-12),
+                            PublishedAt = DateTime.UtcNow.AddHours(-12)
+                        };
+                        db.Cvs.Add(newCv);
+                        candidateIds.Add(cid);
+                    }
+                }
+            }
+
+            // 3. Set exactly values 2.0, 4.0, 6.0 for the top 3 candidates
+            // Average = 4.0, Min = 2.0, Max = 6.0
+            var demoValues = new[] { 2.0m, 4.0m, 6.0m };
+            for (int i = 0; i < Math.Min(3, candidateIds.Count); i++) {
+                var candId = candidateIds[i];
+                var targetVal = demoValues[i];
+
+                var uav = await db.UserAttributeValues
+                    .FirstOrDefaultAsync(v => v.UserId == candId && v.AttributeId == expAttr.Id);
+
+                if (uav == null) {
+                    db.UserAttributeValues.Add(new UserAttributeValue {
+                        UserId = candId,
+                        AttributeId = expAttr.Id,
+                        NumberValue = targetVal,
+                        Version = 1,
+                        UpdatedAt = DateTime.UtcNow
+                    });
+                }
+                else {
+                    uav.NumberValue = targetVal;
+                    uav.UpdatedAt = DateTime.UtcNow;
+                }
+            }
+
+            // If there are more than 3 candidates with published CVs, clear Years of Experience for the rest
+            // so that the exact 2, 4, 6 average (4) / min (2) / max (6) is maintained
+            for (int i = 3; i < candidateIds.Count; i++) {
+                var extraCandId = candidateIds[i];
+                var extraUav = await db.UserAttributeValues
+                    .FirstOrDefaultAsync(v => v.UserId == extraCandId && v.AttributeId == expAttr.Id);
+                if (extraUav != null) {
+                    db.UserAttributeValues.Remove(extraUav);
+                }
+            }
+        }
 
         await db.SaveChangesAsync();
     }

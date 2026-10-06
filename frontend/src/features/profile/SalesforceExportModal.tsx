@@ -81,12 +81,12 @@ export function SalesforceExportModal({ isOpen, onClose, profile, userId }: Prop
       <div className="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div className="modal-content border-0 shadow">
           {/* Header */}
-          <div className="modal-header border-bottom pb-3" style={{ background: 'linear-gradient(135deg, #00A1E0 0%, #0070D2 100%)', color: '#fff' }}>
-            <div className="d-flex align-items-center gap-2">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <div className="modal-header border-bottom pb-3" style={{ background: 'linear-gradient(135deg, #00A1E0 0%, #0070D2 100%)', color: '#ffffff' }}>
+            <div className="d-flex align-items-center gap-2 text-white">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#ffffff' }}>
                 <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />
               </svg>
-              <h5 className="modal-title fw-bold mb-0">{t('Salesforce CRM Integration')}</h5>
+              <h5 className="modal-title fw-bold mb-0 text-white" style={{ color: '#ffffff' }}>{t('Salesforce CRM Integration')}</h5>
             </div>
             <button
               type="button"
@@ -141,7 +141,9 @@ export function SalesforceExportModal({ isOpen, onClose, profile, userId }: Prop
                   <div className="fw-bold mb-1">
                     ✓ {t('Successfully created Account and Contact in Salesforce CRM!')}
                   </div>
-                  <div className="small text-muted mb-2">{result.message}</div>
+                  <div className="small text-muted mb-2">
+                    {t('Successfully exported user to Salesforce CRM.')}
+                  </div>
                   <div className="d-flex flex-wrap gap-3 small">
                     <div>
                       <strong>{t('Account ID')}:</strong> <code className="bg-white px-2 py-1 rounded border">{result.accountId}</code>
@@ -186,7 +188,7 @@ export function SalesforceExportModal({ isOpen, onClose, profile, userId }: Prop
                     disabled={loading}
                   />
                   <small className="text-muted" style={{ fontSize: '0.75rem' }}>
-                    Leave empty to default to user name.
+                    {t('Leave empty to default to user name.')}
                   </small>
                 </div>
 

@@ -224,6 +224,13 @@ const uz: Record<string, string> = {
   'Last used': 'Oxirgi foydalanilgan',
   'Never used': 'Hali foydalanilmagan',
   Created: 'Yaratilgan',
+  'Leave empty to default to user name.': 'Foydalanuvchi ismidan foydalanish uchun bo‘sh qoldiring.',
+  'Successfully exported user to Salesforce CRM.': 'Foydalanuvchi Salesforce CRM tizimiga muvaffaqiyatli eksport qilindi.',
+  'Source URL (TalentHub Position Web Page)': 'Manba URL (TalentHub lavozim sahifasi)',
+  'Copy Source URL': 'Manba URLni nusxalash',
+  'External API Endpoint (Backend)': 'Tashqi API manzili (Backend)',
+  'Use this endpoint in Odoo to fetch aggregated statistics.': 'Odoo tizimida jamlangan ma’lumotlarni olish uchun ushbu manzildan foydalaning.',
+  'Use this URL in Odoo as Source URL to link back to the position in TalentHub.': 'Odoo tizimida TalentHub lavozimiga o‘tish uchun ushbu URLdan foydalaning.',
 }
 
 const ru: Record<string, string> = {
@@ -453,6 +460,13 @@ const ru: Record<string, string> = {
   'Last used': 'Последнее использование',
   'Never used': 'Ещё не использовался',
   Created: 'Создан',
+  'Leave empty to default to user name.': 'Оставьте пустым, чтобы использовать имя пользователя.',
+  'Successfully exported user to Salesforce CRM.': 'Пользователь успешно экспортирован в Salesforce CRM.',
+  'Source URL (TalentHub Position Web Page)': 'Исходный URL (веб-страница позиции в TalentHub)',
+  'Copy Source URL': 'Копировать исходный URL',
+  'External API Endpoint (Backend)': 'Внешний эндпоинт API (Backend)',
+  'Use this endpoint in Odoo to fetch aggregated statistics.': 'Используйте этот эндпоинт в Odoo для получения агрегированных данных.',
+  'Use this URL in Odoo as Source URL to link back to the position in TalentHub.': 'Используйте этот URL в Odoo как Source URL для перехода к позиции в TalentHub.',
 }
 
 export function t(value: string) {

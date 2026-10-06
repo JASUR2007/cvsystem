@@ -2,6 +2,18 @@ import { getToken, clearAuth } from '../auth/api'
 
 const base = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ?? ''
 
+export function getBackendApiBaseUrl(): string {
+  let url = import.meta.env.VITE_API_BASE_URL?.trim()
+  if (!url) {
+    if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+      url = 'http://localhost:5000'
+    } else {
+      url = 'https://cvsystem-jtnh.onrender.com'
+    }
+  }
+  return url.replace(/\/api\/?$/, '').replace(/\/$/, '')
+}
+
 export class ApiError extends Error {
   status: number
   details?: unknown

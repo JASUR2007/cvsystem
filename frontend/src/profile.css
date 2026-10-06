@@ -217,3 +217,25 @@
   background-color: var(--bg-secondary);
   color: var(--text-muted);
 }
+
+.btn-salesforce {
+  border: 1px solid #0070D2;
+  color: #0070D2;
+  background-color: transparent;
+  transition: all 0.15s ease-in-out;
+}
+
+.btn-salesforce:hover,
+.btn-salesforce:focus,
+.btn-salesforce:active {
+  background-color: #0070D2 !important;
+  border-color: #0070D2 !important;
+  color: #ffffff !important;
+}
+
+.btn-salesforce:hover svg,
+.btn-salesforce:focus svg,
+.btn-salesforce:active svg {
+  stroke: #ffffff !important;
+}
+

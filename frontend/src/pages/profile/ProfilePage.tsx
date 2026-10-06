@@ -514,9 +514,8 @@ export default function ProfilePage({ userId }: { userId?: string }) {
               <div className="mt-3 pt-3 border-top w-100">
                 <button
                   type="button"
-                  className="btn btn-outline-primary btn-sm w-100 d-inline-flex align-items-center justify-content-center gap-2"
+                  className="btn btn-salesforce btn-sm w-100 d-inline-flex align-items-center justify-content-center gap-2"
                   onClick={() => setIsSalesforceModalOpen(true)}
-                  style={{ borderColor: '#0070D2', color: '#0070D2' }}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />

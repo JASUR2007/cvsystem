@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { api, type PositionTokenResponse, type PositionTokenStatusResponse, dateText } from '../../shared/api'
+import { api, type PositionTokenResponse, type PositionTokenStatusResponse, dateText, getBackendApiBaseUrl } from '../../shared/api'
 import { useApi } from '../../shared/useApi'
 import { t } from '../../shared/i18n'
 
@@ -15,8 +15,11 @@ export function PositionOdooIntegration({ positionId }: Props) {
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
   const [tokenCopied, setTokenCopied] = useState(false)
   const [endpointCopied, setEndpointCopied] = useState(false)
+  const [sourceCopied, setSourceCopied] = useState(false)
 
-  const endpointUrl = `${window.location.origin}/api/integrations/odoo/position-results`
+  const backendBase = getBackendApiBaseUrl()
+  const endpointUrl = `${backendBase}/api/integrations/odoo/position-results`
+  const sourceUrl = `${window.location.origin}/positions/${positionId}`
 
   async function handleGenerateOrRegenerate() {
     setLoading(true)
@@ -51,6 +54,16 @@ export function PositionOdooIntegration({ positionId }: Props) {
       await navigator.clipboard.writeText(endpointUrl)
       setEndpointCopied(true)
       setTimeout(() => setEndpointCopied(false), 2500)
+    } catch {
+      // ignore clipboard error
+    }
+  }
+
+  async function copySource() {
+    try {
+      await navigator.clipboard.writeText(sourceUrl)
+      setSourceCopied(true)
+      setTimeout(() => setSourceCopied(false), 2500)
     } catch {
       // ignore clipboard error
     }
@@ -162,13 +175,12 @@ export function PositionOdooIntegration({ positionId }: Props) {
               <span>{t('This token grants read-only access to aggregated results for this Position. Keep it private.')}</span>
             </div>
 
-            {/* Public Endpoint Information */}
+            {/* Public Endpoint & Source URL Information */}
             <div className="p-3 rounded border bg-light">
               <div className="fw-semibold small text-secondary mb-2">
-                {t('External API Endpoint')}
+                {t('External API Endpoint (Backend)')}
               </div>
               <div className="mb-2">
-                <div className="small text-muted mb-1">URL:</div>
                 <div className="input-group input-group-sm">
                   <input
                     type="text"
@@ -184,9 +196,36 @@ export function PositionOdooIntegration({ positionId }: Props) {
                     {endpointCopied ? t('Copied!') : t('Copy Endpoint')}
                   </button>
                 </div>
+                <div className="text-muted mt-1" style={{ fontSize: '0.75rem' }}>
+                  {t('Use this endpoint in Odoo to fetch aggregated statistics.')}
+                </div>
               </div>
-              <div className="small text-muted">
+              <div className="small text-muted mb-3">
                 <strong>Header:</strong> <code className="bg-white px-2 py-1 rounded border">X-API-Token: {generatedToken}</code>
+              </div>
+
+              <div className="pt-2 border-top">
+                <div className="fw-semibold small text-secondary mb-1">
+                  {t('Source URL (TalentHub Position Web Page)')}
+                </div>
+                <div className="input-group input-group-sm">
+                  <input
+                    type="text"
+                    readOnly
+                    className="form-control font-monospace small"
+                    value={sourceUrl}
+                  />
+                  <button
+                    type="button"
+                    className={`btn btn-sm ${sourceCopied ? 'btn-success' : 'btn-outline-secondary'}`}
+                    onClick={copySource}
+                  >
+                    {sourceCopied ? t('Copied!') : t('Copy Source URL')}
+                  </button>
+                </div>
+                <div className="text-muted mt-1" style={{ fontSize: '0.75rem' }}>
+                  {t('Use this URL in Odoo as Source URL to link back to the position in TalentHub.')}
+                </div>
               </div>
             </div>
           </div>

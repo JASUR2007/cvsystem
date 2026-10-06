@@ -14,6 +14,7 @@ export function PositionOdooIntegration({ positionId }: Props) {
   const [error, setError] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
   const [tokenCopied, setTokenCopied] = useState(false)
+  const [showToken, setShowToken] = useState(false)
   const [endpointCopied, setEndpointCopied] = useState(false)
   const [sourceCopied, setSourceCopied] = useState(false)
 
@@ -150,12 +151,31 @@ export function PositionOdooIntegration({ positionId }: Props) {
             </label>
             <div className="input-group mb-2">
               <input
-                type="text"
+                type={showToken ? 'text' : 'password'}
                 readOnly
                 className="form-control font-monospace"
                 style={{ fontSize: '0.85rem', backgroundColor: '#F8FAFC' }}
                 value={generatedToken}
               />
+              <button
+                type="button"
+                className="btn btn-outline-secondary d-flex align-items-center"
+                onClick={() => setShowToken(!showToken)}
+                title={showToken ? t('Hide') : t('Show')}
+                aria-label={showToken ? t('Hide') : t('Show')}
+              >
+                {showToken ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                )}
+              </button>
               <button
                 type="button"
                 className={`btn ${tokenCopied ? 'btn-success' : 'btn-outline-secondary'}`}
@@ -201,7 +221,7 @@ export function PositionOdooIntegration({ positionId }: Props) {
                 </div>
               </div>
               <div className="small text-muted mb-3">
-                <strong>Header:</strong> <code className="bg-white px-2 py-1 rounded border">X-API-Token: {generatedToken}</code>
+                <strong>Header:</strong> <code className="bg-white px-2 py-1 rounded border">X-API-Token: {showToken ? generatedToken : `${generatedToken.slice(0, 7)}••••••••••••••••••••••••${generatedToken.slice(-4)}`}</code>
               </div>
 
               <div className="pt-2 border-top">

@@ -19,3 +19,4 @@ DEFENSE_PREPARATION.md
 .env
 frontend/dist/
 frontend/node_modules/
+*.zip

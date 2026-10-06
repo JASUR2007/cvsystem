@@ -1,6 +1,7 @@
 using backend.Auth;
 using backend.Common.Exceptions;
 using backend.DTOs.Profile;
+using backend.DTOs.Salesforce;
 using backend.Entities;
 using backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -12,11 +13,24 @@ namespace backend.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/profile")]
-public sealed class ProfileController(IProfileService profileService, ICurrentUserService currentUser) : ControllerBase {
+public sealed class ProfileController(
+    IProfileService profileService,
+    ISalesforceService salesforceService,
+    ICurrentUserService currentUser) : ControllerBase {
     [HttpGet]
     public async Task<ActionResult<ProfileView>> Get(Guid? userId, CancellationToken cancellationToken) {
         var targetId = ResolveUserId(userId);
         var result = await profileService.GetProfileAsync(targetId, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("salesforce")]
+    public async Task<ActionResult<SalesforceExportResult>> ExportToSalesforce(
+        SalesforceExportRequest request,
+        Guid? userId,
+        CancellationToken cancellationToken) {
+        var targetId = ResolveUserId(userId);
+        var result = await salesforceService.ExportUserAsync(targetId, request, cancellationToken);
         return Ok(result);
     }
 

@@ -68,3 +68,19 @@ export function dateText(value: string | null | undefined): string {
   const year = d.getFullYear()
   return `${day}/${month}/${year}`
 }
+
+export type SalesforceExportRequest = {
+  accountName?: string
+  phone?: string
+  title?: string
+  industry?: string
+  description?: string
+}
+
+export type SalesforceExportResult = {
+  accountId: string
+  contactId: string
+  instanceUrl: string
+  message: string
+}
+

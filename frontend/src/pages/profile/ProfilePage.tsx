@@ -9,6 +9,7 @@ import { imageUrl } from '../../shared/imageUrl'
 import { t } from '../../shared/i18n'
 import ConfirmModal from '../../shared/ConfirmModal'
 import ImageViewerModal from '../../shared/ImageViewerModal'
+import { SalesforceExportModal } from '../../features/profile/SalesforceExportModal'
 import '../../profile.css'
 
 const LOCATION_SUGGESTIONS = [
@@ -80,9 +81,10 @@ export default function ProfilePage({ userId }: { userId?: string }) {
   const [recruiterMessage, setRecruiterMessage] = useState('')
   const [selectedCvs, setSelectedCvs] = useState<string[]>([])
   const [isDeleteCvModalOpen, setIsDeleteCvModalOpen] = useState(false)
+  const [isSalesforceModalOpen, setIsSalesforceModalOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const revision = useRef(0)
-
+  
   async function handleDeleteCvsConfirm() {
     try {
       await Promise.all(selectedCvs.map(id => api(`/cvs/${id}`, { method: 'DELETE' })))
@@ -93,13 +95,20 @@ export default function ProfilePage({ userId }: { userId?: string }) {
       alert(cause instanceof Error ? cause.message : 'Could not delete CV.')
     }
   }
-
+  
   const cachedUser = getCachedUser()
   const userRoles = result.data?.roles || cachedUser?.roles || []
   const isRecruiter = userRoles.includes('Recruiter')
   const isAdministrator = userRoles.includes('Administrator')
   const isCandidateOnly = !userId && !isRecruiter && !isAdministrator
   const recruiterStatus = isRecruiter ? 'Approved' : (result.data?.recruiterRequestStatus || 'None')
+  const canManageSalesforce = !userId || isAdministrator
+
+  useEffect(() => {
+    if (isRecruiter && tab === 'Info') {
+      setTab('Me')
+    }
+  }, [isRecruiter, tab])
 
   useEffect(() => {
     const errorStatus = (result.error as any)?.status || (cvs.error as any)?.status
@@ -326,12 +335,14 @@ export default function ProfilePage({ userId }: { userId?: string }) {
       setSavingManual(false)
     }
   }
+  
+  const project: ('Me' | 'Info' | 'Projects' | 'CVs')[] = isRecruiter ? ['Me', 'Projects', 'CVs'] : ['Me', 'Info', 'Projects', 'CVs'];
 
   return (
     <div className="profile-container">
       {/* Navigation Tabs */}
       <nav className="profile-nav-tabs" aria-label="Profile Sections">
-        {(['Me', 'Info', 'Projects', 'CVs'] as const).map(item => (
+        {project.map(item => (
           <button
             type="button"
             key={item}
@@ -435,7 +446,7 @@ export default function ProfilePage({ userId }: { userId?: string }) {
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
-                  <span>{t('Recruiter')} ({t('Approved')})</span>
+                  <span>{t('Recruiter (Approved)')}</span>
                 </div>
               </div>
             )}
@@ -497,6 +508,22 @@ export default function ProfilePage({ userId }: { userId?: string }) {
                   </div>
                 )}
               </>
+            )}
+
+            {canManageSalesforce && (
+              <div className="mt-3 pt-3 border-top w-100">
+                <button
+                  type="button"
+                  className="btn btn-outline-primary btn-sm w-100 d-inline-flex align-items-center justify-content-center gap-2"
+                  onClick={() => setIsSalesforceModalOpen(true)}
+                  style={{ borderColor: '#0070D2', color: '#0070D2' }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />
+                  </svg>
+                  <span>{t('Export to Salesforce CRM')}</span>
+                </button>
+              </div>
             )}
           </div>
 
@@ -747,6 +774,15 @@ export default function ProfilePage({ userId }: { userId?: string }) {
         title={fullscreenImage?.title}
         onClose={() => setFullscreenImage(null)}
       />
+
+      {form && (
+        <SalesforceExportModal
+          isOpen={isSalesforceModalOpen}
+          onClose={() => setIsSalesforceModalOpen(false)}
+          profile={form}
+          userId={userId}
+        />
+      )}
     </div>
   )
 }

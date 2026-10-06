@@ -7,6 +7,7 @@ using Amazon.Runtime;
 using Amazon.S3;
 using backend.Auth;
 using backend.Common.Middleware;
+using backend.Configuration;
 using backend.Data;
 using backend.Data.Seed;
 using backend.Entities;
@@ -74,6 +75,11 @@ builder.Services.AddScoped<ISearchService, SearchService>();
 builder.Services.AddScoped<IHomeService, HomeService>();
 builder.Services.AddScoped<IAdminUserService, AdminUserService>();
 builder.Services.AddScoped<ISettingsService, SettingsService>();
+
+// Salesforce CRM Integration
+builder.Services.Configure<SalesforceSettings>(builder.Configuration.GetSection(SalesforceSettings.SectionName));
+builder.Services.AddHttpClient("Salesforce");
+builder.Services.AddScoped<ISalesforceService, SalesforceService>();
 
 var authentication = builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddCookie("External", options => {

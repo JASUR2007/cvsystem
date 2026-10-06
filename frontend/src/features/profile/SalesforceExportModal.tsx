@@ -58,7 +58,7 @@ export function SalesforceExportModal({ isOpen, onClose, profile, userId }: Prop
       const res = await api<SalesforceExportResult>(`/profile/salesforce${query}`, json('POST', payload))
       setResult(res)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to export to Salesforce.')
+      setError(err instanceof Error ? err.message : t('Failed to export to Salesforce.'))
     } finally {
       setLoading(false)
     }
@@ -215,7 +215,7 @@ export function SalesforceExportModal({ isOpen, onClose, profile, userId }: Prop
                     id={titleInput}
                     type="text"
                     className="form-control form-control-sm"
-                    placeholder="e.g. Senior Software Engineer / Recruiter"
+                    placeholder={t('e.g. Senior Software Engineer / Recruiter')}
                     value={title}
                     onChange={e => setTitle(e.target.value)}
                     disabled={loading}
@@ -235,7 +235,7 @@ export function SalesforceExportModal({ isOpen, onClose, profile, userId }: Prop
                   >
                     {INDUSTRIES.map(item => (
                       <option key={item} value={item}>
-                        {item}
+                        {t(item)}
                       </option>
                     ))}
                   </select>
@@ -249,7 +249,7 @@ export function SalesforceExportModal({ isOpen, onClose, profile, userId }: Prop
                     id={descInput}
                     rows={3}
                     className="form-control form-control-sm"
-                    placeholder="Candidate skills, recruitment notes, CRM remarks..."
+                    placeholder={t('Candidate skills, recruitment notes, CRM remarks...')}
                     value={description}
                     onChange={e => setDescription(e.target.value)}
                     disabled={loading}

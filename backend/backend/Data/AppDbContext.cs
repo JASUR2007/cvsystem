@@ -21,6 +21,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<CvLike> CvLikes => Set<CvLike>();
     public DbSet<DiscussionPost> DiscussionPosts => Set<DiscussionPost>();
     public DbSet<ExternalAuthTicket> ExternalAuthTickets => Set<ExternalAuthTicket>();
+    public DbSet<PositionApiToken> PositionApiTokens => Set<PositionApiToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         base.OnModelCreating(modelBuilder);

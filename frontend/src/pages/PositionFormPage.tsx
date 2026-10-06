@@ -12,6 +12,8 @@ import {
 import { Status } from '../shared/ui'
 import { useApi } from '../shared/useApi'
 import { t } from '../shared/i18n'
+import { getCachedUser, type CurrentUser } from '../auth/api'
+import { PositionOdooIntegration } from '../features/positions/PositionOdooIntegration'
 import '../position-form.css'
 
 type SelectedAttribute = {
@@ -37,7 +39,9 @@ const STEPS = [
 
 type StepId = (typeof STEPS)[number]['id']
 
-export default function PositionFormPage({ id }: { id?: string }) {
+export default function PositionFormPage({ id, user }: { id?: string; user?: CurrentUser | null }) {
+  const activeUser = user || getCachedUser()
+  const canManage = activeUser?.roles.some(r => r === 'Recruiter' || r === 'Administrator') ?? false
   const existing = useApi<PositionDetail>(id ? `/positions/${id}` : null)
   const [lookup, setLookup] = useState('')
   const library = useApi<Page<AttributeListItem>>(`/attributes?prefix=${encodeURIComponent(lookup)}&pageSize=40`)
@@ -680,6 +684,11 @@ export default function PositionFormPage({ id }: { id?: string }) {
           </footer>
         </form>
       </div>
+
+      {/* Odoo Integration for existing positions */}
+      {id && canManage && (
+        <PositionOdooIntegration positionId={id} />
+      )}
 
       {/* In-Wizard Attribute Creation Modal */}
       {showNewAttrModal && (

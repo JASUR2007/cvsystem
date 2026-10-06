@@ -37,7 +37,7 @@ function Page({ path, user, onAuth }: { path: string; user: CurrentUser | null; 
   if (path === '/admin' || path === '/admin/dashboard' || path === '/admin/users') return <AdminPage />
   if (path === '/search') return <SearchPage user={user} />
   const editPosition = path.match(/^\/positions\/([0-9a-f-]+)\/edit$/i)
-  if (editPosition) return <PositionFormPage id={editPosition[1]} />
+  if (editPosition) return <PositionFormPage id={editPosition[1]} user={user} />
   const positionCvs = path.match(/^\/positions\/([0-9a-f-]+)\/cvs$/i)
   if (positionCvs) return <PositionCvsPage id={positionCvs[1]} />
   const position = path.match(/^\/positions\/([0-9a-f-]+)$/i)

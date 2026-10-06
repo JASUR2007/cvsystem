@@ -84,3 +84,16 @@ export type SalesforceExportResult = {
   message: string
 }
 
+export type PositionTokenResponse = {
+  positionId: string
+  token: string
+  createdAt: string
+}
+
+export type PositionTokenStatusResponse = {
+  hasToken: boolean
+  createdAt: string | null
+  lastUsedAt: string | null
+}
+
+

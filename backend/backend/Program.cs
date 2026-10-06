@@ -81,6 +81,9 @@ builder.Services.Configure<SalesforceSettings>(builder.Configuration.GetSection(
 builder.Services.AddHttpClient("Salesforce");
 builder.Services.AddScoped<ISalesforceService, SalesforceService>();
 
+// Odoo Integration
+builder.Services.AddScoped<IOdooIntegrationService, OdooIntegrationService>();
+
 var authentication = builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddCookie("External", options => {
         options.Cookie.Name = "talenthub_external";

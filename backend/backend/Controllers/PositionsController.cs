@@ -1,6 +1,7 @@
 using backend.Auth;
 using backend.Common.Enums;
 using backend.Common.Pagination;
+using backend.DTOs.Integrations;
 using backend.DTOs.Positions;
 using backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -10,7 +11,9 @@ namespace backend.Controllers;
 
 [ApiController]
 [Route("api/positions")]
-public sealed class PositionsController(IPositionService positionService) : ControllerBase {
+public sealed class PositionsController(
+    IPositionService positionService,
+    IOdooIntegrationService odooIntegrationService) : ControllerBase {
     [HttpGet]
     public async Task<ActionResult<PagedResult<PositionListItem>>> List(
         PositionLevel? level, string? q, bool? isPublic, int page = 1, int pageSize = 20,
@@ -51,5 +54,21 @@ public sealed class PositionsController(IPositionService positionService) : Cont
     public async Task<ActionResult<PositionDetail>> Duplicate(Guid id, CancellationToken cancellationToken) {
         var result = await positionService.DuplicatePositionAsync(id, cancellationToken);
         return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
+    }
+
+    [Authorize(Roles = Roles.Recruiter + "," + Roles.Administrator)]
+    [HttpPost("{id:guid}/odoo-token")]
+    [HttpPost("{id:guid}/integration-token")]
+    public async Task<ActionResult<PositionTokenResponse>> GenerateToken(Guid id, CancellationToken cancellationToken) {
+        var result = await odooIntegrationService.GenerateTokenAsync(id, cancellationToken);
+        return Ok(result);
+    }
+
+    [Authorize(Roles = Roles.Recruiter + "," + Roles.Administrator)]
+    [HttpGet("{id:guid}/odoo-token/status")]
+    [HttpGet("{id:guid}/integration-token/status")]
+    public async Task<ActionResult<PositionTokenStatusResponse>> GetTokenStatus(Guid id, CancellationToken cancellationToken) {
+        var result = await odooIntegrationService.GetTokenStatusAsync(id, cancellationToken);
+        return Ok(result);
     }
 }

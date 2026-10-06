@@ -19,4 +19,5 @@ public sealed class Position {
     public ICollection<PositionProjectTag> ProjectTags { get; set; } = [];
     public ICollection<Cv> Cvs { get; set; } = [];
     public ICollection<DiscussionPost> DiscussionPosts { get; set; } = [];
+    public PositionApiToken? ApiToken { get; set; }
 }
